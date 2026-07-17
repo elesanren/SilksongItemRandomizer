@@ -219,6 +219,7 @@ namespace SilksongItemRandomizer
             return false;
         }
 
+        // ★★★ 核心修改：只认原生调用，Architect Hook 全部放行 ★★★
         [HarmonyPatch(typeof(CollectableItemPickup), "DoPickupAction")]
         [HarmonyPrefix]
         private static void Prefix_DoPickupAction(CollectableItemPickup __instance, ref bool __runOriginal)
@@ -227,8 +228,19 @@ namespace SilksongItemRandomizer
             {
                 if (!__runOriginal || __instance == null) return;
                 if (!_isEnabled) return;
+
+                // ★★★ 检查调用栈：如果来自 Architect 或 CustomPickup，直接放行 ★★★
+                string stackTrace = Environment.StackTrace;
+                if (stackTrace.Contains("Architect") || stackTrace.Contains("CustomPickup"))
+                {
+                    Plugin.Log.LogInfo($"[PickupPatch] 检测到 Architect Hook 调用，放行: {__instance.name}");
+                    return;  // 放行，不执行随机逻辑
+                }
+
+                // ★★★ 只有原生调用才会执行到这里 ★★★
                 var originalItem = __instance.Item;
                 if (originalItem == null || ItemRandomizer.ExcludedNames.Contains(originalItem.name)) return;
+
                 var key = $"{__instance.gameObject.scene.name}_{__instance.transform.position.x:F1}_{__instance.transform.position.y:F1}_{__instance.transform.position.z:F1}";
                 Plugin.AddDestroyedPickupKey(key);
                 originalItem.TryGet(false, true);
