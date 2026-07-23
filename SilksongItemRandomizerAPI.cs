@@ -125,6 +125,9 @@ namespace SilksongItemRandomizer
             // 使用公开方法重置存档，而不是直接赋值
             Plugin.ResetSaveData();
 
+            // 重建缓存
+            SpriteCache.Reset();
+
             ItemRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig, new PluginSaveDataAccessor(), GetFullRandomMode());
             CrestRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig.CrestEnabled, new CrestSaveDataAccessor());
 
@@ -217,26 +220,17 @@ namespace SilksongItemRandomizer
             }
 
             _pendingChanges = false;
-            Plugin.Instance.Config.Save();  // ← 添加
         }
 
         private static void SyncToInternalFields()
         {
             if (Plugin.RandomSeed != null)
-            {
                 Plugin.RandomSeed.Value = _cachedConfig.Seed;
-                Plugin.Instance.Config.Save();  // ← 添加
-            }
             if (Plugin.ItemRandomEnabled != null)
-            {
                 Plugin.ItemRandomEnabled.Value = _cachedConfig.Enabled;
-                Plugin.Instance.Config.Save();  // ← 添加
-            }
             if (Plugin.CrestRandomEnabled != null)
-            {
                 Plugin.CrestRandomEnabled.Value = _cachedConfig.CrestRandomEnabled;
-                Plugin.Instance.Config.Save();  // ← 添加
-            }
+            Plugin.Instance?.Config.Save();  // 合并为一次保存
         }
 
         private static void ApplyHarmonyPatches()

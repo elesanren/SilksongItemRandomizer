@@ -230,8 +230,21 @@ namespace SilksongItemRandomizer
                 if (!_isEnabled) return;
 
                 // ★★★ 检查调用栈：如果来自 Architect 或 CustomPickup，直接放行 ★★★
-                string stackTrace = Environment.StackTrace;
-                if (stackTrace.Contains("Architect") || stackTrace.Contains("CustomPickup"))
+                // 使用 StackFrame(false) 替代 Environment.StackTrace，避免构建完整字符串导致高开销
+                bool isArchitectCall = false;
+                for (int i = 1; i <= 5; i++)
+                {
+                    var frame = new System.Diagnostics.StackFrame(i, false);
+                    var method = frame.GetMethod();
+                    if (method == null || method.DeclaringType == null) break;
+                    string typeName = method.DeclaringType.Name;
+                    if (typeName.Contains("Architect") || typeName.Contains("CustomPickup"))
+                    {
+                        isArchitectCall = true;
+                        break;
+                    }
+                }
+                if (isArchitectCall)
                 {
                     Plugin.Log.LogInfo($"[PickupPatch] 检测到 Architect Hook 调用，放行: {__instance.name}");
                     return;  // 放行，不执行随机逻辑

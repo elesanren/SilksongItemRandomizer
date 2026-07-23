@@ -30,6 +30,7 @@ namespace SilksongItemRandomizer
         }
 
         private static ICurrencySaveDataAccessor _saveData;
+        private static SavedItem _cachedSimpleKey;  // 缓存 Simple Key 引用，避免每次 GiveKey 扫描
         private const string KeyName = "Simple Key";
 
         // ========== 初始化 ==========
@@ -81,13 +82,14 @@ namespace SilksongItemRandomizer
 
         private static void GiveKey()
         {
-            var key = Resources.FindObjectsOfTypeAll<SavedItem>().FirstOrDefault(i => i.name == KeyName);
-            if (key != null)
+            if (_cachedSimpleKey == null)
+                _cachedSimpleKey = Resources.FindObjectsOfTypeAll<SavedItem>().FirstOrDefault(i => i.name == KeyName);
+            if (_cachedSimpleKey != null)
             {
                 TryGetPatch.BypassRandom = true;
                 try
                 {
-                    key.TryGet(false, true);
+                    _cachedSimpleKey.TryGet(false, true);
                 }
                 finally
                 {

@@ -144,6 +144,7 @@
     <Compile Include="ShopRandomizer.cs" />
     <Compile Include="SilkRandomizerPatch.cs" />
     <Compile Include="SilksongItemRandomizerAPI.cs" />
+    <Compile Include="SpriteCache.cs" />
     <Compile Include="SilkSpearPityPatch.cs" />
     <Compile Include="ToolEffectRandomizer.cs" />
     <Compile Include="TrapMovement.cs" />

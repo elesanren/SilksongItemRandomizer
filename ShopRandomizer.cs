@@ -31,6 +31,7 @@ namespace SilksongItemRandomizer
         // ========== 缓存（运行时） ==========
         private static readonly Dictionary<string, SavedItem> _shopItemCache = new();
         private static readonly Dictionary<string, int> _shopPriceCache = new();
+        private static MethodInfo _getPopupIconMethod;  // 缓存反射结果，IsSafeForShop 热路径用
 
         // ========== 初始化 ==========
         public static void Initialize(IShopSaveDataAccessor saveDataAccessor)
@@ -146,10 +147,7 @@ namespace SilksongItemRandomizer
             return list;
         }
 
-        private static Sprite FindSprite(string name)
-        {
-            return Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == name);
-        }
+        private static Sprite FindSprite(string name) => SpriteCache.Find(name);
 
         private static SavedItem GetRandomCoinItem(string permanentId, out int price)
         {
@@ -340,8 +338,10 @@ namespace SilksongItemRandomizer
             if (ItemRandomizer.ExcludedNames.Contains(item.name)) return false;
             if (item is ToolCrest) return false;
 
-            var method = item.GetType().GetMethod("GetPopupIcon", BindingFlags.Instance | BindingFlags.Public);
-            if (method == null || method.DeclaringType == typeof(SavedItem))
+            // 缓存反射结果，避免每个物品每次调用都 GetMethod
+            _getPopupIconMethod ??= typeof(SavedItem).GetMethod("GetPopupIcon", BindingFlags.Instance | BindingFlags.Public);
+            var actualMethod = item.GetType().GetMethod("GetPopupIcon", BindingFlags.Instance | BindingFlags.Public);
+            if (actualMethod == null || actualMethod.DeclaringType == typeof(SavedItem))
                 return false;
 
             try

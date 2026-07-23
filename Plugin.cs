@@ -153,6 +153,8 @@ namespace SilksongItemRandomizer
             CrestRandomEnabled.SettingChanged += (s, e) => SilksongItemRandomizerAPI.SetCrestEnabled(CrestRandomEnabled.Value);
 
             _bgTex = MakeTexture(2, 2, new Color(0, 0, 0, 0.7f));
+            SpriteCache.EnsureBuilt();
+            OverrideBenchwarpLanguage();
             Extracurrencypickup.RegisterAll();
 
             StartCoroutine(InitializeAfterLoad(RandomSeed.Value));
@@ -192,6 +194,7 @@ namespace SilksongItemRandomizer
         {
             if (!ItemRandomEnabled.Value) return;
             _harmonyItem.PatchAll(typeof(PickupPatch));
+            PickupPatch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
             _harmonyItem.PatchAll(typeof(CurrencyCollectPatch));
             _harmonyItem.PatchAll(typeof(TryGetPatch));
             _harmonyItem.PatchAll(typeof(CrestRandomizePatch));
@@ -425,7 +428,47 @@ namespace SilksongItemRandomizer
             };
         }
 
-        public static void OverrideBenchwarpLanguage() { }
-        public void RefreshBenchwarpUI() { }
+        private void OverrideBenchwarpLanguage()
+        {
+            if (!System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            string sourceFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "en.json");
+            string benchwarpLangDir = Path.Combine(Paths.PluginPath, "homothety-Benchwarp", "languages");
+            string targetFile = Path.Combine(benchwarpLangDir, "en.json");
+
+            if (!File.Exists(sourceFile))
+            {
+                Log.LogWarning($"[Benchwarp] 源文件不存在: {sourceFile}");
+                return;
+            }
+
+            try
+            {
+                if (!Directory.Exists(benchwarpLangDir))
+                    Directory.CreateDirectory(benchwarpLangDir);
+
+                string backupFile = targetFile + ".backup";
+                if (File.Exists(targetFile) && !File.Exists(backupFile))
+                    File.Copy(targetFile, backupFile, true);
+
+                File.Copy(sourceFile, targetFile, true);
+                Log.LogInfo($"[Benchwarp] 已覆盖语言文件: {sourceFile} -> {targetFile}");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[Benchwarp] 覆盖失败: {ex.Message}");
+            }
+        }
+
+        public void RefreshBenchwarpUI()
+        {
+            var menu = GameObject.Find("WarpMenu") ?? GameObject.Find("BenchwarpMenu");
+            if (menu == null || !menu.activeInHierarchy)
+                return;
+            menu.SetActive(false);
+            menu.SetActive(true);
+            Log.LogInfo("[Benchwarp] UI 已刷新");
+        }
     }
 }

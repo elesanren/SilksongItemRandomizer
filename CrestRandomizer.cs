@@ -30,6 +30,7 @@ namespace SilksongItemRandomizer
     {
         private static bool _initialized = false;
         private static List<ToolCrest> _allCrests;
+        private static Dictionary<string, ToolCrest> _crestDict;  // name → ToolCrest 快速查找
         private static ICrestSaveDataAccessor _saveData;
         private static Random _rng;
         private static int _seed;
@@ -65,6 +66,10 @@ namespace SilksongItemRandomizer
 
             // 加载所有纹章资源
             _allCrests = Resources.FindObjectsOfTypeAll<ToolCrest>().ToList();
+            _crestDict = new Dictionary<string, ToolCrest>(_allCrests.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (var c in _allCrests)
+                if (c != null && !string.IsNullOrEmpty(c.name))
+                    _crestDict[c.name] = c;
 
             // 确保初始纹章（猎人）已解锁
             EnsureInitialCrests();
@@ -117,6 +122,13 @@ namespace SilksongItemRandomizer
         }
 
         // ========== 内部辅助方法 ==========
+        private static ToolCrest FindCrestByName(string name)
+        {
+            if (_crestDict == null) return null;
+            _crestDict.TryGetValue(name, out var crest);
+            return crest;
+        }
+
         private static void EnsureInitialCrests()
         {
             var unlocked = _saveData.GetUnlockedCrests();
@@ -130,7 +142,7 @@ namespace SilksongItemRandomizer
             // 同步 PlayerData 中的解锁状态（确保工具纹章已解锁）
             foreach (string crestName in unlocked)
             {
-                var crest = _allCrests.FirstOrDefault(c => c.name == crestName);
+                var crest = FindCrestByName(crestName);
                 if (crest != null && !crest.IsUnlocked)
                     UnlockCrestDirectly(crest);
             }
@@ -152,7 +164,7 @@ namespace SilksongItemRandomizer
             if (unlocked.Add(crestName))
             {
                 _saveData.SaveUnlockedCrests(unlocked);
-                var crest = _allCrests.FirstOrDefault(c => c.name == crestName);
+                var crest = FindCrestByName(crestName);
                 if (crest != null && !crest.IsUnlocked)
                     UnlockCrestDirectly(crest);
                 LastUnlockedCrest = crestName;

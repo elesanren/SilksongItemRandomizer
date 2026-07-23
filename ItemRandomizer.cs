@@ -33,6 +33,7 @@ namespace SilksongItemRandomizer
         private static List<IRandomReward> _unlimitedRewards = new();
         private static List<IRandomReward> _limitedRewards = new();
         private static IRandomReward _cachedCrestUnlocker;
+        private static Dictionary<string, ToolCrest> _crestCache;  // 按 name 索引的纹章缓存，避免重复 FindObjectsOfTypeAll
 
         private static Random _globalRng;
         private static int _seed;
@@ -66,6 +67,7 @@ namespace SilksongItemRandomizer
             }
 
             BuildRewardPools(config, fullRandomMode);
+            BuildCrestCache();
             IsInitialized = true;
         }
 
@@ -73,6 +75,7 @@ namespace SilksongItemRandomizer
         {
             if (!IsInitialized) return;
             BuildRewardPools(null, _fullRandomModeActive);
+            BuildCrestCache();
         }
 
         // ========== 奖励池构建 ==========
@@ -229,6 +232,22 @@ namespace SilksongItemRandomizer
         }
 
         // ========== 辅助方法 ==========
+        private static void BuildCrestCache()
+        {
+            var allCrests = Resources.FindObjectsOfTypeAll<ToolCrest>();
+            _crestCache = new Dictionary<string, ToolCrest>(allCrests.Length, StringComparer.OrdinalIgnoreCase);
+            foreach (var c in allCrests)
+                if (c != null && !string.IsNullOrEmpty(c.name))
+                    _crestCache[c.name] = c;
+        }
+
+        private static ToolCrest FindCrestCached(string crestName)
+        {
+            if (_crestCache == null) BuildCrestCache();
+            _crestCache.TryGetValue(crestName, out var crest);
+            return crest;
+        }
+
         private static IEnumerator AddBlueHealthCoroutine(int times, float interval)
         {
             for (int i = 0; i < times; i++)
@@ -288,7 +307,7 @@ namespace SilksongItemRandomizer
                 if (pd == null) return;
                 string crestId = pd.CurrentCrestID;
                 if (string.IsNullOrEmpty(crestId)) crestId = "Hunter";
-                ToolCrest crest = Resources.FindObjectsOfTypeAll<ToolCrest>().FirstOrDefault(c => c.name == crestId);
+                ToolCrest crest = FindCrestCached(crestId);
                 if (crest == null) return;
 
                 var data = crest.SaveData;
@@ -393,48 +412,75 @@ namespace SilksongItemRandomizer
         public static IRandomReward GetRandomReward()
         {
             double rand = _globalRng.NextDouble();
-            float virtualProb = _virtualUnlimitedProbability;
-            float crestProb = _crestUnlockerProbability;
-            float normalProb = _normalLimitedProbability;
 
-            if (rand < virtualProb)
+            if (rand < _virtualUnlimitedProbability)
             {
                 if (_unlimitedRewards.Count > 0)
                     return _unlimitedRewards[_globalRng.Next(_unlimitedRewards.Count)];
                 else
-                    rand = virtualProb + 0.01;
+                    rand = _virtualUnlimitedProbability + 0.01;
             }
 
-            if (rand < virtualProb + crestProb)
+            if (rand < _virtualUnlimitedProbability + _crestUnlockerProbability)
             {
                 if (_cachedCrestUnlocker != null && !_cachedCrestUnlocker.IsAtMax())
                     return _cachedCrestUnlocker;
                 else
-                    rand = virtualProb + crestProb + 0.01;
+                    rand = _virtualUnlimitedProbability + _crestUnlockerProbability + 0.01;
             }
 
-            var availableLimited = _limitedRewards.Where(r => r != _cachedCrestUnlocker && !r.IsAtMax()).ToList();
-            if (availableLimited.Count > 0)
-                return availableLimited[_globalRng.Next(availableLimited.Count)];
-            else if (_unlimitedRewards.Count > 0)
+            // 用计数代替 ToList()，避免每次调用都分配新 List
+            int availableCount = 0;
+            foreach (var r in _limitedRewards)
+                if (r != _cachedCrestUnlocker && !r.IsAtMax())
+                    availableCount++;
+
+            if (availableCount > 0)
+            {
+                int targetIndex = _globalRng.Next(availableCount);
+                foreach (var r in _limitedRewards)
+                {
+                    if (r != _cachedCrestUnlocker && !r.IsAtMax())
+                    {
+                        if (targetIndex == 0)
+                            return r;
+                        targetIndex--;
+                    }
+                }
+            }
+
+            if (_unlimitedRewards.Count > 0)
                 return _unlimitedRewards[_globalRng.Next(_unlimitedRewards.Count)];
-            else
-                return new VirtualReward("virt:FallbackGeo", Locale.Get("保底念珠"), null, () => HeroController.instance?.AddGeo(10), () => false);
+
+            return new VirtualReward("virt:FallbackGeo", Locale.Get("保底念珠"), null, () => HeroController.instance?.AddGeo(10), () => false);
         }
 
         public static SavedItem GetRandomItem()
         {
-            var available = _limitedRewards.Where(r => !r.IsAtMax()).ToList();
-            if (available.Count == 0) return null;
-            var chosen = available[_globalRng.Next(available.Count)];
-            if (chosen is SavedItemReward savedReward)
-                return savedReward.Item;
-            else
+            // 用计数+二次遍历代替 ToList()，避免分配
+            int availableCount = 0;
+            foreach (var r in _limitedRewards)
+                if (!r.IsAtMax())
+                    availableCount++;
+
+            if (availableCount == 0) return null;
+            int targetIndex = _globalRng.Next(availableCount);
+            foreach (var r in _limitedRewards)
             {
-                var proxy = new ProxySavedItem();
-                proxy.Init(chosen);
-                return proxy;
+                if (!r.IsAtMax())
+                {
+                    if (targetIndex == 0)
+                    {
+                        if (r is SavedItemReward savedReward)
+                            return savedReward.Item;
+                        var proxy = new ProxySavedItem();
+                        proxy.Init(r);
+                        return proxy;
+                    }
+                    targetIndex--;
+                }
             }
+            return null;
         }
 
         public static SavedItem PeekRandomItem(Random externalRng)
@@ -491,7 +537,7 @@ namespace SilksongItemRandomizer
                 crestId = unlockedCrests[UnityEngine.Random.Range(0, unlockedCrests.Count)];
             }
 
-            var crest = Resources.FindObjectsOfTypeAll<ToolCrest>().FirstOrDefault(c => c.name == crestId);
+            var crest = FindCrestCached(crestId);
             if (crest == null) return;
 
             var data = crest.SaveData;
@@ -543,7 +589,7 @@ namespace SilksongItemRandomizer
             if (pd == null) return true;
             string crestId = pd.CurrentCrestID;
             if (string.IsNullOrEmpty(crestId)) return false;
-            var crest = Resources.FindObjectsOfTypeAll<ToolCrest>().FirstOrDefault(c => c.name == crestId);
+            var crest = FindCrestCached(crestId);
             if (crest == null) return false;
             var data = crest.SaveData;
             if (data.Slots == null || data.Slots.Count == 0) return false;

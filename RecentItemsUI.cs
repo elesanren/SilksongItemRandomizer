@@ -57,7 +57,8 @@ namespace SilksongItemRandomizer
             GUI.skin.label.fontSize = 32;
 
             GUILayout.BeginVertical();
-            foreach (var reward in RecentRewards.ToList())
+            // 直接遍历 Queue 避免每帧 ToList() 分配
+            foreach (var reward in RecentRewards)
             {
                 try
                 {
@@ -185,10 +186,7 @@ namespace SilksongItemRandomizer
             }
         }
 
-        private static Sprite FindSprite(string name)
-        {
-            return Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == name);
-        }
+        private static Sprite FindSprite(string name) => SpriteCache.Find(name);
 
         private static Sprite GetDefaultFallbackIcon()
         {

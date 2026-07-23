@@ -26,6 +26,7 @@ namespace SilksongItemRandomizer
 
         private static IExtraPickupSaveDataAccessor _saveData;
         private static bool _isInitialized = false;
+        private static Dictionary<string, SavedItem> _cachedItems;  // 缓存 SavedItem 按 name 索引，避免每次 spawn 扫描
 
         // ========== 预定义额外钥匙点的坐标表 ==========
         private static readonly Dictionary<string, List<(Vector3 pos, string itemId)>> pickupTable = new()
@@ -113,6 +114,20 @@ namespace SilksongItemRandomizer
         }
 
         // ========== 已捡坐标判断 ==========
+        private static SavedItem GetCachedSavedItem(string itemId)
+        {
+            if (_cachedItems == null)
+            {
+                var all = Resources.FindObjectsOfTypeAll<SavedItem>();
+                _cachedItems = new Dictionary<string, SavedItem>(all.Length);
+                foreach (var s in all)
+                    if (s != null && !string.IsNullOrEmpty(s.name))
+                        _cachedItems[s.name] = s;
+            }
+            _cachedItems.TryGetValue(itemId, out var item);
+            return item;
+        }
+
         private static bool IsPositionPicked(string sceneName, Vector3 pos, float tolerance = 2.0f)
         {
             if (_saveData == null) return false;
@@ -186,7 +201,8 @@ namespace SilksongItemRandomizer
                 return;
             }
 
-            SavedItem item = Resources.FindObjectsOfTypeAll<SavedItem>().FirstOrDefault(i => i.name == itemId);
+            // 缓存 SavedItem 查找，避免每次 spawn 扫描全部资源
+            SavedItem item = GetCachedSavedItem(itemId);
             if (item == null)
             {
                 Plugin.Log.LogError($"[Extracurrencypickup] Item '{itemId}' not found.");
