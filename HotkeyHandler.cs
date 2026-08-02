@@ -31,11 +31,12 @@ public class HotkeyHandler : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F3))
-            DumpCheckPoints();
-
-        if (Input.GetKeyDown(KeyCode.F4))
-            DumpVanillaTransitions();
+        // [调试] F3 扫描检查点 / F4 导出门连接 —— 已注释停用，避免误触触发大量文件读写
+        // if (Input.GetKeyDown(KeyCode.F3))
+        //     DumpCheckPoints();
+        //
+        // if (Input.GetKeyDown(KeyCode.F4))
+        //     DumpVanillaTransitions();
 
         if (Input.GetKeyDown(KeyCode.F5))
         {
