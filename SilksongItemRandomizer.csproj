@@ -171,6 +171,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\check_points.txt" />
     <EmbeddedResource Include="Resources\shop_slot_keys.txt" />
+    <EmbeddedResource Include="Resources\zh.json" />
+    <EmbeddedResource Include="Resources\en.json" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

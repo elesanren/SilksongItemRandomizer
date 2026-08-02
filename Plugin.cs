@@ -451,30 +451,48 @@ namespace SilksongItemRandomizer
 
         private void OverrideBenchwarpLanguage()
         {
-            if (!System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
-                return;
+            // 按系统/当前语言选择注入的语言表：
+            //   中文（zh*）-> 用中文 zh.json
+            //   其他（英文等）-> 用英文 en.json
+            bool isChinese = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+            string resourceName = isChinese ? "SilksongItemRandomizer.Resources.zh.json" : "SilksongItemRandomizer.Resources.en.json";
 
-            string sourceFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "en.json");
-            string benchwarpLangDir = Path.Combine(Paths.PluginPath, "homothety-Benchwarp", "languages");
-            string targetFile = Path.Combine(benchwarpLangDir, "en.json");
-
-            if (!File.Exists(sourceFile))
+            string content;
+            try
             {
-                Log.LogWarning($"[Benchwarp] 源文件不存在: {sourceFile}");
+                var asm = Assembly.GetExecutingAssembly();
+                using (var stream = asm.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null)
+                    {
+                        Log.LogWarning($"[Benchwarp] 嵌入语言资源不存在: {resourceName}");
+                        return;
+                    }
+                    using (var reader = new StreamReader(stream))
+                        content = reader.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[Benchwarp] 读取语言资源失败 {resourceName}: {ex.Message}");
                 return;
             }
+
+            string benchwarpLangDir = Path.Combine(Paths.PluginPath, "homothety-Benchwarp", "languages");
+            string targetFile = Path.Combine(benchwarpLangDir, "en.json");
 
             try
             {
                 if (!Directory.Exists(benchwarpLangDir))
                     Directory.CreateDirectory(benchwarpLangDir);
 
+                // 首次覆盖前备份 Benchwarp 原始 en.json（仅一次），方便恢复。
                 string backupFile = targetFile + ".backup";
                 if (File.Exists(targetFile) && !File.Exists(backupFile))
                     File.Copy(targetFile, backupFile, true);
 
-                File.Copy(sourceFile, targetFile, true);
-                Log.LogInfo($"[Benchwarp] 已覆盖语言文件: {sourceFile} -> {targetFile}");
+                File.WriteAllText(targetFile, content);
+                Log.LogInfo($"[Benchwarp] 已按{(isChinese ? "中文" : "英文")}覆盖 {targetFile}（{resourceName}）");
             }
             catch (Exception ex)
             {
