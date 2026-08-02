@@ -519,25 +519,9 @@ public class HotkeyHandler : MonoBehaviour
     }
 
     /// <summary>重置 ShopOwnerBase._spawnedShop 静态单例：销毁残留实例并置 null，
-    /// 强制当前场景的 ShopOwner 认为"没有商店"而重新生成商店 UI，保证逐场景扫描不互相干扰。</summary>
-    private static void ResetSpawnedShopSingleton()
-    {
-        try
-        {
-            var shopOwnerBaseType = Type.GetType("ShopOwnerBase, Assembly-CSharp");
-            if (shopOwnerBaseType == null) return;
-            var field = shopOwnerBaseType.GetField("_spawnedShop", BindingFlags.Static | BindingFlags.NonPublic);
-            if (field == null) return;
-            var existing = field.GetValue(null) as UnityEngine.Object;
-            if (existing != null)
-                UnityEngine.Object.DestroyImmediate(existing);
-            field.SetValue(null, null);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.LogWarning($"[扫描] 重置 ShopOwnerBase._spawnedShop 失败: {ex.Message}");
-        }
-    }
+    /// 强制当前场景的 ShopOwner 认为"没有商店"而重新生成商店 UI，保证逐场景扫描不互相干扰。
+    /// 逻辑收敛到 ShakraMerchantKeeper.ResetSpawnedShopSingleton，供扫描与运行时共用。</summary>
+    private static void ResetSpawnedShopSingleton() => ShakraMerchantKeeper.ResetSpawnedShopSingleton();
 
     private static string GetObjectPath(Transform t)
     {

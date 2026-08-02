@@ -164,6 +164,7 @@
     <Compile Include="TrapPreloader.cs" />
     <Compile Include="TrapRandomizer.cs" />
     <Compile Include="TryGetPatch.cs" />
+    <Compile Include="ShakraMerchantKeeper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

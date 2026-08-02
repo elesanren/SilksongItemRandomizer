@@ -230,6 +230,9 @@ namespace SilksongItemRandomizer
             // 强制重置 Mapper 字段（兜底，防其他模组/游戏内代码绕过补丁）
             try { MapperPermanentPatch.ForceResetMapperFields(); }
             catch (Exception ex) { Log.LogWarning($"Mapper 字段重置异常: {ex.Message}"); }
+
+            // 沙克拉商人保活：延迟重置静态商店单例，保证该场景商人生成自己的商店可购买
+            StartCoroutine(ShakraMerchantKeeper.RefreshAfterSceneLoad(scene));
         }
 
         private IEnumerator SpawnTrapsAfterSceneLoad()
