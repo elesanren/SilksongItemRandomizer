@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using StartingAbilityPicker;
@@ -48,7 +48,25 @@ namespace SilksongItemRandomizer
         public static void Draw()
         {
             if (!_showWindow) return;
-            _windowRect = GUILayout.Window(999, _windowRect, DrawWindow, Locale.Get("最近获得物品"));
+            _windowRect = GUILayout.Window(999, _windowRect, DrawWindow, GUIContent.none, GetWindowStyle());
+        }
+
+        /// <summary>
+        /// 透明、无边框、无标题栏的窗口样式（背景置空 + 去掉上下边框，使标题栏塌陷）
+        /// </summary>
+        private static GUIStyle _transparentWindowStyle;
+        private static GUIStyle GetWindowStyle()
+        {
+            if (_transparentWindowStyle == null)
+            {
+                _transparentWindowStyle = new GUIStyle(GUI.skin.window);
+                _transparentWindowStyle.normal.background = null;
+                _transparentWindowStyle.onNormal.background = null;
+                _transparentWindowStyle.border = new RectOffset(0, 0, 0, 0);
+                _transparentWindowStyle.padding = new RectOffset(0, 0, 0, 0);
+                _transparentWindowStyle.margin = new RectOffset(0, 0, 0, 0);
+            }
+            return _transparentWindowStyle;
         }
 
         private static void DrawWindow(int id)
@@ -112,7 +130,9 @@ namespace SilksongItemRandomizer
             string displayName;
             try { displayName = reward.DisplayName; }
             catch { displayName = reward.Id; }
-            GUILayout.Label("• " + displayName, GUILayout.Height(iconHeight));
+            // 文字往后挪一点，去掉前面的圆点
+            GUILayout.Space(15f);
+            GUILayout.Label(displayName, GUILayout.Height(iconHeight));
             GUILayout.EndHorizontal();
         }
 

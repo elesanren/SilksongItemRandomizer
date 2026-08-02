@@ -1,4 +1,4 @@
-﻿// Plugin.cs - 修复后的完整版本
+// Plugin.cs - 修复后的完整版本
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -34,11 +34,14 @@ namespace SilksongItemRandomizer
         public static ConfigEntry<int> SilkRandomMin { get; private set; }
         public static ConfigEntry<int> SilkRandomMax { get; private set; }
 
-        private Harmony _harmonyItem;
-
         // ========== 全局存储 ==========
         public static GlobalSaveData SaveData { get; private set; }
         private static readonly string GlobalSavePath = Path.Combine(Paths.ConfigPath, "SilksongItemRandomizer", "global_save.json");
+
+        // 延迟落盘（批处理高频存档写入，降低同步序列化/写盘开销）
+        private static bool _saveDirty;
+        private static float _lastSaveTime = float.MinValue;
+        private const float SaveDebounceSeconds = 1.5f;
 
         public static bool PublicItemRandomEnabled
         {
@@ -56,7 +59,7 @@ namespace SilksongItemRandomizer
         public static void ResetSaveData()
         {
             SaveData = new GlobalSaveData();
-            SaveGlobalData();
+            SaveGlobalDataNow(); // 重置即时落盘
         }
 
         // ========== 生命周期 ==========
@@ -143,12 +146,10 @@ namespace SilksongItemRandomizer
             };
             SilksongItemRandomizerAPI.Initialize(apiConfig);
 
-            _harmonyItem = new Harmony("SilksongItemRandomizer.ItemPatches");
-            if (ItemRandomEnabled.Value)
-            {
-                ApplyItemPatches();
-                PickupPatch.EnableRandomizer();
-            }
+            // Harmony 补丁统一由 SilksongItemRandomizerAPI 管理：
+            //  - 常驻补丁（MapperPermanentPatch 等）在 Initialize 时就注册，始终生效；
+            //  - 收单开关补丁在 MarkGameReady()（InitializeAfterLoad 协程内）随 Enable 状态批量应用。
+            // 这里不再维护独立的 _harmonyItem，避免两套补丁注册路径导致的重复/漏挂载。
             ItemRandomEnabled.SettingChanged += (s, e) => SilksongItemRandomizerAPI.SetEnabled(ItemRandomEnabled.Value);
             CrestRandomEnabled.SettingChanged += (s, e) => SilksongItemRandomizerAPI.SetCrestEnabled(CrestRandomEnabled.Value);
 
@@ -183,40 +184,14 @@ namespace SilksongItemRandomizer
             yield return null;
 
             SilksongItemRandomizerAPI.MarkGameReady();
-            ItemRandomizer.Initialize(RandomSeed.Value, null, new SilksongItemRandomizerAPI.PluginSaveDataAccessor(), false);
+            bool fullRandom = SilksongItemRandomizerAPI.GetFullRandomMode();
+            ItemRandomizer.Initialize(RandomSeed.Value, null, new SilksongItemRandomizerAPI.PluginSaveDataAccessor(), fullRandom);
             CrestRandomizer.Initialize(RandomSeed.Value, CrestRandomEnabled.Value, new SilksongItemRandomizerAPI.CrestSaveDataAccessor());
+            // ★ 预生成映射表：从随机池提前摸出所有检查点奖励并落盘
+            PreGeneratedMap.Initialize();
             
             Log.LogInfo($"Randomizer initialized with seed: {RandomSeed.Value}");
             ItemLocalizationRegistrar.RegisterAllKnownItems();
-        }
-
-        public void ApplyItemPatches()
-        {
-            if (!ItemRandomEnabled.Value) return;
-            _harmonyItem.PatchAll(typeof(PickupPatch));
-            PickupPatch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            _harmonyItem.PatchAll(typeof(CurrencyCollectPatch));
-            _harmonyItem.PatchAll(typeof(TryGetPatch));
-            _harmonyItem.PatchAll(typeof(CrestRandomizePatch));
-            CrestRandomizePatch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            _harmonyItem.PatchAll(typeof(ShopMenuStock_BuildItemList_Patch));
-            ShopMenuStock_BuildItemList_Patch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            _harmonyItem.PatchAll(typeof(ShopItemStats_Purchase_Patch));
-            _harmonyItem.PatchAll(typeof(SilkSpearPityPatch));
-            SilkSpearPityPatch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            _harmonyItem.PatchAll(typeof(BenchRespawnPatch));
-            BenchRespawnPatch.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            _harmonyItem.PatchAll(typeof(SilkRandomizerPatch));
-            _harmonyItem.PatchAll(typeof(Extracurrencypickup));
-            Extracurrencypickup.Initialize(new SilksongItemRandomizerAPI.PluginSaveDataAccessor());
-            try
-            {
-                EnemyRandoAdjuster.TryPatch(_harmonyItem);
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"EnemyRandoAdjuster 补丁跳过（可能缺少 EnemyRando）: {ex.Message}");
-            }
         }
 
         private IEnumerator InitTrapsAfterLoad()
@@ -229,15 +204,19 @@ namespace SilksongItemRandomizer
         private void OnDestroy()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
-            SaveGlobalData();
+            SaveGlobalDataNow(); // 离开时强制立即落盘，避免延迟批处理丢最后几秒数据
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            // 检查点扫描导出期间跳过所有 mod 场景响应，避免动态生成物污染扫描结果
+            if (HotkeyHandler.IsScanningChecks) return;
+
             if (ItemRandomEnabled.Value)
                 PickupPatch.ApplyStateToSceneWithDelay(scene, 0.2f);
 
             Extracurrencypickup.SpawnPickupsForScene(scene);
+            PreGeneratedMap.OnSceneLoaded(scene);   // ★ 场景加载时为检查点补齐预生成映射
             StartCoroutine(DestroyMarkedPickups(scene));
             if (SaveData.TrapEnabled && scene.name != "Menu_Title" && scene.name != "Menu" && scene.name != "Loading")
             {
@@ -245,6 +224,12 @@ namespace SilksongItemRandomizer
                 StartCoroutine(SpawnTrapsAfterSceneLoad());
             }
             CrestRandomizePatch.OnSceneLoaded(scene, mode);
+            MapStationUnlockPatch.OnSceneLoaded(scene);
+            LoreTriggerPatch.OnSceneLoaded(scene);
+
+            // 强制重置 Mapper 字段（兜底，防其他模组/游戏内代码绕过补丁）
+            try { MapperPermanentPatch.ForceResetMapperFields(); }
+            catch (Exception ex) { Log.LogWarning($"Mapper 字段重置异常: {ex.Message}"); }
         }
 
         private IEnumerator SpawnTrapsAfterSceneLoad()
@@ -260,7 +245,7 @@ namespace SilksongItemRandomizer
             foreach (var p in pickups)
             {
                 if (p.gameObject.scene != scene) continue;
-                var key = $"{scene.name}_{p.transform.position.x:F1}_{p.transform.position.y:F1}_{p.transform.position.z:F1}";
+                var key = $"{scene.name}_{p.transform.position.x:F2}_{p.transform.position.y:F2}_{p.transform.position.z:F2}";
                 if (SaveData.DestroyedPickupKeys.Contains(key))
                 {
                     Destroy(p.gameObject);
@@ -269,7 +254,11 @@ namespace SilksongItemRandomizer
             }
         }
 
-        private void Update() => RecentItemsUI.UpdateAutoHide();
+        private void Update()
+        {
+            RecentItemsUI.UpdateAutoHide();
+            CheckAutoSave();
+        }
 
         private void OnGUI()
         {
@@ -379,12 +368,31 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>
+        /// 标记全局存档为「脏」。实际写盘延后到 Update() 中批处理（帧末/间隔），
+        /// 避免每次字段变更都同步序列化整个 JSON 造成的 GC 与 IO 抖动。
+        /// 需要立即落盘的场景请调用 SaveGlobalDataNow()。
+        /// </summary>
         public static void SaveGlobalData()
+        {
+            _saveDirty = true;
+        }
+
+        /// <summary>立即落盘（忽略去抖，供 OnDestroy / 重置等关键节点使用）</summary>
+        public static void SaveGlobalDataNow()
+        {
+            _saveDirty = false;
+            WriteGlobalData();
+        }
+
+        /// <summary>真正执行序列化并写入磁盘</summary>
+        private static void WriteGlobalData()
         {
             try
             {
                 string dir = Path.GetDirectoryName(GlobalSavePath);
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
                 string json = JsonConvert.SerializeObject(SaveData, Formatting.Indented);
                 File.WriteAllText(GlobalSavePath, json);
             }
@@ -394,16 +402,29 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>供 Update 调用：到达去抖间隔且有脏标记时写盘</summary>
+        private static void CheckAutoSave()
+        {
+            if (!_saveDirty) return;
+            float now = UnityEngine.Time.time;
+            if (now - _lastSaveTime >= SaveDebounceSeconds || _lastSaveTime == float.MinValue)
+            {
+                _lastSaveTime = now;
+                _saveDirty = false;
+                WriteGlobalData();
+            }
+        }
+
         public static void AddDestroyedPickupKey(string key)
         {
             SaveData.DestroyedPickupKeys.Add(key);
-            SaveGlobalData();
+            SaveGlobalDataNow(); // 销毁标记即时落盘
         }
 
         public static void ResetDestroyedPickupKeys()
         {
             SaveData.DestroyedPickupKeys.Clear();
-            SaveGlobalData();
+            SaveGlobalDataNow(); // 即时落盘
         }
 
         // ========== 修复后的 ResetAllStaticData ==========

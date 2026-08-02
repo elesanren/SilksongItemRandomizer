@@ -1,4 +1,4 @@
-﻿// PickupPatch.cs - 修复后的完整版本
+// PickupPatch.cs - 修复后的完整版本
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -254,8 +254,10 @@ namespace SilksongItemRandomizer
                 var originalItem = __instance.Item;
                 if (originalItem == null || ItemRandomizer.ExcludedNames.Contains(originalItem.name)) return;
 
-                var key = $"{__instance.gameObject.scene.name}_{__instance.transform.position.x:F1}_{__instance.transform.position.y:F1}_{__instance.transform.position.z:F1}";
+                var key = $"{__instance.gameObject.scene.name}_{__instance.transform.position.x:F2}_{__instance.transform.position.y:F2}_{__instance.transform.position.z:F2}";
                 Plugin.AddDestroyedPickupKey(key);
+                // ★ 预生成映射：把该点的 key 传给 TryGetPatch（F2 坐标，与预生成表一致），命中则按表给予
+                PreGeneratedMap.PendingKey = PreGeneratedMap.PickupKeyOf(__instance);
                 originalItem.TryGet(false, true);
                 Plugin.Instance.StartCoroutine(DelayedCleanup(__instance));
                 __runOriginal = false;

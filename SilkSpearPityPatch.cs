@@ -1,4 +1,4 @@
-﻿// SilkSpearPityPatch.cs - 修复后的完整版本
+// SilkSpearPityPatch.cs - 修复后的完整版本
 using System;
 using System.Collections;
 using System.Collections.Generic;

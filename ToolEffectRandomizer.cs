@@ -1,4 +1,4 @@
-﻿// ToolEffectRandomizer.cs - 修复后的完整版本
+// ToolEffectRandomizer.cs - 修复后的完整版本
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿using GlobalEnums;
+using GlobalEnums;
 using HarmonyLib;
 using System.Collections;
 using System.Reflection;

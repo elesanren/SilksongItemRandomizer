@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -754,7 +754,10 @@ namespace SilksongItemRandomizer
                     }
                 }
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[TrapRandomizer] ArchitectSpawn 失败: {ex}");
+            }
         }
 
         private static void SpawnActivatorWithEvent(string activatorId, Vector3 pos, string eventName)
@@ -786,7 +789,10 @@ namespace SilksongItemRandomizer
                     if (objDict != null && pid != null) objDict[pid] = obj;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[TrapRandomizer] SpawnActivatorWithEvent 失败: {ex}");
+            }
         }
         public class OneTimeTrap : MonoBehaviour
         {

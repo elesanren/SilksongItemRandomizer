@@ -34,19 +34,31 @@ namespace SilksongItemRandomizer
 
                 // 旁路开关开启时，放行原逻辑
                 if (BypassRandom)
+                {
+                    PreGeneratedMap.PendingKey = null;
                     return true;
+                }
 
                 // 总开关关闭时，放行原逻辑
                 if (!SilksongItemRandomizerAPI.IsEnabled())
+                {
+                    PreGeneratedMap.PendingKey = null;
                     return true;
+                }
 
                 // 黑名单物品直接放行
                 if (ItemRandomizer.ExcludedNames.Contains(__instance.name))
+                {
+                    PreGeneratedMap.PendingKey = null;
                     return true;
+                }
 
                 // 根据物品类型判断是否应该随机
                 if (!ItemTypeRandomFilter.ShouldRandomize(__instance))
+                {
+                    PreGeneratedMap.PendingKey = null;
                     return true;
+                }
 
                 // ★ 帧内防重复：同帧同物品名已随机化过，直接跳过（针对 Architect 嵌套调用）
                 // 必须先于 _isProcessing 检查，因为嵌套调用发生在 reward.Give() 过程中
@@ -69,8 +81,21 @@ namespace SilksongItemRandomizer
 
                 string originalName = __instance.name;
 
-                // 获取随机奖励
-                var reward = ItemRandomizer.GetRandomReward();
+                // ★ 预生成映射：拾取点（PickupPatch）已设置 PendingKey，命中则直接按表给予，
+                // 不消耗随机池；其余来源（商店/任务等无点 key）仍走动态随机。
+                IRandomReward reward = null;
+                string preKey = PreGeneratedMap.PendingKey;
+                if (!string.IsNullOrEmpty(preKey))
+                {
+                    PreGeneratedMap.PendingKey = null;
+                    reward = PreGeneratedMap.ResolveReward(preKey);
+                    if (reward != null)
+                        Plugin.Log.LogInfo($"[TryGetPatch] 按预生成映射给予 {preKey} -> {reward.DisplayName}");
+                }
+
+                // 获取随机奖励（预生成未命中时回退动态随机）
+                if (reward == null)
+                    reward = ItemRandomizer.GetRandomReward();
                 if (reward == null)
                     return true;
 

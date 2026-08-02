@@ -1,4 +1,4 @@
-﻿// Extracurrencypickup.cs - 修复后的完整版本
+// Extracurrencypickup.cs - 修复后的完整版本
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,6 +91,17 @@ namespace SilksongItemRandomizer
             ["Bone_East_15"] = new() { (new Vector3(47f, 8.5f, 0f), "Simple Key") },
             ["Song_09"] = new() { (new Vector3(11f, 56.5f, 0f), "Simple Key") },
         };
+
+        /// <summary>
+        /// 枚举全部额外货币点（场景名 + 生成坐标），供预生成映射表一次性生成映射。
+        /// 坐标与拾取时 PickupPatch 计算的 F2 坐标 key 一致。
+        /// </summary>
+        public static IEnumerable<(string scene, Vector3 pos)> EnumerateAllPickupPoints()
+        {
+            foreach (var kv in pickupTable)
+                foreach (var (pos, _) in kv.Value)
+                    yield return (kv.Key, pos);
+        }
 
         // ========== 初始化 ==========
         public static void Initialize(IExtraPickupSaveDataAccessor saveDataAccessor)

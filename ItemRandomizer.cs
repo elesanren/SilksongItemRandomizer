@@ -1,4 +1,4 @@
-﻿// ItemRandomizer.cs - 完整修复版（消除 Random 歧义，使用 System.Random 明确命名）
+// ItemRandomizer.cs - 完整修复版（消除 Random 歧义，使用 System.Random 明确命名）
 using GlobalEnums;
 using StartingAbilityPicker;
 using System;
@@ -47,9 +47,17 @@ namespace SilksongItemRandomizer
         private static float _normalLimitedProbability = 0.8f;
         private static bool _fullRandomModeActive = false;
 
+        /// <summary>
+        /// LoreReward 在有限池中的抽取权重：等于可用 lore 条目（地点）数，
+        /// 使"随机日志"出现概率按 lore 地点数分配（其余奖励权重恒为 1）。
+        /// </summary>
+        private static int _loreRewardWeight = 1;
+
         // ========== 对外只读属性 ==========
         public static Random Rng => _globalRng;
         public static bool IsInitialized { get; private set; } = false;
+        public static IReadOnlyList<IRandomReward> LimitedRewards => _limitedRewards;
+        public static IReadOnlyList<IRandomReward> UnlimitedRewards => _unlimitedRewards;
 
         // ========== 初始化 ==========
         public static void Initialize(int seed, ItemRandomizerConfig config, ISaveDataAccessor saveDataAccessor, bool fullRandomMode)
@@ -117,6 +125,11 @@ namespace SilksongItemRandomizer
             if (fullRandomMode) AddDirectionPermissionRewards();
             BuildUnlimitedVirtualRewards();
             BuildPreciousVirtualRewards();
+            BuildLoreReward();
+            if (ItemLimitConfig.EnableMapRewards)
+                _limitedRewards.AddRange(MapStationRewards.BuildMapRewards());
+            if (ItemLimitConfig.EnableStationRewards)
+                _limitedRewards.AddRange(MapStationRewards.BuildStationRewards());
 
             _cachedCrestUnlocker = _limitedRewards.FirstOrDefault(r => r.Id == "virt:UnlockCrestSlot");
 
@@ -167,39 +180,43 @@ namespace SilksongItemRandomizer
 
         private static void BuildUnlimitedVirtualRewards()
         {
+            // 1. 灵丝3格（固定）
             if (ItemLimitConfig.EnableInfSilk)
-                _unlimitedRewards.Add(new VirtualReward("virt:Silk_9", Locale.Get("灵丝"), null, () =>
+                _unlimitedRewards.Add(new VirtualReward("virt:Silk_3", Locale.Get("灵丝(3)"), null, () =>
                 {
                     var hero = HeroController.instance;
-                    if (hero != null) for (int i = 0; i < 9; i++) hero.AddSilk(1, false);
+                    if (hero != null) for (int i = 0; i < 3; i++) hero.AddSilk(1, false);
                 }, () => false));
 
-            if (ItemLimitConfig.EnableInfFullRestore)
-                _unlimitedRewards.Add(new VirtualReward("virt:FullRestore", Locale.Get("完全恢复"), null, () =>
-                {
-                    var hero = HeroController.instance;
-                    var pd = PlayerData.instance;
-                    if (hero == null || pd == null) return;
-                    int healthNeeded = pd.CurrentMaxHealth - pd.health;
-                    for (int i = 0; i < healthNeeded; i++) hero.AddHealth(1);
-                    int silkNeeded = pd.CurrentSilkMax - pd.silk;
-                    for (int i = 0; i < silkNeeded; i++) hero.AddSilk(1, false);
-                }, () => false));
-
-            if (ItemLimitConfig.EnableInfBlueHealth)
-                _unlimitedRewards.Add(new VirtualReward("virt:BlueHealth_5", Locale.Get("蓝血"), null, () =>
-                {
-                    Plugin.Instance?.StartCoroutine(AddBlueHealthCoroutine(5, 1f));
-                }, () => false));
-
-            if (ItemLimitConfig.EnableInfGeo300)
-                _unlimitedRewards.Add(new VirtualReward("virt:Geo_300", Locale.Get("念珠"), null, () => HeroController.instance?.AddGeo(300), () => false));
-
+            // 2. 甲壳300（固定）
             if (ItemLimitConfig.EnableInfShards300)
-                _unlimitedRewards.Add(new VirtualReward("virt:Shards_300", Locale.Get("甲壳"), null, () => HeroController.instance?.AddShards(300), () => false));
+                _unlimitedRewards.Add(new VirtualReward("virt:Shards_300", Locale.Get("甲壳300"), null, () => HeroController.instance?.AddShards(300), () => false));
 
-            if (ItemLimitConfig.EnableInfSilkParts)
-                _unlimitedRewards.Add(new VirtualReward("virt:SilkParts_3", Locale.Get("大灵丝碎片"), null, () => HeroController.instance?.AddSilkParts(3), () => false));
+            // 3. 随机蓝血（1~6格，逐格给予，使用协程）
+            if (ItemLimitConfig.EnableInfBlueHealth)
+                _unlimitedRewards.Add(new VirtualReward("virt:BlueHealth_Random", Locale.Get("随机蓝血"), null, () =>
+                {
+                    int total = UnityEngine.Random.Range(1, 7); // 1~6
+                    Plugin.Instance?.StartCoroutine(AddBlueHealthOverTime(total, 0.5f));
+                }, () => false));
+
+            // 4. 随机货币（金额50~300，商店风格）
+            if (ItemLimitConfig.EnableInfGeo300)  // 复用 EnableInfGeo300 作为总开关，但金额随机
+                _unlimitedRewards.Add(new VirtualReward("virt:RandomCoin", Locale.Get("随机念珠"), null, () =>
+                {
+                    int amount = UnityEngine.Random.Range(50, 301);
+                    HeroController.instance?.AddGeo(amount);
+                }, () => false));
+        }
+
+        private static IEnumerator AddBlueHealthOverTime(int total, float interval)
+        {
+            for (int i = 0; i < total; i++)
+            {
+                EventRegister.SendEvent(EventRegisterEvents.AddBlueHealth, null);
+                if (i < total - 1)
+                    yield return new WaitForSeconds(interval);
+            }
         }
 
         private static void BuildPreciousVirtualRewards()
@@ -229,6 +246,17 @@ namespace SilksongItemRandomizer
                 () => TryUnlockCrestSlot(),
                 () => GetGivenCount("virt:UnlockCrestSlot") >= ItemLimitConfig.GetPreciousLimit("virt:UnlockCrestSlot")
             ));
+        }
+
+        private static void BuildLoreReward()
+        {
+            if (!ItemLimitConfig.EnableLoreReward)
+                return;
+            // 权重 = 可用 lore 条目（地点）数；取不到时退化为 1（保持原行为）
+            int keyCount = LoreRandomizer.GetLoreKeys().Count;
+            _loreRewardWeight = keyCount > 0 ? keyCount : 1;
+            _limitedRewards.Add(new LoreReward());
+            Plugin.Log.LogInfo($"[ItemRandomizer] 已加入日志随机奖励 (LoreReward)，按 lore 地点数加权权重 = {_loreRewardWeight}");
         }
 
         // ========== 辅助方法 ==========
@@ -429,22 +457,24 @@ namespace SilksongItemRandomizer
                     rand = _virtualUnlimitedProbability + _crestUnlockerProbability + 0.01;
             }
 
-            // 用计数代替 ToList()，避免每次调用都分配新 List
-            int availableCount = 0;
+            // 有限池按权重抽取：LoreReward 权重 = lore 地点数，其余奖励权重恒为 1。
+            // 这样"随机日志"的出现概率随 lore 地点数线性放大，而不是只占 1 个名额。
+            int totalWeight = 0;
             foreach (var r in _limitedRewards)
                 if (r != _cachedCrestUnlocker && !r.IsAtMax())
-                    availableCount++;
+                    totalWeight += (r is LoreReward ? _loreRewardWeight : 1);
 
-            if (availableCount > 0)
+            if (totalWeight > 0)
             {
-                int targetIndex = _globalRng.Next(availableCount);
+                int target = _globalRng.Next(totalWeight);
                 foreach (var r in _limitedRewards)
                 {
                     if (r != _cachedCrestUnlocker && !r.IsAtMax())
                     {
-                        if (targetIndex == 0)
+                        int w = (r is LoreReward ? _loreRewardWeight : 1);
+                        if (target < w)
                             return r;
-                        targetIndex--;
+                        target -= w;
                     }
                 }
             }
@@ -457,26 +487,21 @@ namespace SilksongItemRandomizer
 
         public static SavedItem GetRandomItem()
         {
-            // 用计数+二次遍历代替 ToList()，避免分配
+            // 仅统计真实物品奖励（SavedItemReward）；跳过 LoreReward 等纯效果奖励，
+            // 避免包成 ProxySavedItem 返回破损物品
             int availableCount = 0;
             foreach (var r in _limitedRewards)
-                if (!r.IsAtMax())
+                if (r is SavedItemReward && !r.IsAtMax())
                     availableCount++;
 
             if (availableCount == 0) return null;
             int targetIndex = _globalRng.Next(availableCount);
             foreach (var r in _limitedRewards)
             {
-                if (!r.IsAtMax())
+                if (r is SavedItemReward saved && !saved.IsAtMax())
                 {
                     if (targetIndex == 0)
-                    {
-                        if (r is SavedItemReward savedReward)
-                            return savedReward.Item;
-                        var proxy = new ProxySavedItem();
-                        proxy.Init(r);
-                        return proxy;
-                    }
+                        return saved.Item;
                     targetIndex--;
                 }
             }
@@ -507,7 +532,22 @@ namespace SilksongItemRandomizer
             GetTotalMappingsDict().Clear();
             SaveGivenCounts();
             SaveTotalMappings();
+            PreGeneratedMap.Reset();
             Plugin.Log.LogInfo("所有随机奖励次数和映射表已重置");
+        }
+
+        /// <summary>
+        /// 按奖励 Id 反查奖励实例（预生成映射表使用）。
+        /// Id 体系：SavedItemReward=物品名，VirtualReward/LoreReward="virt:xxx"，DirectionPermissionReward="perm:xxx"。
+        /// </summary>
+        public static IRandomReward FindRewardById(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var r in _limitedRewards)
+                if (r != null && r.Id == id) return r;
+            foreach (var r in _unlimitedRewards)
+                if (r != null && r.Id == id) return r;
+            return null;
         }
 
         // ========== 纹章槽位解锁器辅助 ==========

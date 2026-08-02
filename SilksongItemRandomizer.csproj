@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>C:\Users\28267\AppData\Roaming\r2modmanPlus-local\HollowKnightSilksong\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Architect">
       <HintPath>C:\Users\28267\AppData\Roaming\r2modmanPlus-local\HollowKnightSilksong\profiles\Default\BepInEx\plugins\cometcake575-Architect\Architect.dll</HintPath>
@@ -70,6 +70,12 @@
     <Reference Include="TeamCherry.Localization, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\TeamCherry.Localization.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Addressables">
+      <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ResourceManager">
+      <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\Unity.ResourceManager.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\UnityEngine.dll</HintPath>
@@ -133,13 +139,20 @@
     <Compile Include="ItemLimitConfig.cs" />
     <Compile Include="ItemLocalizationRegistrar.cs" />
     <Compile Include="ItemRandomizer.cs" />
+    <Compile Include="LoreRandomizer.cs" />
+    <Compile Include="LoreTriggerPatch.cs" />
+    <Compile Include="MapperPermanentPatch.cs" />
+    <Compile Include="MapStationRewards.cs" />
+    <Compile Include="MapStationUnlockPatch.cs" />
     <Compile Include="ItemTypeRandomFilter.cs" />
     <Compile Include="PickupPatch.cs" />
     <Compile Include="Plugin.cs" />
+    <Compile Include="PreGeneratedMap.cs" />
     <Compile Include="PrefabIdList.cs.cs" />
     <Compile Include="RecentItemsUI.cs" />
     <Compile Include="RewardTypes.cs" />
     <Compile Include="ShopItemStats_Purchase_Patch.cs" />
+    <Compile Include="ShopOwnerRegistry.cs" />
     <Compile Include="ShopMenuStock_BuildItemList_Patch.cs" />
     <Compile Include="ShopRandomizer.cs" />
     <Compile Include="SilkRandomizerPatch.cs" />
@@ -154,6 +167,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\check_points.txt" />
+    <EmbeddedResource Include="Resources\shop_slot_keys.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

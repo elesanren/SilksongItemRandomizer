@@ -1,4 +1,4 @@
-﻿// SilksongItemRandomizerAPI.cs - 修复陷阱开关不同步问题
+// SilksongItemRandomizerAPI.cs - 修复陷阱开关不同步问题
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
@@ -61,6 +61,8 @@ namespace SilksongItemRandomizer
             if (_initialized) return;
             _cachedConfig = config ?? new ItemRandomizerConfig();
             _initialized = true;
+            // 常驻补丁（不随总开关切换）在此尽早注册，保证游戏一开始就生效
+            ApplyAlwaysOnPatches();
             _pendingChanges = true;
             SyncToInternalFields();
         }
@@ -128,8 +130,13 @@ namespace SilksongItemRandomizer
             // 重建缓存
             SpriteCache.Reset();
 
+            // ★ 预生成表随存档清空，并重置生成标记（供下面按新种子重新全量生成）
+            PreGeneratedMap.Reset();
+
             ItemRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig, new PluginSaveDataAccessor(), GetFullRandomMode());
             CrestRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig.CrestEnabled, new CrestSaveDataAccessor());
+            // ★ 存档已重建，预生成表清空：重新从随机池摸全部检查点奖励
+            PreGeneratedMap.Initialize();
 
             CrestRandomizePatch.ResetProcessedIds();
             CurrencyCollectPatch.ResetCounters();
@@ -224,13 +231,83 @@ namespace SilksongItemRandomizer
 
         private static void SyncToInternalFields()
         {
-            if (Plugin.RandomSeed != null)
+            // 仅当值确实变化才写回 ConfigEntry，避免每次 ApplyPending 都重复赋值 +
+            // 触发 SettingChanged 事件 + 全量 Config.Save()，消除配置同步的抖动与反复事件。
+            bool changed = false;
+
+            if (Plugin.RandomSeed != null && Plugin.RandomSeed.Value != _cachedConfig.Seed)
+            {
                 Plugin.RandomSeed.Value = _cachedConfig.Seed;
-            if (Plugin.ItemRandomEnabled != null)
+                changed = true;
+            }
+            if (Plugin.ItemRandomEnabled != null && Plugin.ItemRandomEnabled.Value != _cachedConfig.Enabled)
+            {
                 Plugin.ItemRandomEnabled.Value = _cachedConfig.Enabled;
-            if (Plugin.CrestRandomEnabled != null)
+                changed = true;
+            }
+            if (Plugin.CrestRandomEnabled != null && Plugin.CrestRandomEnabled.Value != _cachedConfig.CrestRandomEnabled)
+            {
                 Plugin.CrestRandomEnabled.Value = _cachedConfig.CrestRandomEnabled;
-            Plugin.Instance?.Config.Save();  // 合并为一次保存
+                changed = true;
+            }
+
+            if (changed)
+                Plugin.Instance?.Config.Save();  // 值有变化才保存一次
+        }
+
+        // ========== 补丁类型清单（单一事实来源） ==========
+
+        /// <summary>
+        /// 跟随「物品随机总开关」切换的动态补丁。
+        /// 启用时批量 PatchAll，禁用时按类逐个 Unpatch。
+        /// 与原 Plugin.ApplyItemPatches 对齐：包含商店店主识别等所有需要随开关切换的类型。
+        /// </summary>
+        private static readonly System.Type[] ToggleablePatchTypes =
+        {
+            typeof(PickupPatch),
+            typeof(CurrencyCollectPatch),
+            typeof(TryGetPatch),
+            typeof(CrestRandomizePatch),
+            typeof(ShopOwnerBase_SpawnUpdateShop_Patch),
+            typeof(ShopMenuStock_BuildItemList_Patch),
+            typeof(ShopItemStats_Purchase_Patch),
+            typeof(SilkSpearPityPatch),
+            typeof(BenchRespawnPatch),
+            typeof(SilkRandomizerPatch),
+            typeof(LoreTriggerPatch),
+            typeof(MapStationUnlockPatch),
+            typeof(Extracurrencypickup),
+        };
+
+        /// <summary>
+        /// 常驻补丁：不受总开关控制，始终注册、永不卸载。
+        /// 它们内部以 SilksongItemRandomizerAPI.IsEnabled() 自守卫，禁用时不做任何事，
+        /// 因此始终挂载是安全的。MapperPermanentPatch 同理（始终生效，独立 try/catch 保护）。
+        /// </summary>
+        private static readonly System.Type[] AlwaysOnPatchTypes =
+        {
+            typeof(MapperPermanentPatch),
+        };
+
+        /// <summary>常驻补丁是否已注册（避免重复 PatchAll）</summary>
+        private static bool _alwaysOnPatchesApplied = false;
+
+        /// <summary>
+        /// 注册常驻补丁（幂等，仅执行一次）。由 Initialize 与 ApplyHarmonyPatches 调用。
+        /// 独立 try/catch：个别目标方法缺失不影响其余补丁。
+        /// </summary>
+        public static void ApplyAlwaysOnPatches()
+        {
+            if (_harmony == null)
+                _harmony = new Harmony(HarmonyId);
+            if (_alwaysOnPatchesApplied) return;
+
+            foreach (var type in AlwaysOnPatchTypes)
+            {
+                try { _harmony.PatchAll(type); }
+                catch (Exception ex) { Plugin.Log.LogWarning($"常驻补丁注册失败 {type.Name}（目标方法可能不存在）: {ex.Message}"); }
+            }
+            _alwaysOnPatchesApplied = true;
         }
 
         private static void ApplyHarmonyPatches()
@@ -238,26 +315,45 @@ namespace SilksongItemRandomizer
             if (_harmony == null)
                 _harmony = new Harmony(HarmonyId);
 
-            _harmony.PatchAll(typeof(PickupPatch));
-            _harmony.PatchAll(typeof(CurrencyCollectPatch));
-            _harmony.PatchAll(typeof(TryGetPatch));
-            _harmony.PatchAll(typeof(CrestRandomizePatch));
-            _harmony.PatchAll(typeof(ShopMenuStock_BuildItemList_Patch));
-            _harmony.PatchAll(typeof(ShopItemStats_Purchase_Patch));
-            _harmony.PatchAll(typeof(SilkSpearPityPatch));
-            _harmony.PatchAll(typeof(BenchRespawnPatch));
-            _harmony.PatchAll(typeof(SilkRandomizerPatch));
-            _harmony.PatchAll(typeof(Extracurrencypickup));
-            try { EnemyRandoAdjuster.TryPatch(_harmony); } catch { }
+            ApplyAlwaysOnPatches();
+
+            foreach (var type in ToggleablePatchTypes)
+            {
+                try { _harmony.PatchAll(type); }
+                catch (Exception ex) { Plugin.Log.LogWarning($"补丁注册失败 {type.Name}: {ex.Message}"); }
+            }
+
+            // 按类注册持久化数据访问器（原 Plugin.ApplyItemPatches 在此处完成）
+            PickupPatch.Initialize(new PluginSaveDataAccessor());
+            CrestRandomizePatch.Initialize(new PluginSaveDataAccessor());
+            ShopMenuStock_BuildItemList_Patch.Initialize(new PluginSaveDataAccessor());
+            SilkSpearPityPatch.Initialize(new PluginSaveDataAccessor());
+            BenchRespawnPatch.Initialize(new PluginSaveDataAccessor());
+            Extracurrencypickup.Initialize(new PluginSaveDataAccessor());
+
+            try { EnemyRandoAdjuster.TryPatch(_harmony); }
+            catch (Exception ex) { Plugin.Log.LogWarning($"EnemyRandoAdjuster 补丁跳过（可能缺少 EnemyRando）: {ex.Message}"); }
         }
 
         private static void RemoveHarmonyPatches()
         {
-            _harmony?.UnpatchSelf();
-            _harmony = null;
+            if (_harmony == null) return;
+
+            const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+            foreach (var type in ToggleablePatchTypes)
+            {
+                try
+                {
+                    // HarmonyLib 的 Unpatch 需要 MethodBase，按类卸载时遍历其静态方法逐个 Unpatch。
+                    // 未补丁过的方法 Unpatch 无副作用，安全。
+                    foreach (var method in type.GetMethods(flags))
+                        _harmony.Unpatch(method, HarmonyPatchType.All, HarmonyId);
+                }
+                catch (Exception ex) { Plugin.Log.LogWarning($"补丁卸载失败 {type.Name}: {ex.Message}"); }
+            }
         }
 
-        private static bool GetFullRandomMode()
+        public static bool GetFullRandomMode()
         {
             try
             {

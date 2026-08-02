@@ -1,4 +1,4 @@
-﻿// ItemLimitConfig.cs - 修改为可写属性，保持原有功能
+// ItemLimitConfig.cs - 修改为可写属性，保持原有功能
 using BepInEx.Configuration;
 using System;
 
@@ -62,6 +62,22 @@ namespace SilksongItemRandomizer
         public static bool EnableInfShards300 { get; private set; } = true;
         public static bool EnableInfSilkParts { get; private set; } = true;
 
+        // ========== 日志随机奖励开关 ==========
+        public static bool EnableLoreReward { get; private set; } = true;
+
+        // ========== 世界石碑阅读触发随机奖励开关 ==========
+        public static bool EnableLoreTrigger { get; private set; } = true;
+
+        // ========== 地图/车站随机开关 ==========
+        /// <summary>28 张地图加入随机奖励池</summary>
+        public static bool EnableMapRewards { get; set; } = true;
+        /// <summary>10 个车站 + 铃兽总开关加入随机奖励池</summary>
+        public static bool EnableStationRewards { get; set; } = true;
+        /// <summary>拦截原版地图购买（沙克拉商店）转为随机奖励</summary>
+        public static bool EnableMapCheckIntercept { get; set; } = true;
+        /// <summary>拦截原版车站开通（收费机）转为随机奖励</summary>
+        public static bool EnableStationCheckIntercept { get; set; } = true;
+
         /// <summary>
         /// 从 BepInEx 配置文件初始化（仅在游戏启动时调用一次）
         /// </summary>
@@ -118,6 +134,13 @@ namespace SilksongItemRandomizer
             EnableInfGeo300 = bindBool("Limits", "EnableInfGeo300", true);
             EnableInfShards300 = bindBool("Limits", "EnableInfShards300", true);
             EnableInfSilkParts = bindBool("Limits", "EnableInfSilkParts", true);
+            EnableLoreReward = bindBool("Limits", "EnableLoreReward", true);
+            EnableLoreTrigger = bindBool("Limits", "EnableLoreTrigger", true);
+
+            EnableMapRewards = bindBool("MapStation", "EnableMapRewards", true);
+            EnableStationRewards = bindBool("MapStation", "EnableStationRewards", true);
+            EnableMapCheckIntercept = bindBool("MapStation", "EnableMapCheckIntercept", true);
+            EnableStationCheckIntercept = bindBool("MapStation", "EnableStationCheckIntercept", true);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿// TrapDistanceAnalyzer.cs
+// TrapDistanceAnalyzer.cs
 // 测试用：场景加载后自动输出一次所有活跃陷阱间的最近距离与相对水平面的角度
 // 用完从项目中排除编译即可
 

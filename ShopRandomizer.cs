@@ -1,4 +1,4 @@
-﻿// ShopRandomizer.cs - 修复后的完整版本
+// ShopRandomizer.cs - 修复后的完整版本
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -215,83 +215,53 @@ namespace SilksongItemRandomizer
         {
             EnsureAllShopItems();
 
-            int slotIndex = -1;
-            string[] parts = permanentId.Split('_');
-            for (int i = parts.Length - 1; i >= 0; i--)
+            // ★ 预生成映射优先：key = "shop:" + permanentId，与 PreGeneratedMap.ShopSlotKeys 完全一致
+            //（permanentId = "{场景名}_{槽位}"，ResolveReward 对 shop: 前缀只做精确匹配）
+            string shopKey = "shop:" + permanentId;
+            IRandomReward preReward = PreGeneratedMap.ResolveReward(shopKey);
+            if (preReward != null)
             {
-                if (int.TryParse(parts[i], out slotIndex))
-                    break;
-            }
+                if (_shopItemCache.TryGetValue(permanentId, out var cachedItem) && !IsItemOwned(cachedItem))
+                {
+                    price = _shopPriceCache[permanentId];
+                    return cachedItem;
+                }
 
-            // 槽位 0,1,2 为特殊奖励（每个商店固定出现，不参与去重）
-            if (slotIndex == 0)
-            {
-                if (_shopItemCache.TryGetValue(permanentId, out var cachedCoin))
+                // 价格：虚拟奖励固定为 1，真实物品按种子随机
+                if (preReward.Id.StartsWith("virt:"))
                 {
-                    price = _shopPriceCache[permanentId];
-                    return cachedCoin;
+                    price = 1;
                 }
-                var coinItem = GetRandomCoinItem(permanentId, out price);
-                _shopItemCache[permanentId] = coinItem;
-                _shopPriceCache[permanentId] = price;
-                return coinItem;
-            }
-            if (slotIndex == 1)
-            {
-                if (_shopItemCache.TryGetValue(permanentId, out var cachedBlue))
-                {
-                    price = _shopPriceCache[permanentId];
-                    return cachedBlue;
-                }
-                var blueItem = GetRandomBlueHealthItem(permanentId, out price);
-                _shopItemCache[permanentId] = blueItem;
-                _shopPriceCache[permanentId] = price;
-                return blueItem;
-            }
-            if (slotIndex == 2)
-            {
-                if (_shopItemCache.TryGetValue(permanentId, out var cachedCap))
-                {
-                    price = _shopPriceCache[permanentId];
-                    return cachedCap;
-                }
-                var capItem = GetRandomCapUpgradeItem(permanentId, out price);
-                _shopItemCache[permanentId] = capItem;
-                _shopPriceCache[permanentId] = price;
-                return capItem;
-            }
-
-            // 普通槽位（3-11）
-            if (_shopItemCache.TryGetValue(permanentId, out var cachedItem) && !IsItemOwned(cachedItem))
-            {
-                if (!_shopPriceCache.TryGetValue(permanentId, out price))
+                else
                 {
                     var rng = new Random(Plugin.RandomSeed.Value ^ permanentId.GetHashCode());
                     price = GenerateRandomPrice(rng);
-                    _shopPriceCache[permanentId] = price;
                 }
-                if (usedInThisShop.Contains(cachedItem.name))
-                {
-                    return GenerateRandomShopItem(permanentId, out price, usedInThisShop);
-                }
-                usedInThisShop.Add(cachedItem.name);
-                return cachedItem;
+
+                var proxy = new ProxySavedItem();
+                proxy.Init(preReward);
+                _shopItemCache[permanentId] = proxy;
+                _shopPriceCache[permanentId] = price;
+                usedInThisShop.Add(proxy.name);
+                return proxy;
             }
 
-            var newItem = GenerateRandomShopItem(permanentId, out price, usedInThisShop);
-            if (newItem == null)
-            {
-                price = 10;
-                var fallbackReward = new VirtualReward("virt:FallbackGeo", Locale.Get("保底念珠"), FindSprite("coinget_01"),
-                    () => HeroController.instance?.AddGeo(10), () => false);
-                var proxy = new ProxySavedItem();
-                proxy.Init(fallbackReward);
-                newItem = proxy;
-            }
-            _shopItemCache[permanentId] = newItem;
+            // 回退（极少发生）：映射缺失时使用虚拟货币奖励
+            Plugin.Log.LogWarning($"[ShopRandomizer] 映射缺失，槽位 {permanentId} 使用虚拟奖励");
+            var fallbackReward = new VirtualReward(
+                "virt:FallbackCoin",
+                Locale.Get("随机货币"),
+                FindSprite("coinget_01"),
+                () => HeroController.instance?.AddGeo(UnityEngine.Random.Range(1, 6)),
+                () => false
+            );
+            price = 1;
+            var fallbackProxy = new ProxySavedItem();
+            fallbackProxy.Init(fallbackReward);
+            _shopItemCache[permanentId] = fallbackProxy;
             _shopPriceCache[permanentId] = price;
-            usedInThisShop.Add(newItem.name);
-            return newItem;
+            usedInThisShop.Add(fallbackProxy.name);
+            return fallbackProxy;
         }
 
         private static SavedItem GenerateRandomShopItem(string permanentId, out int price, HashSet<string> usedInThisShop)

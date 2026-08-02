@@ -1,4 +1,4 @@
-﻿// BenchRespawnPatch.cs - 修复后的完整版本
+// BenchRespawnPatch.cs - 修复后的完整版本
 using HarmonyLib;
 using System;
 using System.Collections;

@@ -1,4 +1,4 @@
-﻿// RewardTypes.cs - 补充缺失的 Item 属性和 LimitedVirtualReward
+// RewardTypes.cs - 补充缺失的 Item 属性和 LimitedVirtualReward
 using StartingAbilityPicker;
 using System;
 using System.Collections.Generic;
@@ -73,7 +73,30 @@ namespace SilksongItemRandomizer
         }
         public SavedItem Item => _item;  // 添加公开属性
         public SavedItemReward(SavedItem item) => _item = item;
-        public void Give() => _item?.TryGet(false, true);
+
+        /// <summary>
+        /// 定向给予 _item 本体（拾取点按表 / 商店货架 / 保底等「已确定给哪个物品」的场景）。
+        /// 必须走 TryGetPatch.BypassRandom 保护：否则 _item.TryGet 会被 TryGetPatch 拦截并
+        /// 重新随机成一个新物品（表现为「买到的和货架不是同一个」）。
+        /// 保存/恢复 BypassRandom 与 PendingKey，对调用方完全透明，不影响外部 PendingKey 分发。
+        /// </summary>
+        public void Give()
+        {
+            if (_item == null) return;
+            bool prevBypass = TryGetPatch.BypassRandom;
+            string prevPending = PreGeneratedMap.PendingKey;
+            TryGetPatch.BypassRandom = true;
+            try
+            {
+                _item.TryGet(false, true);
+            }
+            finally
+            {
+                TryGetPatch.BypassRandom = prevBypass;
+                PreGeneratedMap.PendingKey = prevPending;
+            }
+        }
+
         public bool IsAtMax() => ItemRandomizer.GetGivenCount(Id) >= ItemLimitConfig.GetItemTypeLimit(_item);
     }
 

@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ===== 本项目补充 =====
+# 未筛选的原始扫描/映射导出数据（非运行时输入，不入库）
+all_points_merged.txt
+random_mapping.txt
+
+# IDE/工具目录
+.codebuddy/

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SilksongItemRandomizer
@@ -72,6 +72,11 @@ namespace SilksongItemRandomizer
 
         // ===== 来自 SkillTriggerMod =====
         public HashSet<string> SkillTriggerRecords = new HashSet<string>();
+
+        // ===== 预生成映射表（新增部分）：所有检查点 key -> "reward:Id" =====
+        // 进入游戏后从随机池提前摸出具体奖励并落盘，遇点时直接按表给予。
+        // key 格式：拾取点=场景_F2坐标，Lore=场景:对象名，车站=check:bool
+        public Dictionary<string, string> PreGeneratedMappings = new();
     }
 
     // 仅用于旧数据迁移的内部类

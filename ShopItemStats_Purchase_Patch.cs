@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Reflection;
@@ -79,7 +79,9 @@ namespace SilksongItemRandomizer
             int index = spawnedStock.IndexOf(stats);
             if (index < 0) return null;
             string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            return $"{sceneName}_{index}";
+            // 与构建补丁共用同一店主标识，保证购买时的永久 ID 一致
+            string disc = ShopMenuStock_BuildItemList_Patch.CurrentShopDisc;
+            return disc == null ? $"{sceneName}_{index}" : $"{sceneName}_{disc}_{index}";
         }
     }
 }

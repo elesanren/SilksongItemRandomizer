@@ -1,4 +1,4 @@
-﻿// ShopMenuStock_BuildItemList_Patch.cs - 修复后的完整版本
+// ShopMenuStock_BuildItemList_Patch.cs - 修复后的完整版本
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -37,6 +37,9 @@ namespace SilksongItemRandomizer
         }
 
         private static IShopSlotCountAccessor _slotCountAccessor;
+
+        /// <summary>当前商店菜单解析出的店主标识（多店主场景非 null），购买补丁取槽位 ID 时共用</summary>
+        public static string CurrentShopDisc;
 
         public static void Initialize(IShopSlotCountAccessor accessor)
         {
@@ -209,6 +212,9 @@ namespace SilksongItemRandomizer
                 EnsureReflectionFields();
 
                 string sceneName = SceneManager.GetActiveScene().name;
+                // 店主区分：多店主场景解析当前店主标识，永久 ID 带上该标识
+                string disc = ShopOwnerRegistry.ResolveDiscriminator(sceneName);
+                CurrentShopDisc = disc;
                 var spawnedStock = _spawnedStockField.GetValue(__instance) as IList<ShopItemStats>;
                 var availableStock = _availableStockField.GetValue(__instance) as IList;
                 float yDistanceRaw = (float)_yDistanceField.GetValue(__instance);
@@ -249,7 +255,7 @@ namespace SilksongItemRandomizer
                     var stats = spawnedStock[i];
                     if (stats == null) continue;
 
-                    string permanentId = $"{sceneName}_{i}";
+                    string permanentId = disc == null ? $"{sceneName}_{i}" : $"{sceneName}_{disc}_{i}";
                     bool isPurchased = GetCount(permanentId) <= 0;
 
                     var shiftFsm = stats.GetComponent<PlayMakerFSM>();

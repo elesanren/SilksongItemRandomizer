@@ -1,4 +1,4 @@
-﻿// CurrencyCollectPatch.cs - 修复后的完整版本
+// CurrencyCollectPatch.cs - 修复后的完整版本
 using System;
 using System.Linq;
 using HarmonyLib;

@@ -1,4 +1,4 @@
-﻿// CrestRandomizePatch.cs - 修复后的完整版本
+// CrestRandomizePatch.cs - 修复后的完整版本
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
