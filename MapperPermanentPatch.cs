@@ -1,52 +1,16 @@
 using HarmonyLib;
 using UnityEngine;
-using System.Reflection;
-using UnityEngine.SceneManagement;
 
 namespace SilksongItemRandomizer
 {
     /// <summary>
     /// 强制所有区域的沙克拉（Mapper）商店永久显示，不会因换区、剧情或随机而消失。
+    /// 采用"独立补丁类"拆分注册：每个 [HarmonyPatch] 类单独 PatchAll，
+    /// 单个目标方法解析失败不影响其余补丁（避免 PatchClassProcessor 一票否决）。
     /// </summary>
-    [HarmonyPatch]
     public static class MapperPermanentPatch
     {
-        // 1. 拦截 GameManager.MapperLeavePreviousLocations
-        [HarmonyPatch(typeof(GameManager), "MapperLeavePreviousLocations")]
-        [HarmonyPrefix]
-        private static bool Prefix_MapperLeavePreviousLocations()
-        {
-            // 直接返回 false，阻止任何旧区域离开标记被置 true
-            return false;
-        }
-
-        // 2. 拦截 SceneTravelerTempEval.OnEnter（PlayMaker 版本）
-        [HarmonyPatch("HutongGames.PlayMaker.Actions.SceneTravelerTempEval", "OnEnter")]
-        [HarmonyPrefix]
-        private static bool Prefix_SceneTravelerTempEval()
-        {
-            // 直接返回 false，阻止 PlayMaker 版本的旧区域离开逻辑
-            return false;
-        }
-
-        // 3. 拦截 PlayerData.MapperLeaveAll（剧情最终离开）
-        [HarmonyPatch(typeof(PlayerData), "MapperLeaveAll")]
-        [HarmonyPrefix]
-        private static bool Prefix_MapperLeaveAll()
-        {
-            return false;
-        }
-
-        // 4. 拦截场景加载时随机设置 mapperAway 的逻辑
-        // 由于内联代码无法直接 Patch，我们用后置补丁在每次场景加载后强制重置
-        [HarmonyPatch(typeof(GameManager), "LoadScene")]
-        [HarmonyPostfix] // 或使用其他合适的方法如 OnSceneLoaded
-        private static void Postfix_ResetMapperState()
-        {
-            ForceResetMapperFields();
-        }
-
-        // 5. 额外兜底：在场景加载时强制重置所有 Mapper 相关字段（双重保险）
+        // ========== 供外部（Plugin 等）调用的强制重置 ==========
         public static void ForceResetMapperFields()
         {
             var pd = PlayerData.instance;
@@ -71,7 +35,54 @@ namespace SilksongItemRandomizer
             // 临时离开标记置 false
             try { pd.mapperAway = false; } catch { }
 
-            // 如果需要进行更多重置，可在此处添加
+            // 阻止"沙克拉最终任务出现"标志被置真：
+            // GameManager 会因它调 MapperLeaveAll() 让所有商人离场。
+            try { pd.ShakraFinalQuestAppear = false; } catch { }
         }
+    }
+
+    /// <summary>拦截 PlayerData.MapperLeaveAll：阻止一次性清空所有商人</summary>
+    [HarmonyPatch(typeof(PlayerData), "MapperLeaveAll")]
+    public static class MapperLeaveAllPatch
+    {
+        [HarmonyPrefix]
+        private static bool Prefix() => false;
+    }
+
+    /// <summary>拦截 GameManager.MapperLeavePreviousLocations：阻止经过地区的商人离场</summary>
+    [HarmonyPatch(typeof(GameManager), "MapperLeavePreviousLocations")]
+    public static class MapperLeavePrevPatch
+    {
+        [HarmonyPrefix]
+        private static bool Prefix() => false;
+    }
+
+    /// <summary>
+    /// 拦截 PlayMaker 版离开逻辑 SceneTravelerTempEval.OnEnter（HutongGames.PlayMaker.Actions）。
+    /// 用字符串类型名避免编译期依赖 PlayMaker。独立类，若目标缺失不影响其他补丁。
+    /// </summary>
+    [HarmonyPatch("HutongGames.PlayMaker.Actions.SceneTravelerTempEval", "OnEnter")]
+    public static class SceneTravelerEvalPatch
+    {
+        [HarmonyPrefix]
+        private static bool Prefix() => false;
+    }
+
+    /// <summary>
+    /// 场景加载/进入后强制重置所有 Mapper 字段，兜底覆盖剧情/PlayMaker 在场景中后期再次置真。
+    /// LoadScene 与 FinishedEnteringScene 各自独立，某个失败不影响另一个。
+    /// </summary>
+    [HarmonyPatch(typeof(GameManager), "LoadScene")]
+    public static class MapperResetOnLoadPatch
+    {
+        [HarmonyPostfix]
+        private static void Postfix() => MapperPermanentPatch.ForceResetMapperFields();
+    }
+
+    [HarmonyPatch(typeof(GameManager), "FinishedEnteringScene")]
+    public static class MapperResetOnEnterPatch
+    {
+        [HarmonyPostfix]
+        private static void Postfix() => MapperPermanentPatch.ForceResetMapperFields();
     }
 }

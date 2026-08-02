@@ -282,11 +282,16 @@ namespace SilksongItemRandomizer
         /// <summary>
         /// 常驻补丁：不受总开关控制，始终注册、永不卸载。
         /// 它们内部以 SilksongItemRandomizerAPI.IsEnabled() 自守卫，禁用时不做任何事，
-        /// 因此始终挂载是安全的。MapperPermanentPatch 同理（始终生效，独立 try/catch 保护）。
+        /// 因此始终挂载是安全的。
+        /// 拆分独立补丁类：每个单独 PatchAll + try/catch，避免单个目标缺失导致一票否决。
         /// </summary>
         private static readonly System.Type[] AlwaysOnPatchTypes =
         {
-            typeof(MapperPermanentPatch),
+            typeof(MapperLeaveAllPatch),
+            typeof(MapperLeavePrevPatch),
+            typeof(SceneTravelerEvalPatch),
+            typeof(MapperResetOnLoadPatch),
+            typeof(MapperResetOnEnterPatch),
         };
 
         /// <summary>常驻补丁是否已注册（避免重复 PatchAll）</summary>
