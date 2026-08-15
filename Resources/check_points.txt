@@ -5,13 +5,10 @@ Pickup|Abyss_04|Collectable Item Pickup|Collectable Item Pickup|Ancient Egg Abys
 Lore|Abyss_06|Abyss_lore_stone/Inspect Region|Inspect Region||loretrig:Abyss_06:Inspect Region|39.2|42.4|scan
 Pickup|Abyss_08|Collectable Item Pickup|Collectable Item Pickup|Farsight|Abyss_08_Collectable Item Pickup|157.6|90.5|scan
 Lore|Abyss_08|Group (5)/Inspect Region - Void Tendrils|Inspect Region - Void Tendrils||loretrig:Abyss_08:Inspect Region - Void Tendrils|17.7|68.6|scan
-Lore|Abyss_08|weaver_spire_base control/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Abyss_08:Shrine Weaver Ability|86.9|9.9|scan
 Pickup|Abyss_12|weaver_harp_sign_map/Get Map Inspect|Get Map Inspect|Abyss Map|Abyss_12_13.94_26.83_0.00|13.9|26.8|scan
-Lore|Abyss_12|weaver_harp_sign_map/Get Map Inspect|Get Map Inspect||loretrig:Abyss_12:Get Map Inspect|13.9|26.8|scan
 Pickup|Ant_04_left|<extra>|Collectable Item Pickup (extra)|Simple Key|Ant_04_left_7.00_29.00_0.00|7.0|29.0|extra
 Pickup|Ant_04_left|ant_item_string/Item Holder/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Medium|Ant_04_left_85.02_26.99_0.01|85.0|27.0|scan
 Pickup|Ant_08|Battle Scene/End Scene/Collectable Item Pickup|Collectable Item Pickup|Vintage Nectar|Ant_08_44.85_24.93_0.00|44.9|24.9|scan
-Lore|Ant_08|Battle Scene/BattleStart Inspect Region|BattleStart Inspect Region||loretrig:Ant_08:BattleStart Inspect Region|45.0|26.3|scan
 Pickup|Ant_20|Enemy Break Cage (2)/Corpse/Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Ant_20_147.39_13.79_0.00|147.4|13.8|scan
 Pickup|Ant_21|ant_item_string/Item Holder/Collectable Item Pickup|Collectable Item Pickup|Curve Claws|Ant_21_44.78_76.93_0.01|44.8|76.9|scan
 Pickup|Ant_21|<extra>|Collectable Item Pickup (extra)|Simple Key|Ant_21_48.50_74.00_0.00|48.5|74.0|extra
@@ -21,36 +18,26 @@ Pickup|Aqueduct_01|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Fr
 Pickup|Aqueduct_04|Breakable_cage/Collectable Item Pickup Slab Key|Collectable Item Pickup Slab Key|Slab Key C|Aqueduct_04_Collectable Item Pickup Slab Key|7.4|38.7|scan
 Pickup|Aqueduct_05|tool_metal_deposit/Collectable Item Pickup - Tool Metal|Collectable Item Pickup - Tool Metal|Tool Metal|Aqueduct_05_326.85_17.69_0.02|326.9|17.7|scan
 Lore|Aqueduct_05|Mr_Mush_Tablet_St/Mr Mushroom Tablet|Mr Mushroom Tablet||loretrig:Aqueduct_05:Mr Mushroom Tablet|238.4|84.8|scan
-Lore|Aqueduct_05|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Aqueduct_05:Vassal_Rest_Spot|275.8|32.7|scan
 Pickup|Aqueduct_05_festival|Caravan_States/Flea Festival Outro/Flea Festival Pinata/Item Reward 2/Collectable Item Pickup Reward 2|Collectable Item Pickup Reward 2|Rosary_Set_Medium|Aqueduct_05_festival_152.78_16.24_0.03|152.8|16.2|scan
 Pickup|Aqueduct_05_festival|Caravan_States/Flea Festival Outro/Flea Festival Pinata/Item Reward Final/Collectable Item Pickup Reward 3|Collectable Item Pickup Reward 3|Pale_Oil|Aqueduct_05_festival_153.11_15.32_0.03|153.1|15.3|scan
 Pickup|Aqueduct_05_festival|Caravan_States/Flea Festival Outro/Flea Festival Pinata/Item Reward 1/Collectable Item Pickup Reward 1|Collectable Item Pickup Reward 1|Rosary_Set_Small|Aqueduct_05_festival_154.04_15.98_0.03|154.0|16.0|scan
 Lore|Aqueduct_05_festival|Caravan_States/Flea_Festival_Intro/weaver_harp_sign (3)/Inspect Region|Inspect Region||loretrig:Aqueduct_05_festival:Inspect Region|187.5|9.3|scan
-Lore|Aqueduct_05_festival|Caravan_States/Flea Festival/Flea Festival Scoreboard/Interact|Interact||loretrig:Aqueduct_05_festival:Interact|187.7|7.0|scan
-Lore|Aqueduct_05_festival|Caravan_States/Flea Festival/Festival_Feast/Flea Brew Scene/Flea Festival Brew Pot/Refill Inspect|Refill Inspect||loretrig:Aqueduct_05_festival:Refill Inspect|117.8|8.0|scan
 Lore|Aqueduct_05_pre|Caravan_States/Pre_Fleatopia/weaver_harp_sign (1)/Inspect Region|Inspect Region||loretrig:Aqueduct_05_pre:Inspect Region|187.5|9.3|scan
 Pickup|Aqueduct_06|Collectable Item Pickup|Collectable Item Pickup|Maggot Charm|Aqueduct_06_126.24_8.43_0.00|126.2|8.4|scan
 Pickup|Aqueduct_07|Aqueduct Map Inspect|Aqueduct Map Inspect|Aqueduct Map|Aqueduct_07_28.93_28.98_0.00|28.9|29.0|scan
-Lore|Aqueduct_07|Aqueduct Map Inspect|Aqueduct Map Inspect||loretrig:Aqueduct_07:Aqueduct Map Inspect|28.9|29.0|scan
 Lore|Arborium_01|Inspect Region|Inspect Region||loretrig:Arborium_01:Inspect Region|14.2|19.8|scan
-Lore|Arborium_01|Group/Inspect Region (1)|Inspect Region (1)||loretrig:Arborium_01:Inspect Region (1)|5.7|98.3|scan
-Lore|Arborium_01|Group (1)/Inspect Region (1)|Inspect Region (1)||loretrig:Arborium_01:Inspect Region (1)|23.8|42.1|scan
 Lore|Arborium_03|Inspect Region|Inspect Region||loretrig:Arborium_03:Inspect Region|17.9|98.3|scan
 Pickup|Arborium_05|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Arborium_05_Collectable Item Pickup|4.0|7.3|scan
 Pickup|Arborium_07|Battle Scene/End Scene/Collectable Item Pickup Battle|Collectable Item Pickup Battle|Lightning Rod|Arborium_07_154.27_10.54_0.00|154.3|10.5|scan
 Pickup|Arborium_07|Collectable Item Pickup Materium|Collectable Item Pickup Materium|Materium|Arborium_07_Collectable Item Pickup Materium|103.4|11.1|scan
 Pickup|Arborium_10|Music Box Sequence - EDITED/music_box_reward_pillar/Collectable Holder/Collectable Item Pickup|Collectable Item Pickup|Cog Heart Pieces|Arborium_10_17.81_5.70_0.03|17.8|5.7|scan
 Pickup|Arborium_11|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Arborium_11_Collectable Item Pickup|211.2|10.3|scan
-Lore|Arborium_11|Map Machine|Map Machine||loretrig:Arborium_11:Map Machine|13.4|11.2|scan
 Lore|Arborium_Tube|City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Arborium_Tube:tube_toll_machine|16.0|4.7|scan
 Pickup|Aspid_01|<extra>|Collectable Item Pickup (extra)|Simple Key|Aspid_01_10.50_7.50_0.00|10.5|7.5|extra
 Pickup|Aspid_01|Collectable Item Pickup (2)|Collectable Item Pickup (2)|Seal Chit Aspid_01|Aspid_01_63.31_65.26_0.00|63.3|65.3|scan
-Lore|Aspid_01|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Aspid_01:Vassal_Rest_Spot|68.0|244.9|scan
 Pickup|Bellshrine_Coral|Collectable Item Pickup|Collectable Item Pickup|Simple Key|Bellshrine_Coral_Collectable Item Pickup|28.3|16.5|scan
 Pickup|Belltown|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Belltown_Collectable Item Pickup|59.2|66.2|scan
-Lore|Belltown|Hornet House States/Door Lock|Door Lock||loretrig:Belltown:Door Lock|60.8|40.1|scan
 Lore|Belltown|hanging_bell_house_Pinsmith/closed/door_note/Inspect Region|Inspect Region||loretrig:Belltown:Inspect Region|82.2|36.2|scan
-Lore|Belltown|Town States/Spinner Defeated/Quest Board Pivot/Quest_Board|Quest_Board||loretrig:Belltown:Quest_Board|50.7|8.4|scan
 Pickup|Belltown_04|Quest Bell Dropper (6)/Drop Bell/Silver/Collectable Item Pickup Child|Collectable Item Pickup Child|Shiny Bell Goomba|Belltown_04_13.37_75.72_0.00|13.4|75.7|scan
 Pickup|Belltown_04|Quest Bell Dropper (5)/Drop Bell/Silver/Collectable Item Pickup Child|Collectable Item Pickup Child|Shiny Bell Goomba|Belltown_04_18.66_90.22_0.00|18.7|90.2|scan
 Pickup|Belltown_04|Quest Bell Dropper (2)/Drop Bell/Silver/Collectable Item Pickup Child|Collectable Item Pickup Child|Shiny Bell Goomba|Belltown_04_31.73_31.75_0.00|31.7|31.8|scan
@@ -63,8 +50,6 @@ Pickup|Belltown_04|<extra>|Collectable Item Pickup (extra)|Simple Key|Belltown_0
 Lore|Belltown_06|Inspect Region|Inspect Region||loretrig:Belltown_06:Inspect Region|14.9|8.4|scan
 Lore|Belltown_07|Black Thread States Thread Only Variant/Normal World/Inspect Region|Inspect Region||loretrig:Belltown_07:Inspect Region|57.6|8.4|scan
 Pickup|Belltown_08|Boss Scene/Lantern Item|Lantern Item|Wisp Lantern|Belltown_08_54.55_11.31_0.00|54.6|11.3|scan
-Lore|Belltown_Room_Spare|furnishings/Floor Group/floor inspect/Inspect Alt Trophies|Inspect Alt Trophies||loretrig:Belltown_Room_Spare:Inspect Alt Trophies|23.5|8.3|scan
-Lore|Belltown_Room_Spare|furnishings/Floor Group/floor inspect/Inspect Region Floor|Inspect Region Floor||loretrig:Belltown_Room_Spare:Inspect Region Floor|23.5|8.3|scan
 Pickup|Belltown_Room_shellwood|Collectable Item Pickup|Collectable Item Pickup|Harpoon|Belltown_Room_shellwood_37.02_7.07_0.14|37.0|7.1|scan
 Lore|Belltown_basement|Bellway Toll Machine|Bellway Toll Machine||loretrig:Belltown_basement:Bellway Toll Machine|28.3|95.2|scan
 Pickup|Belltown_basement_03|Quest Bell Dropper (3)/Drop Bell/Silver/Collectable Item Pickup Child|Collectable Item Pickup Child|Shiny Bell Goomba|Belltown_basement_03_104.15_81.72_0.00|104.2|81.7|scan
@@ -94,7 +79,6 @@ Lore|Bellway_Aqueduct|Bellway Toll Machine|Bellway Toll Machine||loretrig:Bellwa
 Pickup|Bellway_City|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Bellway_City_Collectable Item Pickup|67.6|24.3|scan
 Lore|Bellway_City|Bellway Toll Machine|Bellway Toll Machine||loretrig:Bellway_City:Bellway Toll Machine|39.9|10.2|scan
 Lore|Bellway_City|Bellway Toll Machine (1)|Bellway Toll Machine (1)||loretrig:Bellway_City:Bellway Toll Machine (1)|59.6|10.2|scan
-Lore|Bellway_City|Map Machine|Map Machine||loretrig:Bellway_City:Map Machine|102.6|10.0|scan
 Lore|Bellway_City|City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Bellway_City:tube_toll_machine|81.6|9.7|scan
 Toll|Bellway_Peak|bell_bench/bell_toll_machine|bell_toll_machine|||14.4|3.7|scan
 Toll|Bellway_Peak|bell_bench/rosary_string_machine|rosary_string_machine|||19.7|5.0|scan
@@ -123,7 +107,6 @@ Pickup|Bone_10|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_10_8.00_4
 Pickup|Bone_10|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Bone_10_Collectable Item Pickup|99.0|41.3|scan
 Pickup|Bone_11|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_11_8.00_9.50_0.00|8.0|9.5|extra
 Pickup|Bone_12|Collectable Item Pickup Pin|Collectable Item Pickup Pin|Straight Pin|Bone_12_41.13_27.81_0.02|41.1|27.8|scan
-Lore|Bone_12|Black Thread States/Black Thread World/Ladybugs_Act_3/Ladybug Craft Pickup/Inspect Region|Inspect Region||loretrig:Bone_12:Inspect Region|23.0|5.3|scan
 Pickup|Bone_14|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_14_129.00_8.50_0.00|129.0|8.5|extra
 Pickup|Bone_15|Boss Scene/Skull King/Corpse Skull King SkullFragment(Clone)/Chunks/Chunk/Collectable Item Pickup Instant|Collectable Item Pickup Instant|Great Shard|Bone_15_118.39_21.76_0.01|118.4|21.8|scan
 Pickup|Bone_15|Boss Scene/Corpse/Chunk/Collectable Item Pickup|Collectable Item Pickup|Skull King Fragment|Bone_15_66.35_13.63_0.01|66.3|13.6|scan
@@ -136,7 +119,6 @@ Pickup|Bone_19|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_19_28.00_
 Pickup|Bone_East_01|Demo Gate (2)/Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Bone_East_01_38.31_72.30_0.00|38.3|72.3|scan
 Pickup|Bone_East_03|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_03_153.00_22.50_0.00|153.0|22.5|extra
 Pickup|Bone_East_04b|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Bone_East_04b_Collectable Item Pickup|6.5|87.2|scan
-Lore|Bone_East_05|Ability Scene (1)/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Bone_East_05:Shrine Weaver Ability|100.0|13.3|scan
 Pickup|Bone_East_07|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_07_10.00_165.50_0.00|10.0|165.5|extra
 Pickup|Bone_East_07|Mort Death Scene/Collectable Item Pickup|Collectable Item Pickup|Weighted Anklet|Bone_East_07_13.50_111.33_0.00|13.5|111.3|scan
 Pickup|Bone_East_08|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_08_59.00_21.50_0.00|59.0|21.5|extra
@@ -145,11 +127,9 @@ Pickup|Bone_East_08_boss_beastfly|Boss Scene Beastfly/Beastfly States/Defeated/I
 Pickup|Bone_East_09b|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_09b_61.00_141.50_0.00|61.0|141.5|extra
 Lore|Bone_East_10|Black Thread States Thread Only Variant/Normal World/Group/Inspect Region|Inspect Region||loretrig:Bone_East_10:Inspect Region|33.4|5.9|scan
 Lore|Bone_East_10|Black Thread States Thread Only Variant/Normal World/toll door interactible|toll door interactible||loretrig:Bone_East_10:toll door interactible|77.7|6.3|scan
-Lore|Bone_East_12|Demo States/Demo/Dock Key Receptacle|Dock Key Receptacle||loretrig:Bone_East_12:Dock Key Receptacle|73.1|17.2|scan
 Pickup|Bone_East_14|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Bone Record Bone_East_14|Bone_East_14_42.21_40.57_0.00|42.2|40.6|scan
 Pickup|Bone_East_14|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_14_88.00_40.50_0.00|88.0|40.5|extra
 Pickup|Bone_East_14|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Small|Bone_East_14_Collectable Item Pickup|13.8|7.5|scan
-Lore|Bone_East_14|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Bone_East_14:Vassal_Rest_Spot|111.4|67.8|scan
 Pickup|Bone_East_14b|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_14b_250.00_52.50_0.00|250.0|52.5|extra
 Toll|Bone_East_15|bell_bench/bell_toll_machine|bell_toll_machine|||35.3|51.7|scan
 Toll|Bone_East_15|bell_bench/rosary_string_machine|rosary_string_machine|||40.7|53.0|scan
@@ -170,25 +150,19 @@ Pickup|Bone_East_Weavehome|Weaver Speed Challenge/Weaver Challenge Reward/stand/
 Pickup|Bone_East_Weavehome|Collectable Item Pickup|Collectable Item Pickup|Weaver Record Sprint_Challenge|Bone_East_Weavehome_51.32_63.31_0.00|51.3|63.3|scan
 Lore|Bone_East_Weavehome|Group/Inspect Region (2)|Inspect Region (2)||loretrig:Bone_East_Weavehome:Inspect Region (2)|58.6|65.5|scan
 Pickup|Bonegrave|<extra>|Collectable Item Pickup (extra)|Simple Key|Bonegrave_270.50_72.50_0.00|270.5|72.5|extra
-Lore|Bonegrave|Inspect Region|Inspect Region||loretrig:Bonegrave:Inspect Region|198.1|8.3|scan
 Pickup|Bonetown|Collectable Item Pickup|Collectable Item Pickup|Weaver Totem Bonetown_upper_room|Bonetown_132.73_62.52_4.16|132.7|62.5|scan
 Pickup|Bonetown|<extra>|Collectable Item Pickup (extra)|Simple Key|Bonetown_151.00_69.00_0.00|151.0|69.0|extra
 Pickup|Bonetown|<extra>|Collectable Item Pickup (extra)|Simple Key|Bonetown_224.00_80.00_0.00|224.0|80.0|extra
-Lore|Bonetown|Black Thread States/Normal World/Inspect Region|Inspect Region||loretrig:Bonetown:Inspect Region|208.7|8.6|scan
 Lore|Bonetown|Inspect Region (1)|Inspect Region (1)||loretrig:Bonetown:Inspect Region (1)|225.0|81.3|scan
-Lore|Bonetown|Black Thread States/Normal World/bonebottom_quest_board/complete/Quest Board Pivot/Quest_Board|Quest_Board||loretrig:Bonetown:Quest_Board|287.4|9.8|scan
 Pickup|Chapel_Wanderer|<extra>|Collectable Item Pickup (extra)|Simple Key|Chapel_Wanderer_79.50_106.40_0.00|79.5|106.4|extra
 Pickup|Clover_01|Memory Scene Control/Memory Scene After/Collectable Item Pickup|Collectable Item Pickup|Clover Heart|Clover_01_118.69_7.20_0.00|118.7|7.2|scan
-Lore|Clover_02c|Inspect Region|Inspect Region||loretrig:Clover_02c:Inspect Region|128.2|18.2|scan
 Lore|Clover_10|Plaque_Scene/Plaque/Inspect Region|Inspect Region||loretrig:Clover_10:Inspect Region|56.0|8.4|scan
 Lore|Clover_18|Fountains Group/Plaque/Up/Inspect Region|Inspect Region||loretrig:Clover_18:Inspect Region|114.1|9.4|scan
 Lore|Clover_18|Fountains Group/Shrine Group/Needolin Plinth/Plinth Inspect|Plinth Inspect||loretrig:Clover_18:Plinth Inspect|114.1|9.4|scan
 Pickup|Clover_20|Collectable Item Pickup|Collectable Item Pickup|Clover Map|Clover_20_Collectable Item Pickup|133.6|16.5|scan
 Pickup|Cog_07|Battle Scene Test/Battle Scene/Wave 2 - Item/Item Placer/Collectable Item Pickup|Collectable Item Pickup|Pristine Core|Cog_07_0.00_0.00_0.00|0.0|0.0|scan
 Pickup|Cog_10|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Cog_10_Collectable Item Pickup|6.8|44.7|scan
-Lore|Cog_10|Song Knight Scene/Song Knight Sleeping/Dialogue Region|Dialogue Region||loretrig:Cog_10:Dialogue Region|62.4|46.5|scan
 Pickup|Cog_Bench|Group/Collectable Item Pickup Child|Collectable Item Pickup Child|Cog Map|Cog_Bench_26.26_29.04_-0.10|26.3|29.0|scan
-Lore|Cog_Dancers|Boss Scene/Lift Locked Inspect|Lift Locked Inspect||loretrig:Cog_Dancers:Lift Locked Inspect|39.9|5.2|scan
 Toll|Coral_02|bell_bench/bell_toll_machine|bell_toll_machine|||195.9|2.8|scan
 Toll|Coral_02|bell_bench/rosary_string_machine|rosary_string_machine|||201.2|4.1|scan
 BellBench|Coral_02|bell_bench|bell_bench|||195.7|11.4|scan
@@ -198,10 +172,8 @@ Pickup|Coral_12|<extra>|Collectable Item Pickup (extra)|Simple Key|Coral_12_87.0
 Lore|Coral_19|Black Thread States Thread Only Variant/Normal World/Inspect Region|Inspect Region||loretrig:Coral_19:Inspect Region|298.9|36.4|scan
 Pickup|Coral_23|GameObject (3)/Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Coral_23_Collectable Item Pickup|90.7|50.4|scan
 Lore|Coral_25|Coral Crust Lore Tablet/Interact|Interact||loretrig:Coral_25:Interact|129.5|85.1|scan
-Lore|Coral_28|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Coral_28:Vassal_Rest_Spot|25.2|9.8|scan
 Pickup|Coral_29|Boss Scene/Zap Core Enemy/Collectable Item Pickup|Collectable Item Pickup|Zap Imbuement|Coral_29_174.18_31.62_0.03|174.2|31.6|scan
 Pickup|Coral_29|Boss Scene/Collectable Item Pickup|Collectable Item Pickup|Zap Imbuement|Coral_29_175.79_23.21_0.00|175.8|23.2|scan
-Lore|Coral_29|Boss Scene/Zap Core Enemy/Collectable Item Pickup|Collectable Item Pickup||loretrig:Coral_29:Collectable Item Pickup|174.2|31.6|scan
 Lore|Coral_29|Inspect Region|Inspect Region||loretrig:Coral_29:Inspect Region|295.8|22.3|scan
 Pickup|Coral_32|tool_metal_deposit/Collectable Item Pickup - Tool Metal|Collectable Item Pickup - Tool Metal|Tool Metal|Coral_32_74.84_9.64_0.02|74.8|9.6|scan
 Pickup|Coral_33|Black Thread States/Normal World/Dice Game Control/Dice Game Corpse/Collectable Item Pickup|Collectable Item Pickup|Magnetite Dice|Coral_33_20.59_60.28_0.00|20.6|60.3|scan
@@ -214,20 +186,16 @@ Pickup|Coral_39|Coral Warrior Item Spitter/Pit Pickup|Pit Pickup|Grey Memento|Co
 Pickup|Coral_39|Collectable Item Pickup|Collectable Item Pickup|Grey Memento|Coral_39_126.16_6.43_0.00|126.2|6.4|scan
 Pickup|Coral_41|Group/Collectable Item Pickup|Collectable Item Pickup|Coral Ingredient|Coral_41_Collectable Item Pickup|7.1|36.4|scan
 Pickup|Coral_43|Zaza Beckon NPC/Memento Pickup|Memento Pickup|Memento Garmond|Coral_43_101.09_5.29_0.00|101.1|5.3|scan
-Lore|Coral_Judge_Arena|Caravan_Set/Caravan/Active/Caravan Troup Member Short Pot/Pot|Pot||loretrig:Coral_Judge_Arena:Pot|36.6|25.0|scan
 Pickup|Coral_Tower_01|Memory Group/Collectible Item Pickup Scene/Collectable Item Pickup Stand|Collectable Item Pickup Stand|Conch Drill|Coral_Tower_01_80.87_7.31_0.00|80.9|7.3|scan
 Pickup|Coral_Tower_01|Memory Group/after/GK_collapse/Collectable Item Pickup Heart|Collectable Item Pickup Heart|Coral Heart|Coral_Tower_01_80.88_10.11_0.00|80.9|10.1|scan
 Pickup|Coral_Tower_01|Memory Group/after/Collectable Item Pickup Heart|Collectable Item Pickup Heart|Coral Heart|Coral_Tower_01_82.58_6.37_0.00|82.6|6.4|scan
 Lore|Coral_Tower_01|Coral Crust Lore Tablet/Interact|Interact||loretrig:Coral_Tower_01:Interact|24.7|5.9|scan
-Lore|Cradle_02|Group/Map Machine (1)|Map Machine (1)||loretrig:Cradle_02:Map Machine (1)|54.1|67.2|scan
 Lore|Cradle_02b|Inspect Region|Inspect Region||loretrig:Cradle_02b:Inspect Region|8.3|30.7|scan
 Lore|Cradle_02b|Inspect Region (1)|Inspect Region (1)||loretrig:Cradle_02b:Inspect Region (1)|7.7|15.8|scan
 Lore|Cradle_02b|Inspect Region (2)|Inspect Region (2)||loretrig:Cradle_02b:Inspect Region (2)|24.0|7.5|scan
 Pickup|Crawl_01|Tool Conditions/Collectable Item Pickup - Purse|Collectable Item Pickup - Purse|Dead Mans Purse|Crawl_01_54.50_85.10_0.00|54.5|85.1|scan
 Pickup|Crawl_02|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Crawl_02_Collectable Item Pickup|3.1|142.3|scan
-Lore|Crawl_02|aspid_sealed_gate_stone/lock|lock||loretrig:Crawl_02:lock|4.3|28.3|scan
 Pickup|Crawl_04|Roof Crab/Corpse Roof Crab(Clone)/Chunks/Collectable Item Pickup Instant|Collectable Item Pickup Instant|Great Shard|Crawl_04_83.51_14.09_0.00|83.5|14.1|scan
-Lore|Crawl_05|Ability Scene (2)/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Crawl_05:Shrine Weaver Ability|22.9|16.3|scan
 Pickup|Crawl_09|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Crawl_09_Collectable Item Pickup|130.5|3.3|scan
 Toll|Dock_01|bell_bench (1)/bell_toll_machine|bell_toll_machine|||19.2|62.7|scan
 Toll|Dock_01|bell_bench (1)/rosary_string_machine|rosary_string_machine|||24.5|64.0|scan
@@ -240,11 +208,8 @@ Pickup|Dock_03|City Shard Chest/Item/Collectable Item Pickup|Collectable Item Pi
 Pickup|Dock_03b|Collectable Item Pickup|Collectable Item Pickup|Bell Bind|Dock_03b_154.09_107.44_0.00|154.1|107.4|scan
 Pickup|Dock_06_Church|<extra>|Collectable Item Pickup (extra)|Simple Key|Dock_06_Church_11.00_21.50_0.00|11.0|21.5|extra
 Pickup|Dock_11|Collectable Item Pickup|Collectable Item Pickup|Great Shard|Dock_11_Collectable Item Pickup|100.6|6.3|scan
-Lore|Dock_12|Controls inspect/Inspect Region|Inspect Region||loretrig:Dock_12:Inspect Region|25.1|55.3|scan
-Lore|Dock_12|Diving Bell/States/Standard/Diving Bell Door/lock|lock||loretrig:Dock_12:lock|30.4|29.4|scan
 Pickup|Dock_13|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Dock_13_Collectable Item Pickup|15.3|3.3|scan
 Pickup|Dust_01|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Dust_01_Collectable Item Pickup|76.4|2.7|scan
-Lore|Dust_02|Green Prince Caged/Prince Cell Door/Key Receptactle|Key Receptactle||loretrig:Dust_02:Key Receptactle|17.7|23.1|scan
 Lore|Dust_05|Black Thread States Thread Only Variant/Black Thread World/Roach Guts Materium Inspect/Inspect Region|Inspect Region||loretrig:Dust_05:Inspect Region|180.2|4.3|scan
 Pickup|Dust_06|Roachkeeper Key Control/Collectable Item SimpleKey|Collectable Item SimpleKey|Simple Key|Dust_06_6.01_179.63_0.00|6.0|179.6|scan
 Pickup|Dust_06|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Dust_06_Collectable Item Pickup|26.1|96.3|scan
@@ -280,19 +245,14 @@ Pickup|Greymoor_16|Collectable Item Pickup|Collectable Item Pickup|Crest Socket 
 Lore|Greymoor_16|Inspect Region|Inspect Region||loretrig:Greymoor_16:Inspect Region|56.9|52.2|scan
 Pickup|Greymoor_21|Collectable Item Pickup|Collectable Item Pickup|Bone Record Greymoor_flooded_corridor|Greymoor_21_72.17_8.28_0.00|72.2|8.3|scan
 Pickup|Greymoor_22|<extra>|Collectable Item Pickup (extra)|Simple Key|Greymoor_22_88.00_25.50_0.00|88.0|25.5|extra
-Lore|Greymoor_22|Ability Scene/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Greymoor_22:Shrine Weaver Ability|39.8|36.5|scan
 Pickup|Halfway_01|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Halfway_01_Collectable Item Pickup|8.3|13.0|scan
 Lore|Halfway_01|_NPCs/Hunter Fan Control/Nuu_Scrolls/Inspect Region|Inspect Region||loretrig:Halfway_01:Inspect Region|23.6|21.1|scan
-Lore|Hang_06|bank_door|bank_door||loretrig:Hang_06:bank_door|16.3|19.1|scan
 Toll|Hang_06_bank|rosary_cannon/Art/Rosary Cannon Scene/rosary_string_machine|rosary_string_machine|||41.0|25.0|scan
 Toll|Hang_06_bank|rosary_string_machine|rosary_string_machine|||41.0|25.0|scan
 Pickup|Hang_06_bank|rosary_cannon/Art/Rosary Cannon Scene/Rosary Cannon Pickup|Rosary Cannon Pickup|Rosary Cannon|Hang_06_bank_40.89_16.11_0.00|40.9|16.1|scan
 Pickup|Hang_06_bank|Thief Scene Control/Thieves Not Here/Chest/Item/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Huge_White|Hang_06_bank_73.41_35.39_0.00|73.4|35.4|scan
-Lore|Hang_06b|new_scene/Map Machine|Map Machine||loretrig:Hang_06b:Map Machine|51.0|3.1|scan
 Lore|Hang_06b|new_scene/City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Hang_06b:tube_toll_machine|31.4|2.7|scan
 Pickup|Hang_08|<extra>|Collectable Item Pickup (extra)|Simple Key|Hang_08_19.50_195.00_0.00|19.5|195.0|extra
-Lore|Hang_08|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Hang_08:Vassal_Rest_Spot|12.7|181.0|scan
-Lore|Hang_09|Craft Pickup/Inspect Region|Inspect Region||loretrig:Hang_09:Inspect Region|71.1|35.7|scan
 Pickup|Hang_10|Collectable Item Pickup|Collectable Item Pickup|Psalm Cylinder Hang|Hang_10_72.66_15.21_0.00|72.7|15.2|scan
 Pickup|Hang_12|Black Thread States/Black Thread World/Collectable Item Pickup|Collectable Item Pickup|Weaver Record Conductor|Hang_12_15.21_4.91_0.00|15.2|4.9|scan
 Pickup|Hang_16|laundry_basket (1)/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Hang_16_Collectable Item Pickup|67.8|6.4|scan
@@ -300,7 +260,6 @@ Pickup|Hang_17b|Boss Defeated Scene - deprecated/Collectable Item Pickup|Collect
 Pickup|Library_02|GameObject/Battle Scene Control/Battle Scene Acolyte/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Large|Library_02_76.44_48.02_0.00|76.4|48.0|scan
 Pickup|Library_03|Collectable Item Pickup|Collectable Item Pickup|Pale_Oil|Library_03_Collectable Item Pickup|8.2|41.5|scan
 Pickup|Library_04|<extra>|Collectable Item Pickup (extra)|Simple Key|Library_04_51.00_77.00_0.00|51.0|77.0|extra
-Lore|Library_04|Map Machine (1)|Map Machine (1)||loretrig:Library_04:Map Machine (1)|10.3|205.8|scan
 Pickup|Library_06|<extra>|Collectable Item Pickup (extra)|Simple Key|Library_06_36.50_63.00_0.00|36.5|63.0|extra
 Pickup|Library_07|<extra>|Collectable Item Pickup (extra)|Simple Key|Library_07_39.00_139.50_0.00|39.0|139.5|extra
 Pickup|Library_08|Collectable Item Pickup Librarian|Collectable Item Pickup Librarian|Psalm Cylinder Librarian|Library_08_93.69_30.25_0.00|93.7|30.3|scan
@@ -308,7 +267,6 @@ Pickup|Library_08|Collectable Item Pickup|Collectable Item Pickup|Crest Socket U
 Pickup|Library_09|Collectable Item Pickup|Collectable Item Pickup|Psalm Cylinder Library Roof|Library_09_25.54_12.21_0.00|25.5|12.2|scan
 Pickup|Library_09|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Rosary_Set_Large|Library_09_Collectable Item Pickup (1)|14.1|36.4|scan
 Pickup|Library_10|Collectable Item Pickup - Melody|Collectable Item Pickup - Melody|Librarian Melody Cylinder|Library_10_14.18_3.87_0.00|14.2|3.9|scan
-Lore|Library_10|Library Statue NPC|Library Statue NPC||loretrig:Library_10:Library Statue NPC|132.5|18.0|scan
 Pickup|Library_12|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Library_12_Collectable Item Pickup|126.4|24.4|scan
 Pickup|Library_13|Grand Stage Scene/Re-Entry Pickup|Re-Entry Pickup|Dazzle Bind|Library_13_73.61_13.23_0.00|73.6|13.2|scan
 Lore|Library_13|Grand Stage Scene/First_Stage/Post_defeat_set/trobbio_signpost/Inspect Region|Inspect Region||loretrig:Library_13:Inspect Region|19.6|15.4|scan
@@ -316,26 +274,19 @@ Pickup|Library_13b|Desk Inspect and Quill/Interactive Quills/Collectable Item Pi
 Lore|Library_13b|Desk Inspect and Quill/Group/desk_inspect/Inspect Region Act 2|Inspect Region Act 2||loretrig:Library_13b:Inspect Region Act 2|21.9|7.4|scan
 Lore|Library_13b|Desk Inspect and Quill/Group/desk_inspect/Inspect Region Act 3|Inspect Region Act 3||loretrig:Library_13b:Inspect Region Act 3|21.9|7.4|scan
 Pickup|Library_16|Music Box Sequence - EDITED/music_box_reward_pillar/Collectable Holder/Collectable Item Pickup|Collectable Item Pickup|Cog Heart Pieces|Library_16_49.36_3.67_0.00|49.4|3.7|scan
-Lore|Memory_First_Sinner|Memory Control/memory_orb_inspect|memory_orb_inspect||loretrig:Memory_First_Sinner:memory_orb_inspect|180.1|244.2|scan
-Lore|Memory_Needolin|Memory Control/memory_orb_inspect|memory_orb_inspect||loretrig:Memory_Needolin:memory_orb_inspect|39.2|185.3|scan
 Pickup|Mosstown_01|<extra>|Collectable Item Pickup (extra)|Simple Key|Mosstown_01_48.00_23.50_0.00|48.0|23.5|extra
 Pickup|Mosstown_02|<extra>|Collectable Item Pickup (extra)|Simple Key|Mosstown_02_154.00_55.50_0.00|154.0|55.5|extra
 Pickup|Mosstown_02|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Mosstown_02_Collectable Item Pickup|35.3|40.3|scan
 Lore|Mosstown_02|lore_tablet/moss_bone_plaque/Inspect Region|Inspect Region||loretrig:Mosstown_02:Inspect Region|86.9|35.1|scan
 Lore|Mosstown_02|lore_tablet/weaver_harp_sign/Inspect Region|Inspect Region||loretrig:Mosstown_02:Inspect Region|86.8|35.4|scan
-Lore|Mosstown_02|Ability Scene/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Mosstown_02:Shrine Weaver Ability|86.9|52.3|scan
-Lore|Mosstown_03|Inspect Region|Inspect Region||loretrig:Mosstown_03:Inspect Region|16.6|57.1|scan
 Lore|Peak_05e|Inspect Region|Inspect Region||loretrig:Peak_05e:Inspect Region|20.1|49.5|scan
-Lore|Peak_08b|DJ Get Sequence/Calling Device/Inspect Region|Inspect Region||loretrig:Peak_08b:Inspect Region|281.0|103.1|scan
 Lore|Peak_10|Inspect Region (2)|Inspect Region (2)||loretrig:Peak_10:Inspect Region (2)|15.1|34.0|scan
-Lore|Peak_12|Webshot Scene/Inspect Region|Inspect Region||loretrig:Peak_12:Inspect Region|13.7|6.4|scan
 Pickup|Room_CrowCourt_02|Battle Scene/Wave 6/Crawfather/Corpse Crawfather(Clone)/Pickup|Pickup|Crowman Memento|Room_CrowCourt_02_32.39_28.86_4.93|32.4|28.9|scan
 Pickup|Room_CrowCourt_02|Battle Scene/Collectable Item Pickup|Collectable Item Pickup|Crowman Memento|Room_CrowCourt_02_34.75_20.30_0.00|34.8|20.3|scan
 Pickup|Room_CrowCourt_02|Collectable Item Pickup Crawbell|Collectable Item Pickup Crawbell|Crawbell|Room_CrowCourt_02_Collectable Item Pickup Crawbell|19.4|44.3|scan
 Pickup|Room_Forge|Demo Pieces/Demo gate/Collectable Item Pickup (1)|Collectable Item Pickup (1)|Dock Demo Key|Room_Forge_5.23_7.53_0.01|5.2|7.5|scan
 Pickup|Room_Forge|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Room_Forge_Collectable Item Pickup|5.1|37.4|scan
 Lore|Room_Forge|Inspect Region|Inspect Region||loretrig:Room_Forge:Inspect Region|27.4|17.3|scan
-Lore|Room_Forge|dock_sealed_gate/song_knight_lock|song_knight_lock||loretrig:Room_Forge:song_knight_lock|133.3|14.3|scan
 Lore|Room_Pinstress|Pinstress States/Room Regular Parent/Peak_Summons/Inspect Region|Inspect Region||loretrig:Room_Pinstress:Inspect Region|25.7|8.6|scan
 Pickup|Shadow_02|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Shadow_02_Collectable Item Pickup|49.2|161.5|scan
 Lore|Shadow_08|Inspect Region|Inspect Region||loretrig:Shadow_08:Inspect Region|38.3|8.5|scan
@@ -358,7 +309,6 @@ Toll|Shellwood_08c|bell_bench/bell_toll_machine|bell_toll_machine|||14.9|2.7|sca
 Toll|Shellwood_08c|bell_bench/rosary_string_machine|rosary_string_machine|||20.2|4.0|scan
 BellBench|Shellwood_08c|bell_bench|bell_bench|||14.7|11.3|scan
 Lore|Shellwood_10|weaver_harp_sign/Inspect Region|Inspect Region||loretrig:Shellwood_10:Inspect Region|40.3|12.2|scan
-Lore|Shellwood_10|Ability Scene (1)/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Shellwood_10:Shrine Weaver Ability|40.6|79.2|scan
 Pickup|Shellwood_11|<extra>|Collectable Item Pickup (extra)|Simple Key|Shellwood_11_59.00_21.50_0.00|59.0|21.5|extra
 Pickup|Shellwood_11b|memory_font/Completed/Collectable Item Pickup|Collectable Item Pickup|Flower Heart|Shellwood_11b_22.01_149.01_0.70|22.0|149.0|scan
 Lore|Shellwood_11b|Inspect Region|Inspect Region||loretrig:Shellwood_11b:Inspect Region|59.1|149.0|scan
@@ -367,44 +317,26 @@ Lore|Shellwood_19|Bellway Toll Machine|Bellway Toll Machine||loretrig:Shellwood_
 Pickup|Shellwood_25|Collectable Item Pickup|Collectable Item Pickup|Weaver Totem Witch|Shellwood_25_281.47_26.40_0.00|281.5|26.4|scan
 Pickup|Shellwood_25|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Rosary_Set_Small|Shellwood_25_Collectable Item Pickup (1)|83.3|25.4|scan
 Pickup|Shellwood_26|<extra>|Collectable Item Pickup (extra)|Simple Key|Shellwood_26_98.50_75.50_0.00|98.5|75.5|extra
-Lore|Shellwood_26|Vassal_Rest_Spot|Vassal_Rest_Spot||loretrig:Shellwood_26:Vassal_Rest_Spot|120.5|56.9|scan
 Pickup|Slab_02|Slab Chain cage_small_break (2)/lamp/Broken/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Slab_02_53.46_21.21_0.00|53.5|21.2|scan
-Lore|Slab_03|Slab Lock|Slab Lock||loretrig:Slab_03:Slab Lock|20.7|152.2|scan
-Lore|Slab_03|Slab Lock (1)|Slab Lock (1)||loretrig:Slab_03:Slab Lock (1)|27.0|245.2|scan
-Lore|Slab_03|Slab Lock (2)|Slab Lock (2)||loretrig:Slab_03:Slab Lock (2)|1.9|81.2|scan
-Lore|Slab_03|Slab Lock (3)|Slab Lock (3)||loretrig:Slab_03:Slab Lock (3)|35.5|92.0|scan
-Lore|Slab_03|Slab Lock (4)|Slab Lock (4)||loretrig:Slab_03:Slab Lock (4)|27.2|49.3|scan
 Pickup|Slab_04|Slab Chain cage_small_break/lamp/Broken/Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Slab_04_9.49_15.69_0.00|9.5|15.7|scan
-Lore|Slab_05|Slab Lock (2)|Slab Lock (2)||loretrig:Slab_05:Slab Lock (2)|97.0|10.3|scan
 Pickup|Slab_06|Breakable_cage/Collectable Item Pickup|Collectable Item Pickup||Slab_06_82.99_27.74_0.03|83.0|27.7|scan
 Lore|Slab_06|Bellway_pieces/Bellway Toll Machine|Bellway Toll Machine||loretrig:Slab_06:Bellway Toll Machine|44.5|5.3|scan
 Lore|Slab_08|dock_b__0051_lore_sign_hang (1)/Inspect Region|Inspect Region||loretrig:Slab_08:Inspect Region|25.4|13.8|scan
 Lore|Slab_08|dock_b__0051_lore_sign_hang/Inspect Region|Inspect Region||loretrig:Slab_08:Inspect Region|20.5|13.8|scan
-Lore|Slab_10b|Shrine First Weaver|Shrine First Weaver||loretrig:Slab_10b:Shrine First Weaver|38.4|9.5|scan
 Lore|Slab_10c|Break Gate Group/Group/gate/Inspect Region|Inspect Region||loretrig:Slab_10c:Inspect Region|22.8|12.8|scan
 Pickup|Slab_12|Collectable Item Pickup|Collectable Item Pickup|Weaver Totem Slab_Bottom|Slab_12_98.51_27.52_0.00|98.5|27.5|scan
 Pickup|Slab_14|slab_item_chain/breakable/Collectable Item Pickup (1)|Collectable Item Pickup (1)|Slab Key A|Slab_14_12.90_6.89_0.00|12.9|6.9|scan
-Lore|Slab_14|Thief NPC Scene/Slab Lock L|Slab Lock L||loretrig:Slab_14:Slab Lock L|81.4|4.4|scan
-Lore|Slab_14|Thief NPC Scene/Slab Lock R|Slab Lock R||loretrig:Slab_14:Slab Lock R|84.5|4.4|scan
-Lore|Slab_15|Slab Lock (1)|Slab Lock (1)||loretrig:Slab_15:Slab Lock (1)|82.7|4.4|scan
-Lore|Slab_15|Slab Lock (2)|Slab Lock (2)||loretrig:Slab_15:Slab Lock (2)|80.5|4.4|scan
 Pickup|Slab_16|Event Control/Battle Completed Scene/Collectable Item Pickup Return|Collectable Item Pickup Return|Slab Key B|Slab_16_25.45_18.20_0.00|25.5|18.2|scan
 Pickup|Slab_16|Event Control/Battle Cloakless Scene/Wave 9 - Item/Item Placer/Collectable Item Pickup|Collectable Item Pickup|Slab Key B|Slab_16_25.54_23.67_0.00|25.5|23.7|scan
-Lore|Slab_16|Slab Lock (1)|Slab Lock (1)||loretrig:Slab_16:Slab Lock (1)|81.1|20.4|scan
-Lore|Slab_16|Slab Lock (2)|Slab Lock (2)||loretrig:Slab_16:Slab Lock (2)|84.4|20.4|scan
 Pickup|Slab_16b|Broodmother Scene Control/Broodmother Scene/Battle Scene Broodmother/Collectable Item Pickup|Collectable Item Pickup|Slab Key C|Slab_16b_59.98_15.24_0.00|60.0|15.2|scan
 Pickup|Slab_16b|Broodmother Scene Control/Broodmother Defeated Scene/Broodmother Corpse Return/Collectable Item Pickup - Broodmother Eye|Collectable Item Pickup - Broodmother Eye|Broodmother Remains|Slab_16b_61.57_4.68_0.01|61.6|4.7|scan
 Pickup|Slab_16b|Broodmother Scene Control/Broodmother Scene/Battle Scene Broodmother/Wave 4/Slab Fly Broodmother/Corpse Slab Fly Broodmaster(Clone)/Collectable Item Pickup|Collectable Item Pickup|Broodmother Remains|Slab_16b_63.10_-2.67_-0.01|63.1|-2.7|scan
 Pickup|Slab_18|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Slab_18_Collectable Item Pickup|17.2|21.2|scan
 Pickup|Slab_20|Slab Map Inspect|Slab Map Inspect|Slab Map|Slab_20_86.57_14.07_0.00|86.6|14.1|scan
-Lore|Slab_20|Slab Map Inspect|Slab Map Inspect||loretrig:Slab_20:Slab Map Inspect|86.6|14.1|scan
-Lore|Slab_21|Slab Lock|Slab Lock||loretrig:Slab_21:Slab Lock|-31.0|105.2|scan
 Pickup|Slab_22|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Slab_22_Collectable Item Pickup|28.3|30.4|scan
-Lore|Slab_23|Slab Lock L|Slab Lock L||loretrig:Slab_23:Slab Lock L|46.3|10.3|scan
 Pickup|Slab_Cell_Quiet|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Slab_Cell_Quiet_Collectable Item Pickup|42.4|30.4|scan
 Pickup|Song_01|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_01_109.00_129.50_0.00|109.0|129.5|extra
 Pickup|Song_01|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_01_19.50_80.50_0.00|19.5|80.5|extra
-Lore|Song_01b|Map Machine (2)|Map Machine (2)||loretrig:Song_01b:Map Machine (2)|102.7|2.9|scan
 Lore|Song_01b|City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Song_01b:tube_toll_machine|47.9|2.7|scan
 Pickup|Song_03|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_03_130.00_4.50_0.00|130.0|4.5|extra
 Pickup|Song_04|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Large|Song_04_Collectable Item Pickup|121.5|37.6|scan
@@ -414,13 +346,10 @@ Pickup|Song_09|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Medium
 Pickup|Song_11|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_11_44.00_44.50_0.00|44.0|44.5|extra
 Pickup|Song_15|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_15_6.50_6.50_0.00|6.5|6.5|extra
 Pickup|Song_17|<extra>|Collectable Item Pickup (extra)|Simple Key|Song_17_34.50_100.50_0.00|34.5|100.5|extra
-Lore|Song_19_entrance|Map Machine (1)|Map Machine (1)||loretrig:Song_19_entrance:Map Machine (1)|40.1|7.0|scan
 Pickup|Song_26|_Props/Music Box Sequence - EDITED/music_box_reward_pillar/Collectable Holder/Collectable Item Pickup|Collectable Item Pickup|Cog Heart Pieces|Song_26_15.53_5.70_0.03|15.5|5.7|scan
 Lore|Song_28|Toll_machine (1)/Art/Toll_machine_silk_ration|Toll_machine_silk_ration||loretrig:Song_28:Toll_machine_silk_ration|12.8|7.6|scan
 Lore|Song_29|Toll machine ration/Art/Toll_machine_silk_ration|Toll_machine_silk_ration||loretrig:Song_29:Toll_machine_silk_ration|24.0|7.6|scan
 Pickup|Song_Enclave|Black Thread States/Normal World/Enclave States/Ward Key Scene/Collectable Item Pickup|Collectable Item Pickup|Ward Key|Song_Enclave_Collectable Item Pickup|102.1|6.3|scan
-Lore|Song_Enclave|Black Thread States/Normal World/Enclave States/States/Level 1/Quest Board Pivot/Quest_Board|Quest_Board||loretrig:Song_Enclave:Quest_Board|73.5|9.1|scan
-Lore|Song_Enclave|Black Thread States/Black Thread World/Enclave Act 3/Town/Quest Board Pivot/Quest_Board|Quest_Board||loretrig:Song_Enclave:Quest_Board|73.5|9.1|scan
 Lore|Song_Enclave_Tube|City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Song_Enclave_Tube:tube_toll_machine|16.0|4.6|scan
 Pickup|Tube_Hub|Black Thread States/Black Thread World/Collectable Item Pickup|Collectable Item Pickup|Cradle Map|Tube_Hub_27.04_29.40_0.00|27.0|29.4|scan
 Lore|Tube_Hub|Black Thread States/Normal World/Inspect Region|Inspect Region||loretrig:Tube_Hub:Inspect Region|118.3|39.8|scan
@@ -435,7 +364,6 @@ Pickup|Under_03|Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Unde
 Pickup|Under_07c|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Under_07c_Collectable Item Pickup|75.6|76.1|scan
 Pickup|Under_08|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Psalm Cylinder Ward|Under_08_67.42_47.48_0.00|67.4|47.5|scan
 Pickup|Under_08|Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Under_08_Collectable Item Pickup|61.1|16.5|scan
-Lore|Under_08|Confessional NPC/NPC Control|NPC Control||loretrig:Under_08:NPC Control|117.2|18.2|scan
 Lore|Under_08|Understore Toll Bench|Understore Toll Bench||loretrig:Under_08:Understore Toll Bench|79.3|15.8|scan
 Lore|Under_08|Understore Toll Bench (1)|Understore Toll Bench (1)||loretrig:Under_08:Understore Toll Bench (1)|83.3|15.8|scan
 Lore|Under_08|Understore Toll Bench (2)|Understore Toll Bench (2)||loretrig:Under_08:Understore Toll Bench (2)|87.3|15.8|scan
@@ -443,19 +371,10 @@ Pickup|Under_12|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Fraye
 Pickup|Under_14|Collectable Item Pickup|Collectable Item Pickup|Screw Attack|Under_14_72.11_6.71_0.00|72.1|6.7|scan
 Pickup|Under_16|map_collectable/Understore Map Inspect|Understore Map Inspect|Understore Map|Under_16_65.10_35.33_0.01|65.1|35.3|scan
 Pickup|Under_16|Collectable Item Pickup|Collectable Item Pickup|Bone Record Understore_Map_Room|Under_16_71.36_15.39_0.00|71.4|15.4|scan
-Lore|Under_16|map_collectable/Understore Map Inspect|Understore Map Inspect||loretrig:Under_16:Understore Map Inspect|65.1|35.3|scan
 Pickup|Under_17|Architect Final_Scene/Collectable Item Pickup|Collectable Item Pickup|Pristine Core|Under_17_75.44_23.37_-0.26|75.4|23.4|scan
-Lore|Under_17|Architect Shrine Door|Architect Shrine Door||loretrig:Under_17:Architect Shrine Door|26.3|36.1|scan
 Pickup|Under_18|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Shard Pouch|Under_18_Collectable Item Pickup (1)|34.1|34.3|scan
-Lore|Under_18|Ability Scene/Shrine Weaver Ability|Shrine Weaver Ability||loretrig:Under_18:Shrine Weaver Ability|26.4|13.2|scan
-Lore|Under_18|Ability Scene/Shrine Weaver HarpoonDash|Shrine Weaver HarpoonDash||loretrig:Under_18:Shrine Weaver HarpoonDash|26.4|13.2|scan
 Pickup|Under_19b|tool_metal_deposit/Collectable Item Pickup - Tool Metal|Collectable Item Pickup - Tool Metal|Tool Metal|Under_19b_7.74_8.71_0.02|7.7|8.7|scan
-Lore|Under_20|Inspect Region|Inspect Region||loretrig:Under_20:Inspect Region|153.3|16.6|scan
 Lore|Under_22|City Travel Tube/tube_toll_machine|tube_toll_machine||loretrig:Under_22:tube_toll_machine|66.1|2.6|scan
-Lore|Ward_01|Map Machine (1)|Map Machine (1)||loretrig:Ward_01:Map Machine (1)|54.5|20.0|scan
-Lore|Ward_01|key_machine|key_machine||loretrig:Ward_01:key_machine|29.3|97.9|scan
-Lore|Ward_02|Boss Scene Parent/ward_slide_hatch/lock_machine|lock_machine||loretrig:Ward_02:lock_machine|41.5|60.6|scan
-Lore|Ward_02|Boss Scene Parent/ward_slide_hatch_return/lock_machine|lock_machine||loretrig:Ward_02:lock_machine|41.5|60.6|scan
 Pickup|Ward_02b|Husk Item Ambush/Ward Bed (1)/corpse/Collectable Item Pickup|Collectable Item Pickup|Seal Chit Ward Corpse|Ward_02b_51.12_3.92_0.00|51.1|3.9|scan
 Pickup|Ward_03|Collectable Item Pickup|Collectable Item Pickup|Quickbind|Ward_03_96.49_32.78_0.00|96.5|32.8|scan
 Pickup|Ward_05|Collectable Item Pickup|Collectable Item Pickup|Seal Chit Silk Siphon|Ward_05_133.04_4.24_0.00|133.0|4.2|scan
@@ -469,11 +388,8 @@ Pickup|Weave_03|Boss Scene/Bosses/Mossbone Mother A/Mossbone Mother Ambient Corp
 Pickup|Weave_08|Collectable Item Pickup|Collectable Item Pickup|Weaver Record Weave_08|Weave_08_41.68_54.13_0.00|41.7|54.1|scan
 Lore|Weave_08|Group/Inspect Region (1)|Inspect Region (1)||loretrig:Weave_08:Inspect Region (1)|40.4|30.4|scan
 Pickup|Weave_12|weaver_harp_sign_map/Get Map Inspect|Get Map Inspect|Weavehome Map|Weave_12_14.02_11.05_0.00|14.0|11.1|scan
-Lore|Weave_12|weaver_harp_sign_map/Get Map Inspect|Get Map Inspect||loretrig:Weave_12:Get Map Inspect|14.0|11.1|scan
 Pickup|Weave_14|Collectable Item Pickup (1)|Collectable Item Pickup (1)|Silk Snare|Weave_14_66.53_6.72_0.02|66.5|6.7|scan
 Pickup|Wisp_02|Collectable Scene/Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Medium|Wisp_02_111.32_37.99_0.00|111.3|38.0|scan
 Pickup|Wisp_03|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Wisp_03_Collectable Item Pickup|62.9|35.3|scan
-Lore|Wisp_03|bell bits/closed/Doctor Door Inspect|Doctor Door Inspect||loretrig:Wisp_03:Doctor Door Inspect|50.8|6.3|scan
 Pickup|Wisp_05|sc_cart_plat/Art/tool_metal_deposit/Collectable Item Pickup - Tool Metal|Collectable Item Pickup - Tool Metal|Tool Metal|Wisp_05_45.55_62.05_0.01|45.6|62.0|scan
-Lore|Wisp_06|Craft Pickup/Inspect Region|Inspect Region||loretrig:Wisp_06:Inspect Region|20.0|4.5|scan
 Pickup|Wisp_08|Collectable Item Pickup|Collectable Item Pickup|Bone Record Wisp Top|Wisp_08_10.18_114.64_0.00|10.2|114.6|scan

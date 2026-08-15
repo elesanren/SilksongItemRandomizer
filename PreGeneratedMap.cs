@@ -83,6 +83,31 @@ namespace SilksongItemRandomizer
 
         private static bool _initialized = false;
 
+        // 场景索引缓存（FindKeyByProximity 容差匹配用）：按场景分组 key，避免每次全表线性扫描
+        private static Dictionary<string, string> _sceneIndexDictRef = null;
+        private static readonly Dictionary<string, List<string>> SceneKeysCache =
+            new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        private static void EnsureSceneIndex()
+        {
+            var dict = Dict;
+            if (dict == null) return;
+            if (ReferenceEquals(_sceneIndexDictRef, dict)) return;
+            _sceneIndexDictRef = dict;
+            SceneKeysCache.Clear();
+            foreach (var key in dict.Keys)
+            {
+                string scene = ExtractScene(key);
+                if (string.IsNullOrEmpty(scene)) continue;
+                if (!SceneKeysCache.TryGetValue(scene, out var list))
+                {
+                    list = new List<string>();
+                    SceneKeysCache[scene] = list;
+                }
+                list.Add(key);
+            }
+        }
+
         private static Dictionary<string, string> Dict
         {
             get
@@ -94,15 +119,44 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>
+        /// 初始化预生成映射。
+        /// 判断依据是「持久化的配置指纹」（落盘，重启后依旧在）：
+        ///   - 指纹一致 且 映射表非空 → 认为已被本次配置生成过，直接跳过，绝不重复重建；
+        ///   - 指纹不一致（配置/种子变化）或映射表为空 → 才重新生成。
+        /// 静态 _initialized 仅作进程内缓存标记，不代表跨启动的已生成状态。
+        /// </summary>
         public static void Initialize()
         {
-            if (_initialized) return;
             if (!SilksongItemRandomizerAPI.IsEnabled()) return;
             if (!ItemRandomizer.IsInitialized) return;
 
+            string stamp = BuildConfigStamp();
+            var dict = Dict;
+            bool stampMatches = Plugin.SaveData.MappingsConfigStamp == stamp;
+            bool hasMappings = dict != null && dict.Count > 0;
+
+            // 已持久化的指纹与本轮一致，且映射表已有内容：本次配置下已生成过，无需重建
+            if (stampMatches && hasMappings)
+            {
+                _initialized = true;
+                return;
+            }
+
+            // 指纹变化（种子/limit 有差异）或映射为空 → 自动失效旧映射重建
+            Plugin.Log.LogInfo($"[PreGeneratedMap] 映射配置指纹: {stamp}，保存值: {Plugin.SaveData.MappingsConfigStamp ?? "(空)"}，{(stampMatches ? "映射为空，重建" : "配置有变化，重新生成")}");
             BuildAllMappings();
+            Plugin.SaveData.MappingsConfigStamp = stamp;
+            Plugin.SaveGlobalData();
             _initialized = true;
             Plugin.Log.LogInfo($"[PreGeneratedMap] 全量映射构建完成，共 {Dict?.Count ?? 0} 条映射");
+        }
+
+        /// <summary>生成当前配置指纹：全部 limit 额度 + 随机种子 + 映射数据版本（凡会影响映射分配的内容）
+        /// 数据版本随 check_points.txt / InspectPermitRewards 等映射数据变更时手动 +1，强制旧存档重建映射。</summary>
+        private static string BuildConfigStamp()
+        {
+            return $"L{ItemLimitConfig.BuildLimitsStamp()}|seed{Plugin.RandomSeed?.Value ?? 0}|data2";
         }
 
         /// <summary>
@@ -162,6 +216,12 @@ namespace SilksongItemRandomizer
             // 2.3 商店槽位键（已含 "shop:" 前缀）
             foreach (var key in ShopSlotKeys)
                 allKeys.Add(key);
+
+            // 2.4 原生碎片/苔莓顺序发放键（按获取顺序依次给；地点未知，先预编号）
+            //     面具碎片 heart:01~20、丝轴碎片 spool:01~18、苔莓 moss:01~06
+            for (int i = 1; i <= 20; i++) allKeys.Add($"heart:{i:D2}");
+            for (int i = 1; i <= 18; i++) allKeys.Add($"spool:{i:D2}");
+            for (int i = 1; i <= 6; i++) allKeys.Add($"moss:{i:D2}");
 
             // 3. 获取所有有限奖励
             var allLimitedRewards = ItemRandomizer.LimitedRewards;
@@ -336,60 +396,6 @@ namespace SilksongItemRandomizer
             return;
         }
 
-        // 已废弃：全量映射已覆盖所有点，不再需要运行时补缺。
-        // 保留代码仅供参考。
-        /*
-        public static bool EnsureMapped(string key, bool skipLoreReward = false)
-        {
-            try
-            {
-                var dict = Dict;
-                if (dict == null || string.IsNullOrEmpty(key)) return false;
-
-                // 1. 精确匹配
-                if (dict.ContainsKey(key)) return false;
-
-                // 2. ★★★ 容差匹配：检查是否有坐标接近的已有映射 ★★★
-                string scene = ExtractScene(key);
-                if (!string.IsNullOrEmpty(scene))
-                {
-                    Vector3 pos = ExtractPosition(key);
-                    if (pos != Vector3.zero)
-                    {
-                        string existingKey = FindKeyByProximity(scene, pos, CoordinateTolerance);
-                        if (!string.IsNullOrEmpty(existingKey))
-                        {
-                            // 已有接近的映射，直接复用，不生成新的
-                            return false;
-                        }
-                    }
-                }
-
-                // 3. 没有接近的映射，生成新的
-                IRandomReward reward = null;
-                for (int i = 0; i < 10; i++)
-                {
-                    var candidate = ItemRandomizer.GetRandomReward();
-                    if (candidate == null) break;
-                    if (skipLoreReward && candidate is LoreReward) continue;
-                    reward = candidate;
-                    break;
-                }
-                if (reward == null) return false;
-
-                dict[key] = "reward:" + reward.Id;
-                Plugin.SaveGlobalData();
-                Plugin.Log.LogInfo($"[PreGeneratedMap] 预生成 {key} -> {reward.DisplayName} ({reward.Id})");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.LogWarning($"[PreGeneratedMap] 预生成失败 {key}: {ex.Message}");
-                return false;
-            }
-        }
-        */
-
         public static IRandomReward ResolveReward(string key)
         {
             try
@@ -411,7 +417,7 @@ namespace SilksongItemRandomizer
                             "virt:FallbackCoin",
                             Locale.Get("随机货币"),
                             SpriteCache.Find("coinget_01"),
-                            () => HeroController.instance?.AddGeo(UnityEngine.Random.Range(1, 6)),
+                            () => HeroController.instance?.AddGeo(ItemRandomizer.Rng.Next(1, 6)),
                             () => false
                         );
                     }
@@ -475,16 +481,14 @@ namespace SilksongItemRandomizer
 
         private static string FindKeyByProximity(string scene, Vector3 pos, float tolerance)
         {
-            var dict = Dict;
-            if (dict == null) return null;
-
-            foreach (var kv in dict)
+            EnsureSceneIndex();
+            if (!SceneKeysCache.TryGetValue(scene, out var keys)) return null;
+            for (int i = 0; i < keys.Count; i++)
             {
-                if (!kv.Key.StartsWith(scene + "_")) continue;
-                Vector3 other = ExtractPosition(kv.Key);
+                Vector3 other = ExtractPosition(keys[i]);
                 if (other == Vector3.zero) continue;
                 if (Vector3.Distance(pos, other) <= tolerance)
-                    return kv.Key;
+                    return keys[i];
             }
             return null;
         }
@@ -496,10 +500,14 @@ namespace SilksongItemRandomizer
                 if (Plugin.SaveData != null && Plugin.SaveData.PreGeneratedMappings != null)
                 {
                     Plugin.SaveData.PreGeneratedMappings.Clear();
+                    Plugin.SaveData.MappingsConfigStamp = null;
                     Plugin.SaveGlobalData();
                 }
                 _initialized = false;
                 PendingKey = null;
+                _sceneIndexDictRef = null;
+                SceneKeysCache.Clear();
+                ItemLimitConfig.ResetRegenerateState(); // 防抖状态复位，避免残留脏标
                 ResetDataCache(); // 允许外部覆盖文件变更后重新加载
             }
             catch (Exception ex)
@@ -512,6 +520,28 @@ namespace SilksongItemRandomizer
         {
             var pos = pickup.transform.position;
             return $"{pickup.gameObject.scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
+        }
+
+        /// <summary>
+        /// 按顺序发放的映射奖励：按前缀+序号（如 heart:01）从预生成映射取奖励。
+        /// 命中则递增对应序号并返回奖励；未命中（映射未初始化/序号越界）返回 null，由调用方回退动态随机。
+        /// </summary>
+        public static IRandomReward ResolveSequentialReward(string prefix, int seq)
+        {
+            try
+            {
+                if (seq <= 0) return null;
+                string key = $"{prefix}:{seq:D2}";
+                var dict = Dict;
+                if (dict == null || !dict.TryGetValue(key, out string stored) || string.IsNullOrEmpty(stored))
+                    return null;
+                string id = stored.StartsWith("reward:", StringComparison.Ordinal)
+                    ? stored.Substring("reward:".Length)
+                    : stored;
+                if (id == "virt:FallbackCoin") return null;
+                return ItemRandomizer.FindRewardById(id);
+            }
+            catch { return null; }
         }
     }
 }

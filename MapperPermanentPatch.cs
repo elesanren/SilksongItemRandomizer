@@ -4,85 +4,118 @@ using UnityEngine;
 namespace SilksongItemRandomizer
 {
     /// <summary>
-    /// 强制所有区域的沙克拉（Mapper）商店永久显示，不会因换区、剧情或随机而消失。
-    /// 采用"独立补丁类"拆分注册：每个 [HarmonyPatch] 类单独 PatchAll，
-    /// 单个目标方法解析失败不影响其余补丁（避免 PatchClassProcessor 一票否决）。
+    /// 沙克拉（Mapper）商人常驻补丁。
+    ///
+    /// 设计原则：一律用 Postfix 在游戏原生逻辑执行完后再把字段拉回"在场"值，
+    /// 绝不拦截 Prefix（拦截会让 evaluate_location 等 FSM 状态机收不到事件而中断，
+    /// 导致"点交互没反应"）。所有对话/商店/任务流程完全原样运行。
+    ///
+    /// 封堵的 C# 写入路径（均为直接字段赋值，不经 PlayMaker action）：
+    ///   1) GameManager.TimePasses()        → mapperAway（50% 概率置 true，商人 AWAY 不可交互）
+    ///   2) GameManager.MapperLeavePreviousLocations(seenBool)
+    ///   3) SceneTravelerTempEval.OnEnter   → MapperLeft*
+    ///   4) PlayerData.MapperLeaveAll()     → 14 区全置 true
+    /// 以及场景隐藏组件 DeactivateIfPlayerdataTrue（MapperLeft* 为 true 时 SetActive(false)）。
+    ///
+    /// 结构：后置回写类嵌套于此统一管理，注册由 SilksongItemRandomizerAPI.AlwaysOnPatchTypes 逐类 PatchAll。
     /// </summary>
     public static class MapperPermanentPatch
     {
-        // ========== 供外部（Plugin 等）调用的强制重置 ==========
+        /// <summary>一次性兜底重置：清存档残留的离开/暂离标记（不打断任何流程）。</summary>
         public static void ForceResetMapperFields()
         {
             var pd = PlayerData.instance;
             if (pd == null) return;
 
-            // 所有 14 个离开标记置 false（逐字段保护，防止个别字段缺失影响整体）
-            try { pd.MapperLeftBonetown = false; } catch { }
-            try { pd.MapperLeftBoneForest = false; } catch { }
-            try { pd.MapperLeftDocks = false; } catch { }
-            try { pd.MapperLeftWilds = false; } catch { }
-            try { pd.MapperLeftCrawl = false; } catch { }
-            try { pd.MapperLeftGreymoor = false; } catch { }
-            try { pd.MapperLeftBellhart = false; } catch { }
-            try { pd.MapperLeftShellwood = false; } catch { }
-            try { pd.MapperLeftHuntersNest = false; } catch { }
-            try { pd.MapperLeftJudgeSteps = false; } catch { }
-            try { pd.MapperLeftDustpens = false; } catch { }
-            try { pd.MapperLeftPeak = false; } catch { }
-            try { pd.MapperLeftShadow = false; } catch { }
-            try { pd.MapperLeftCoralCaverns = false; } catch { }
-
-            // 临时离开标记置 false
             try { pd.mapperAway = false; } catch { }
 
-            // 阻止"沙克拉最终任务出现"标志被置真：
-            // GameManager 会因它调 MapperLeaveAll() 让所有商人离场。
-            try { pd.ShakraFinalQuestAppear = false; } catch { }
+            var fields = typeof(PlayerData).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            foreach (var fi in fields)
+            {
+                if (fi.FieldType != typeof(bool)) continue;
+                if (!(fi.Name.StartsWith("MapperLeft") || fi.Name.StartsWith("SeenMapper"))) continue;
+                try { fi.SetValue(pd, false); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// 根因：TimePasses 每次 50% 概率把 mapperAway 置 true（非
+        /// Bonetown/Belltown），商人 FSM 读到即走 AWAY 分支 → 商人可见但点交互没反应。
+        /// Postfix 拉回，不打断 TimePasses 其余逻辑。
+        /// </summary>
+        [HarmonyPatch(typeof(GameManager), "TimePasses")]
+        public static class TimePassesPatch
+        {
+            [HarmonyPostfix]
+            private static void Postfix() => ForceResetMapperFields();
+        }
+
+        /// <summary>
+        /// MapperLeavePreviousLocations（被 evaluate_location FSM 的 CallMethodProper 调用）：
+        /// Postfix 把被置 true 的 MapperLeft* 拉回，CallMethodProper 的 FINISHED 事件照常发出。
+        /// </summary>
+        [HarmonyPatch(typeof(GameManager), "MapperLeavePreviousLocations")]
+        public static class MapperLeavePrevPatch
+        {
+            [HarmonyPostfix]
+            private static void Postfix() => ForceResetMapperFields();
+        }
+
+        /// <summary>
+        /// SceneTravelerTempEval.OnEnter：评估当前区域并置 MapperLeft*、
+        /// 发 LeftEvent/StillHereEvent。Postfix 拉回字段，事件链不被中断（避免对话 FSM 卡死）。
+        /// </summary>
+        [HarmonyPatch("HutongGames.PlayMaker.Actions.SceneTravelerTempEval", "OnEnter")]
+        public static class SceneTravelerEvalPatch
+        {
+            [HarmonyPostfix]
+            private static void Postfix() => ForceResetMapperFields();
+        }
+
+        /// <summary>
+        /// MapperLeaveAll（TimePasses 终局分支调用）：Postfix 全量拉回。
+        /// </summary>
+        [HarmonyPatch(typeof(PlayerData), "MapperLeaveAll")]
+        public static class MapperLeaveAllPatch
+        {
+            [HarmonyPostfix]
+            private static void Postfix() => ForceResetMapperFields();
+        }
+
+        /// <summary>
+        /// 场景加载后一次性兜底（清存档残留），无高频循环。
+        /// </summary>
+        [HarmonyPatch(typeof(GameManager), "FinishedEnteringScene")]
+        public static class ResetOnEnterPatch
+        {
+            [HarmonyPostfix]
+            private static void Postfix() => ForceResetMapperFields();
         }
     }
 
-    /// <summary>拦截 PlayerData.MapperLeaveAll：阻止一次性清空所有商人</summary>
-    [HarmonyPatch(typeof(PlayerData), "MapperLeaveAll")]
-    public static class MapperLeaveAllPatch
-    {
-        [HarmonyPrefix]
-        private static bool Prefix() => false;
-    }
-
-    /// <summary>拦截 GameManager.MapperLeavePreviousLocations：阻止经过地区的商人离场</summary>
-    [HarmonyPatch(typeof(GameManager), "MapperLeavePreviousLocations")]
-    public static class MapperLeavePrevPatch
-    {
-        [HarmonyPrefix]
-        private static bool Prefix() => false;
-    }
-
     /// <summary>
-    /// 拦截 PlayMaker 版离开逻辑 SceneTravelerTempEval.OnEnter（HutongGames.PlayMaker.Actions）。
-    /// 用字符串类型名避免编译期依赖 PlayMaker。独立类，若目标缺失不影响其他补丁。
+    /// 场景隐藏组件兜底：DeactivateIfPlayerdataTrue 因 MapperLeft* 判 true 时跳过隐藏并强制激活。
     /// </summary>
-    [HarmonyPatch("HutongGames.PlayMaker.Actions.SceneTravelerTempEval", "OnEnter")]
-    public static class SceneTravelerEvalPatch
+    [HarmonyPatch(typeof(DeactivateIfPlayerdataTrue), "ForceEvaluate")]
+    public static class DeactivateIfPlayerdataTruePatch
     {
         [HarmonyPrefix]
-        private static bool Prefix() => false;
-    }
+        private static bool Prefix(DeactivateIfPlayerdataTrue __instance)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(__instance.boolName)) return true;
+                if (!__instance.boolName.StartsWith("MapperLeft")) return true;
 
-    /// <summary>
-    /// 场景加载/进入后强制重置所有 Mapper 字段，兜底覆盖剧情/PlayMaker 在场景中后期再次置真。
-    /// LoadScene 与 FinishedEnteringScene 各自独立，某个失败不影响另一个。
-    /// </summary>
-    [HarmonyPatch(typeof(GameManager), "LoadScene")]
-    public static class MapperResetOnLoadPatch
-    {
-        [HarmonyPostfix]
-        private static void Postfix() => MapperPermanentPatch.ForceResetMapperFields();
-    }
-
-    [HarmonyPatch(typeof(GameManager), "FinishedEnteringScene")]
-    public static class MapperResetOnEnterPatch
-    {
-        [HarmonyPostfix]
-        private static void Postfix() => MapperPermanentPatch.ForceResetMapperFields();
+                var target = __instance.objectToDeactivate != null
+                    ? __instance.objectToDeactivate
+                    : __instance.gameObject;
+                if (target != null && !target.activeSelf)
+                    target.SetActive(true);
+                return false;
+            }
+            catch { }
+            return true;
+        }
     }
 }

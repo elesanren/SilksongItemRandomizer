@@ -75,6 +75,14 @@ namespace SilksongItemRandomizer
             if (item == null) return "";
             try
             {
+                // 代理包装（预生成/虚拟奖励）：内部若是原生物品则解包转发，恢复描述
+                if (item is ProxySavedItem proxy)
+                {
+                    if (proxy.InnerReward is SavedItemReward sir && sir.Item != null)
+                        return GetItemDescription(sir.Item);
+                    return "";
+                }
+
                 if (item is CollectableItem c)
                     return c.GetDescription((CollectableItem.ReadSource)3);
                 if (item is CollectableRelic r)
@@ -174,6 +182,9 @@ namespace SilksongItemRandomizer
                 string name = savedItem.name;
                 if (name == "virt:HeartPiece" || name == "virt:SpoolPart" || name == "virt:MaxSilkRegenUp")
                     scale = 0.5f;
+                // 地点权限 / 方向权限图标（Map_prompt、技能图标）原图很大，缩小防止遮挡视野
+                else if (name.StartsWith("virt:Permit:") || name.StartsWith("perm:"))
+                    scale = 0.35f;
                 itemSpriteScaleField.SetValue(temp, scale);
             }
 

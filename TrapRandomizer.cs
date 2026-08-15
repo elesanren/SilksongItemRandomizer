@@ -117,37 +117,6 @@ namespace SilksongItemRandomizer
         }
 
         /// <summary>
-        /// 供 API 调用，更新配置后重新生成陷阱（如果已启用）
-        /// </summary>
-        public static void Reconfigure(bool enabled, bool movementEnabled, int difficulty)
-        {
-            bool wasEnabled = _enabled;
-            _enabled = enabled;
-            _movementEnabled = movementEnabled;
-            _difficulty = difficulty;
-
-            if (_enabled)
-            {
-                if (!wasEnabled)
-                {
-                    // 之前未启用，全新生成
-                    ClearAll();
-                    SpawnTraps();
-                }
-                else
-                {
-                    // 重新生成
-                    ClearAll();
-                    SpawnTraps();
-                }
-            }
-            else
-            {
-                ClearAll();
-            }
-        }
-
-        /// <summary>
         /// 设置冻结黑名单（用于冰冻交替机制）
         /// </summary>
         public static void SetFrostBannedScenes(HashSet<string> bannedScenes)
@@ -176,7 +145,8 @@ namespace SilksongItemRandomizer
             }
 
             ClearAll();  // 清除当前场景的陷阱
-            ScanSceneSurfaces();  // 扫描地形
+            if (scene != _lastScene)
+                ScanSceneSurfaces();  // 仅场景变化时全量重扫地形（复用上次扫描结果）
 
             var rng = new Random(_masterSeed ^ scene.GetHashCode());
             var minY = _surfacePoints.Count > 0 ? _surfacePoints.Min(p => p.y) : 0f;

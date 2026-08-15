@@ -20,28 +20,26 @@ namespace SilksongItemRandomizer
     public class ItemLimitSettings
     {
         public int SkillItem = 2, Relic = 2, OtherItem = 2;
-        public int UpSlash = 1, LeftSlash = 1, RightSlash = 1;
+        public int UpSlash = 2, LeftSlash = 2, RightSlash = 2;
         public int DashLeft = 1, DashRight = 1;
         public int HarpoonLeft = 1, HarpoonRight = 1;
         public int FloatLeft = 1, FloatRight = 1;
         public int WallJumpLeft = 1, WallJumpRight = 1;
-        public int Heal = 1;
-        public int NeedleThrow = 1, ThreadSphere = 1, HarpoonDash = 1;
-        public int SilkCharge = 1, SilkBomb = 1, SilkBossNeedle = 1;
-        public int Needolin = 1, Parry = 1, NeedolinMemory = 1, FastTravel = 1, EvaHeal = 1;
-        public int Dash = 1, Brolly = 1, DoubleJump = 1, SuperJump = 1, WallJump = 1, ChargeSlash = 1;
-        public int HeartPiece = 2, SpoolPart = 2, MaxSilkRegenUp = 2;
+        public int Heal = 2;
+        public int NeedleThrow = 2, ThreadSphere = 2, HarpoonDash = 2;
+        public int SilkCharge = 2, SilkBomb = 2, SilkBossNeedle = 2;
+        public int Needolin = 2, Parry = 2, NeedolinMemory = 2, FastTravel = 2, EvaHeal = 2;
+        public int Dash = 2, Brolly = 2, DoubleJump = 2, SuperJump = 2, WallJump = 2, ChargeSlash = 2;
+        public int HeartPiece = 20, SpoolPart = 18, MaxSilkRegenUp = 2;
         public int UnlockCrestSlot = 2;
     }
 
     public class InfinitePoolSettings
     {
         public bool Silk = true;
-        public bool FullRestore = true;
         public bool BlueHealth = true;
         public bool Geo300 = true;
         public bool Shards300 = true;
-        public bool SilkParts = true;
     }
 
     // ========== 物品/技能奖励的具体实现 ==========
@@ -115,6 +113,26 @@ namespace SilksongItemRandomizer
         public bool IsAtMax() => _isAtMax?.Invoke() ?? false;
     }
 
+    /// <summary>
+    /// 权限类 inspect 地点的权限物：放进随机池，玩家获得后该地点"允许"走原生流程
+    /// （把存储的不允许变成允许）。纯记录型奖励，发放记录由触发方统一 AddGivenCount。
+    /// </summary>
+    public class InspectPermissionReward : IRandomReward
+    {
+        private readonly string _scene, _name, _displayName;
+        public InspectPermissionReward(string scene, string name)
+        {
+            _scene = scene;
+            _name = name;
+            _displayName = $"地点权限:{scene}/{name}";
+        }
+        public string Id => "virt:Permit:" + _scene + ":" + _name;
+        public string DisplayName => _displayName;
+        public Sprite Icon => SpriteCache.Find("Map_prompt");
+        public void Give() { }
+        public bool IsAtMax() => ItemRandomizer.GetGivenCount(Id) >= 1;
+    }
+
     public class DirectionPermissionReward : IRandomReward
     {
         private readonly string _id;
@@ -136,7 +154,7 @@ namespace SilksongItemRandomizer
         }
         public string Id => _id;
         public string DisplayName => _displayName;
-        public Sprite Icon => _icon;
+        public Sprite Icon => GetIcon();
         public void Give()
         {
             if (_isAttack)
@@ -160,18 +178,50 @@ namespace SilksongItemRandomizer
             }
         }
         public bool IsAtMax() => ItemRandomizer.GetGivenCount(Id) >= ItemLimitConfig.GetDirectionLimit(Id);
+
+        /// <summary>方向权限图标：优先取对应技能图标（冲刺/飞针/漂浮/壁跳），攻击/回血权限用通用图标。</summary>
+        private Sprite GetIcon()
+        {
+            try
+            {
+                if (_isAttack || _isHeal)
+                {
+                    string iconName = _isHeal ? "prompt_silkheart" : "cross_slash_attack_circle";
+                    return SpriteCache.Find(iconName);
+                }
+                return StartingAbilityPicker.StartingAbilityPickerAPI.GetIcon(_skillField);
+            }
+            catch { return null; }
+        }
     }
 
     public class ProxySavedItem : SavedItem
     {
         private IRandomReward _reward;
         public void Init(IRandomReward reward) { _reward = reward; name = _reward.Id; }
+        public IRandomReward InnerReward => _reward;
         public override string GetPopupName() => _reward.DisplayName;
         public override Sprite GetPopupIcon() => _reward.Icon;
         public override void Get(bool showPopup = true) => _reward.Give();
         public override bool CanGetMore() => !_reward.IsAtMax();
         public override int GetSavedAmount() => 0;
         public override bool IsUnique => false;
+    }
+
+    /// <summary>
+    /// 图标覆盖包装：显示用指定图标，其余行为完全委托给被包装奖励（给予/上限判断/名称）。
+    /// 用于 lore 触发时按交互物类型（收费机/地图/音乐/蘑菇/门锁）展示对应图标。
+    /// </summary>
+    public class IconOverrideReward : IRandomReward
+    {
+        private readonly IRandomReward _inner;
+        private readonly Sprite _icon;
+        public IconOverrideReward(IRandomReward inner, Sprite icon) { _inner = inner; _icon = icon; }
+        public string Id => _inner.Id;
+        public string DisplayName => _inner.DisplayName;
+        public Sprite Icon => _icon;
+        public void Give() => _inner.Give();
+        public bool IsAtMax() => _inner.IsAtMax();
     }
 
     // 将 LimitedVirtualReward 移到公共位置

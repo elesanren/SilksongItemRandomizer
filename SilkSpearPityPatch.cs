@@ -71,8 +71,6 @@ namespace SilksongItemRandomizer
             _saveData.SetTryGetCount(newCount);
             int requiredCount = _saveData.GetPityCount();
 
-            Plugin.Log.LogInfo($"[丝矛保底] 物品获得计数: {newCount}/{requiredCount} (物品: {__instance.name})");
-
             if (newCount < requiredCount) return;
 
             Plugin.Log.LogInfo($"[丝矛保底] 保底触发（第{newCount}次物品获得）");
@@ -126,7 +124,11 @@ namespace SilksongItemRandomizer
         private static IEnumerator ShowNativePopupAndRefreshHealth(SkillGetMsg prefab, ToolItemSkill skillItem, SavedItem silkSpearItem)
         {
             bool finished = false;
-            SkillGetMsg.Spawn(prefab, skillItem, () => finished = true);
+            SkillGetMsg.Spawn(prefab, skillItem, () =>
+            {
+                finished = true;
+                GameCameras.instance?.HUDIn();
+            });
 
             TryGetPatch.BypassRandom = true;
             try
@@ -145,6 +147,18 @@ namespace SilksongItemRandomizer
                 yield return null;
                 timeout -= Time.deltaTime;
             }
+            GameCameras.instance?.HUDIn();
+
+            // 按原生流程：弹窗结束后把技能装配到当前纹章的法术槽
+            try
+            {
+                ToolItemManager.AutoEquip(skillItem);
+                Plugin.Log.LogInfo($"[丝矛保底] 已装配 {skillItem.name} 到法术槽");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[丝矛保底] 自动装配 {skillItem?.name} 失败: {ex.Message}");
+            }
 
             yield return new WaitForSeconds(5f);
             ForceFullHealAndSilk();
@@ -156,7 +170,7 @@ namespace SilksongItemRandomizer
             ForceFullHealAndSilk();
         }
 
-        private static void ForceFullHealAndSilk()
+        public static void ForceFullHealAndSilk()
         {
             try
             {

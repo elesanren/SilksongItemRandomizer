@@ -52,6 +52,18 @@ namespace SilksongItemRandomizer
         };
 
         /// <summary>
+        /// 是否 Hunter 系列纹章（初始纹章升级链）
+        /// 剧情/梦境进出时游戏会自动设置这些纹章，参与随机会导致纹章被意外替换
+        /// </summary>
+        private static bool IsHunterSeries(string crestName)
+        {
+            if (string.IsNullOrEmpty(crestName)) return false;
+            return string.Equals(crestName, "Hunter", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(crestName, "Hunter_v2", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(crestName, "Hunter_v3", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// 初始化纹章随机系统
         /// </summary>
         /// <param name="seed">随机种子</param>
@@ -178,6 +190,10 @@ namespace SilksongItemRandomizer
         public static string GetMappedCrestName(string sourceCrestName)
         {
             if (!IsEnabled)
+                return sourceCrestName;
+
+            // Hunter 系列是初始纹章升级链（剧情/梦境进出会由游戏自动设置），不作为源参与随机映射
+            if (IsHunterSeries(sourceCrestName))
                 return sourceCrestName;
 
             // 已经解锁的纹章不需要再次随机

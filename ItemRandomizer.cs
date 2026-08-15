@@ -126,6 +126,8 @@ namespace SilksongItemRandomizer
             BuildUnlimitedVirtualRewards();
             BuildPreciousVirtualRewards();
             BuildLoreReward();
+            BuildInspectPermitRewards();
+            BuildProgressRewards();
             if (ItemLimitConfig.EnableMapRewards)
                 _limitedRewards.AddRange(MapStationRewards.BuildMapRewards());
             if (ItemLimitConfig.EnableStationRewards)
@@ -159,6 +161,11 @@ namespace SilksongItemRandomizer
                     () => GetGivenCount(field) >= ItemLimitConfig.GetAbilityLimit(field)
                 );
                 _limitedRewards.Add(reward);
+                // 能力物品翻倍（同能力两处发放，不强行去重挪走）
+                _limitedRewards.Add(new VirtualReward(field, displayName, icon,
+                    () => GiveSkillWithMenuCheck(field),
+                    () => GetGivenCount(field) >= ItemLimitConfig.GetAbilityLimit(field)
+                ));
             }
         }
 
@@ -172,17 +179,22 @@ namespace SilksongItemRandomizer
             _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("漂浮右"), "hasBrolly", true, false));
             _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("壁跳左"), "hasWalljump", false, true));
             _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("壁跳右"), "hasWalljump", true, false));
-            _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("上劈权限"), "upward", true, false, true));
-            _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("左劈权限"), "left", true, false, true));
-            _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("右劈权限"), "right", true, false, true));
-            _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("回血权限"), "heal", true, false, false, true));
+
+            // 攻击方向/回血权限翻倍（上劈/左劈/右劈/回血各两处发放）
+            for (var i = 0; i < 2; i++)
+            {
+                _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("上劈权限"), "upward", true, false, true));
+                _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("左劈权限"), "left", true, false, true));
+                _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("右劈权限"), "right", true, false, true));
+                _limitedRewards.Add(new DirectionPermissionReward(Locale.Get("回血权限"), "heal", true, false, false, true));
+            }
         }
 
         private static void BuildUnlimitedVirtualRewards()
         {
             // 1. 灵丝3格（固定）
             if (ItemLimitConfig.EnableInfSilk)
-                _unlimitedRewards.Add(new VirtualReward("virt:Silk_3", Locale.Get("灵丝(3)"), null, () =>
+                _unlimitedRewards.Add(new VirtualReward("virt:Silk_3", Locale.Get("灵丝(3)"), SpriteCache.Find("icon_silk_materium"), () =>
                 {
                     var hero = HeroController.instance;
                     if (hero != null) for (int i = 0; i < 3; i++) hero.AddSilk(1, false);
@@ -190,21 +202,21 @@ namespace SilksongItemRandomizer
 
             // 2. 甲壳300（固定）
             if (ItemLimitConfig.EnableInfShards300)
-                _unlimitedRewards.Add(new VirtualReward("virt:Shards_300", Locale.Get("甲壳300"), null, () => HeroController.instance?.AddShards(300), () => false));
+                _unlimitedRewards.Add(new VirtualReward("virt:Shards_300", Locale.Get("甲壳300"), SpriteCache.Find("Shell_shard_icon"), () => HeroController.instance?.AddShards(300), () => false));
 
             // 3. 随机蓝血（1~6格，逐格给予，使用协程）
             if (ItemLimitConfig.EnableInfBlueHealth)
-                _unlimitedRewards.Add(new VirtualReward("virt:BlueHealth_Random", Locale.Get("随机蓝血"), null, () =>
+                _unlimitedRewards.Add(new VirtualReward("virt:BlueHealth_Random", Locale.Get("随机蓝血"), SpriteCache.Find("Icon_Inv_Blue_Health_Blood"), () =>
                 {
                     int total = UnityEngine.Random.Range(1, 7); // 1~6
                     Plugin.Instance?.StartCoroutine(AddBlueHealthOverTime(total, 0.5f));
                 }, () => false));
 
-            // 4. 随机货币（金额50~300，商店风格）
+            // 4. 随机货币（金额0~90，商店风格）
             if (ItemLimitConfig.EnableInfGeo300)  // 复用 EnableInfGeo300 作为总开关，但金额随机
-                _unlimitedRewards.Add(new VirtualReward("virt:RandomCoin", Locale.Get("随机念珠"), null, () =>
+                _unlimitedRewards.Add(new VirtualReward("virt:RandomCoin", Locale.Get("随机念珠"), SpriteCache.Find("I_rosary_icon_clean"), () =>
                 {
-                    int amount = UnityEngine.Random.Range(50, 301);
+                    int amount = Rng.Next(0, 91);
                     HeroController.instance?.AddGeo(amount);
                 }, () => false));
         }
@@ -221,28 +233,23 @@ namespace SilksongItemRandomizer
 
         private static void BuildPreciousVirtualRewards()
         {
-            _limitedRewards.Add(new VirtualReward("virt:HeartPiece", Locale.Get("面具碎片"), null, () =>
+            _limitedRewards.Add(new VirtualReward("virt:HeartPiece", Locale.Get("面具碎片"), SpriteCache.Find("Heart_Piece_01"), () =>
             {
-                var pd = PlayerData.instance;
-                if (pd != null) pd.heartPieces++;
-                EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
+                NativePickupGiver.GiveHeartPiece();
             }, () => GetGivenCount("virt:HeartPiece") >= ItemLimitConfig.GetPreciousLimit("virt:HeartPiece")));
 
-            _limitedRewards.Add(new VirtualReward("virt:SpoolPart", Locale.Get("丝轴碎片"), null, () =>
+            _limitedRewards.Add(new VirtualReward("virt:SpoolPart", Locale.Get("丝轴碎片"), SpriteCache.Find("spool_upgrade_pickup"), () =>
             {
-                var pd = PlayerData.instance;
-                if (pd != null) pd.silkSpoolParts++;
-                GameCameras.instance?.silkSpool?.RefreshSilk();
-                EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
+                Plugin.Instance?.StartCoroutine(NativePickupGiver.GiveSpoolPart());
             }, () => GetGivenCount("virt:SpoolPart") >= ItemLimitConfig.GetPreciousLimit("virt:SpoolPart")));
 
-            _limitedRewards.Add(new VirtualReward("virt:MaxSilkRegenUp", Locale.Get("丝线恢复上限 +1"), null, () => HeroController.instance?.AddToMaxSilkRegen(1),
+            _limitedRewards.Add(new VirtualReward("virt:MaxSilkRegenUp", Locale.Get("丝线恢复上限 +1"), SpriteCache.Find("silk_heart_inv_icon"), () => HeroController.instance?.AddToMaxSilkRegen(1),
                 () => GetGivenCount("virt:MaxSilkRegenUp") >= ItemLimitConfig.GetPreciousLimit("virt:MaxSilkRegenUp")));
 
             _limitedRewards.Add(new VirtualReward(
                 "virt:UnlockCrestSlot",
                 Locale.Get("纹章槽位解锁器"),
-                null,
+                SpriteCache.Find("Tool_slot_lock_ring"),
                 () => TryUnlockCrestSlot(),
                 () => GetGivenCount("virt:UnlockCrestSlot") >= ItemLimitConfig.GetPreciousLimit("virt:UnlockCrestSlot")
             ));
@@ -252,11 +259,79 @@ namespace SilksongItemRandomizer
         {
             if (!ItemLimitConfig.EnableLoreReward)
                 return;
-            // 权重 = 可用 lore 条目（地点）数；取不到时退化为 1（保持原行为）
-            int keyCount = LoreRandomizer.GetLoreKeys().Count;
+            // 权重 = 可用 lore 条目数；取不到时退化为 1（保持原行为）
+            int keyCount = LoreRandomizer.LoreTable.Length;
             _loreRewardWeight = keyCount > 0 ? keyCount : 1;
             _limitedRewards.Add(new LoreReward());
-            Plugin.Log.LogInfo($"[ItemRandomizer] 已加入日志随机奖励 (LoreReward)，按 lore 地点数加权权重 = {_loreRewardWeight}");
+        }
+
+        /// <summary>
+        /// 进度类奖励：监狱三把钥匙（叠加权限）+ 五圣钟解锁标志。
+        /// 钥匙 = HasSlabKeyA/B/C 三个 bool（原版由 Slab 区域拾取点设置，最终审判门检查三者全 true）；
+        /// 五圣钟解锁 = 一次性置位五个 bellShrine* bool，让最终审判者挑战直接可进
+        /// （房间随机复杂，钟椅不再逐个找，给一个整体解锁标志）。
+        /// </summary>
+        private static void BuildProgressRewards()
+        {
+            // 三把监狱钥匙（叠加权限，各只能获得一次）
+            _limitedRewards.Add(new VirtualReward("virt:SlabKeyA", Locale.Get("怠惰之钥"), SpriteCache.Find("I_slab_key"),
+                () => GiveProgressBool("HasSlabKeyA"), () => HasProgressBool("HasSlabKeyA")));
+            _limitedRewards.Add(new VirtualReward("virt:SlabKeyB", Locale.Get("异端之钥"), SpriteCache.Find("I_slab_key_brass"),
+                () => GiveProgressBool("HasSlabKeyB"), () => HasProgressBool("HasSlabKeyB")));
+            _limitedRewards.Add(new VirtualReward("virt:SlabKeyC", Locale.Get("叛教之钥"), SpriteCache.Find("I_slab_key_gold"),
+                () => GiveProgressBool("HasSlabKeyC"), () => HasProgressBool("HasSlabKeyC")));
+
+            // 五圣钟解锁标志（一次性整体解锁，最终审判者挑战可进）
+            _limitedRewards.Add(new VirtualReward("virt:Bellshrines", Locale.Get("五圣钟解锁"), SpriteCache.Find("QI_Main_bellshrines"),
+                () =>
+                {
+                    foreach (var b in FiveBellBools)
+                        GiveProgressBool(b);
+                },
+                () =>
+                {
+                    var pd = PlayerData.instance;
+                    return pd != null && Array.TrueForAll(FiveBellBools, b => pd.GetBool(b));
+                }));
+        }
+
+        /// <summary>五圣钟（最终审判者挑战的 5 个钟椅 bool；Enclave 涉及剧情不做改动）</summary>
+        private static readonly string[] FiveBellBools =
+        {
+            "bellShrineBoneForest", "bellShrineWilds", "bellShrineGreymoor",
+            "bellShrineShellwood", "bellShrineBellhart"
+        };
+
+        private static void GiveProgressBool(string boolName)
+        {
+            var pd = PlayerData.instance;
+            if (pd == null) return;
+            try
+            {
+                pd.SetBool(boolName, true);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[进度奖励] 置位 {boolName} 失败: {ex}");
+            }
+        }
+
+        private static bool HasProgressBool(string boolName)
+        {
+            var pd = PlayerData.instance;
+            return pd != null && pd.GetBool(boolName);
+        }
+
+        /// <summary>
+        /// 权限类 inspect 地点权限物入池：每个地点一个"允许走原生流程"的许可（virt:Permit:scene:name），
+        /// 玩家随机获得后该地点放行原生流程（记录二）；inspect 每地只触发一次随机（记录一，见 LoreTriggerPatch）。
+        /// </summary>
+        private static void BuildInspectPermitRewards()
+        {
+            if (!ItemLimitConfig.EnableInspectPermit)
+                return;
+            foreach (var e in InspectPermitRewards.Permits)
+                _limitedRewards.Add(new InspectPermissionReward(e.Scene, e.Name));
         }
 
         // ========== 辅助方法 ==========
@@ -274,16 +349,6 @@ namespace SilksongItemRandomizer
             if (_crestCache == null) BuildCrestCache();
             _crestCache.TryGetValue(crestName, out var crest);
             return crest;
-        }
-
-        private static IEnumerator AddBlueHealthCoroutine(int times, float interval)
-        {
-            for (int i = 0; i < times; i++)
-            {
-                EventRegister.SendEvent(EventRegisterEvents.AddBlueHealth, null);
-                if (i < times - 1)
-                    yield return new WaitForSeconds(interval);
-            }
         }
 
         private static bool IsDirectionSkillField(string field)
@@ -361,7 +426,6 @@ namespace SilksongItemRandomizer
                 if (changed)
                 {
                     crest.SaveData = data;
-                    Plugin.Log.LogInfo($"[ItemRandomizer] 已为纹章 {crestId} 解锁法术槽");
                 }
             }
             catch (Exception ex) { Plugin.Log.LogWarning($"[ItemRandomizer] 解锁法术槽失败: {ex.Message}"); }

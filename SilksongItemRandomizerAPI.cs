@@ -25,7 +25,7 @@ namespace SilksongItemRandomizer
         public bool Enabled = false;
         public bool CrestEnabled = false;
         public bool TrapEnabled = false;
-        public bool TrapMovementEnabled = true;
+        public bool TrapMovementEnabled = false;
         public int TrapDifficulty = 0;
         public bool CrestRandomEnabled = true;
         public bool SkillItemRandomEnabled = true;
@@ -71,6 +71,8 @@ namespace SilksongItemRandomizer
         {
             if (_isGameReady) return;
             _isGameReady = true;
+            // 启动早期 EnemyRando 尚未初始化时其配置写入会被跳过，此时游戏已就绪，重放一次
+            EnemyRandoAdjuster.ReapplyConfig();
             if (_pendingChanges) ApplyPending();
         }
 
@@ -115,11 +117,91 @@ namespace SilksongItemRandomizer
         public static (int first, int second) GetCurrencyThresholds() => (_cachedConfig.CurrencyFirstThreshold, _cachedConfig.CurrencySecondThreshold);
         public static int GetSilkSpearPityCount() => _cachedConfig.SilkSpearPityCount;
 
+        // ========== 灵丝获得/消耗随机化开关（独立于总开关，默认关闭） ==========
+        public static bool IsSilkRandomEnabled() => Plugin.SilkRandomizerEnabled != null && Plugin.SilkRandomizerEnabled.Value;
+        public static void SetSilkRandomEnabled(bool enabled)
+        {
+            if (Plugin.SilkRandomizerEnabled == null) return;
+            Plugin.SilkRandomizerEnabled.Value = enabled;
+        }
+
         // ========== 运行时操作 ==========
         public static void RegenerateTrapsNow()
         {
             if (!_isGameReady || !_cachedConfig.TrapEnabled) return;
             TrapRandomizer.RespawnTraps();
+        }
+
+        /// <summary>
+        /// 面板直接修改 ItemLimitConfig 静态字段后调用：
+        /// 同步回 _cachedConfig（防止 ApplyPending 用旧快照把面板新值覆盖回退）、
+        /// 并置脏标，由 Update 防抖后统一持久化 cfg + 重建一次全量映射。
+        /// </summary>
+        public static void SaveLimitsAndRegenerateMappings()
+        {
+            SyncLimitsBackToCachedConfig();
+            ItemLimitConfig.MarkLimitsDirty();
+        }
+
+        /// <summary>
+        /// 主线程每帧调用（HotkeyHandler.Update）：
+        /// 防抖窗口到且存在脏标时，真正执行「写回 cfg + 强制重建映射」。
+        /// </summary>
+        public static void FlushLimitsRegenerate()
+        {
+            if (!ItemLimitConfig.TryFlushLimitsRegenerate()) return;
+
+            ItemLimitConfig.SaveToConfigFile();
+            PreGeneratedMap.Reset();   // 清空映射、恢复未初始化状态
+            PreGeneratedMap.Initialize(); // 按当前 limit 重新全量生成
+        }
+
+        /// <summary>
+        /// 把 ItemLimitConfig 当前静态字段同步回 _cachedConfig.Limits，
+        /// 使后续 ApplyPending 的 ItemLimitConfig.Apply 不会用旧默认值覆盖面板改动。
+        /// </summary>
+        private static void SyncLimitsBackToCachedConfig()
+        {
+            if (_cachedConfig == null) return;
+            _cachedConfig.Limits = new ItemLimitSettings
+            {
+                SkillItem = ItemLimitConfig.LimitSkillItem,
+                Relic = ItemLimitConfig.LimitRelic,
+                OtherItem = ItemLimitConfig.LimitOtherItem,
+                UpSlash = ItemLimitConfig.LimitUpSlash,
+                LeftSlash = ItemLimitConfig.LimitLeftSlash,
+                RightSlash = ItemLimitConfig.LimitRightSlash,
+                DashLeft = ItemLimitConfig.LimitDashLeft,
+                DashRight = ItemLimitConfig.LimitDashRight,
+                HarpoonLeft = ItemLimitConfig.LimitHarpoonLeft,
+                HarpoonRight = ItemLimitConfig.LimitHarpoonRight,
+                FloatLeft = ItemLimitConfig.LimitFloatLeft,
+                FloatRight = ItemLimitConfig.LimitFloatRight,
+                WallJumpLeft = ItemLimitConfig.LimitWallJumpLeft,
+                WallJumpRight = ItemLimitConfig.LimitWallJumpRight,
+                Heal = ItemLimitConfig.LimitHeal,
+                NeedleThrow = ItemLimitConfig.LimitNeedleThrow,
+                ThreadSphere = ItemLimitConfig.LimitThreadSphere,
+                HarpoonDash = ItemLimitConfig.LimitHarpoonDash,
+                SilkCharge = ItemLimitConfig.LimitSilkCharge,
+                SilkBomb = ItemLimitConfig.LimitSilkBomb,
+                SilkBossNeedle = ItemLimitConfig.LimitSilkBossNeedle,
+                Needolin = ItemLimitConfig.LimitNeedolin,
+                Parry = ItemLimitConfig.LimitParry,
+                NeedolinMemory = ItemLimitConfig.LimitNeedolinMemory,
+                FastTravel = ItemLimitConfig.LimitFastTravel,
+                EvaHeal = ItemLimitConfig.LimitEvaHeal,
+                Dash = ItemLimitConfig.LimitDash,
+                Brolly = ItemLimitConfig.LimitBrolly,
+                DoubleJump = ItemLimitConfig.LimitDoubleJump,
+                SuperJump = ItemLimitConfig.LimitSuperJump,
+                WallJump = ItemLimitConfig.LimitWallJump,
+                ChargeSlash = ItemLimitConfig.LimitChargeSlash,
+                HeartPiece = ItemLimitConfig.LimitHeartPiece,
+                SpoolPart = ItemLimitConfig.LimitSpoolPart,
+                MaxSilkRegenUp = ItemLimitConfig.LimitMaxSilkRegenUp,
+                UnlockCrestSlot = ItemLimitConfig.LimitUnlockCrestSlot,
+            };
         }
 
         public static void ResetAllData()
@@ -162,9 +244,17 @@ namespace SilksongItemRandomizer
 
             SyncToInternalFields();
 
+            string limitStampBefore = ItemLimitConfig.BuildLimitsStamp();
             ItemLimitConfig.Apply(_cachedConfig.Limits);
             ItemLimitConfig.ApplyInfinitePoolSettings(_cachedConfig.InfinitePool);
             ItemTypeRandomFilter.Apply(_cachedConfig.CrestRandomEnabled, _cachedConfig.SkillItemRandomEnabled, _cachedConfig.RelicRandomEnabled);
+
+            // ★ limit 实际变化时才写回 cfg 持久化，并置脏标让 Update 防抖重建映射
+            if (ItemLimitConfig.BuildLimitsStamp() != limitStampBefore)
+            {
+                ItemLimitConfig.SaveToConfigFile();
+                ItemLimitConfig.MarkLimitsDirty();
+            }
 
             var saveData = Plugin.SaveData;
             saveData.CurrencyFirstThreshold = _cachedConfig.CurrencyFirstThreshold;
@@ -260,7 +350,7 @@ namespace SilksongItemRandomizer
         /// <summary>
         /// 跟随「物品随机总开关」切换的动态补丁。
         /// 启用时批量 PatchAll，禁用时按类逐个 Unpatch。
-        /// 与原 Plugin.ApplyItemPatches 对齐：包含商店店主识别等所有需要随开关切换的类型。
+        /// 包含商店店主识别等所有需要随开关切换的类型。
         /// </summary>
         private static readonly System.Type[] ToggleablePatchTypes =
         {
@@ -272,6 +362,29 @@ namespace SilksongItemRandomizer
             typeof(ShopMenuStock_BuildItemList_Patch),
             typeof(ShopItemStats_Purchase_Patch),
             typeof(SilkSpearPityPatch),
+            typeof(SpoolPartPatch),
+            typeof(SetPlayerDataVariable_OnEnter_Patch),
+            typeof(PlayerData_IncrementInt_Patch),
+            typeof(CreateObjectV2_OnEnter_Patch),
+            typeof(CreateObject_OnEnter_Patch),
+            typeof(IntOperator_OnEnter_Patch),
+            typeof(SetAnimator_OnEnter_Patch),
+            typeof(AnimatorPlayStateWait_OnEnter_Patch),
+            typeof(ListenForAnimationEvent_OnEnter_Patch),
+            typeof(Tk2dPlayAnimation_OnEnter_Patch),
+            typeof(Tk2dPlayAnimationWithEvents_OnEnter_Patch),
+            typeof(Wait_OnEnter_Patch),
+            typeof(EaseColor_OnEnter_Patch),
+            typeof(Tk2dSpriteSetColor_OnEnter_Patch),
+            typeof(SetMeshRenderer_OnEnter_Patch),
+            typeof(iTweenMoveTo_OnEnter_Patch),
+            typeof(iTweenScaleTo_OnEnter_Patch),
+            typeof(AudioPlayerOneShotSingle_OnEnter_Patch),
+            typeof(PlayParticleEmitter_OnEnter_Patch),
+            typeof(StopParticleEmitter_OnEnter_Patch),
+            typeof(HeroController_AddToMaxSilk_Patch),
+            typeof(HeroController_AddToMaxHealth_Patch),
+            typeof(MossberryRandomizer.CollectableItem_Collect_Patch),
             typeof(BenchRespawnPatch),
             typeof(SilkRandomizerPatch),
             typeof(LoreTriggerPatch),
@@ -287,11 +400,12 @@ namespace SilksongItemRandomizer
         /// </summary>
         private static readonly System.Type[] AlwaysOnPatchTypes =
         {
-            typeof(MapperLeaveAllPatch),
-            typeof(MapperLeavePrevPatch),
-            typeof(SceneTravelerEvalPatch),
-            typeof(MapperResetOnLoadPatch),
-            typeof(MapperResetOnEnterPatch),
+            typeof(MapperPermanentPatch.TimePassesPatch),
+            typeof(MapperPermanentPatch.MapperLeavePrevPatch),
+            typeof(MapperPermanentPatch.SceneTravelerEvalPatch),
+            typeof(MapperPermanentPatch.MapperLeaveAllPatch),
+            typeof(MapperPermanentPatch.ResetOnEnterPatch),
+            typeof(DeactivateIfPlayerdataTruePatch),
         };
 
         /// <summary>常驻补丁是否已注册（避免重复 PatchAll）</summary>
@@ -328,7 +442,7 @@ namespace SilksongItemRandomizer
                 catch (Exception ex) { Plugin.Log.LogWarning($"补丁注册失败 {type.Name}: {ex.Message}"); }
             }
 
-            // 按类注册持久化数据访问器（原 Plugin.ApplyItemPatches 在此处完成）
+            // 按类注册持久化数据访问器
             PickupPatch.Initialize(new PluginSaveDataAccessor());
             CrestRandomizePatch.Initialize(new PluginSaveDataAccessor());
             ShopMenuStock_BuildItemList_Patch.Initialize(new PluginSaveDataAccessor());

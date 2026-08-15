@@ -5,7 +5,7 @@ namespace SilksongItemRandomizer
 {
     /// <summary>
     /// 灵丝获得/消耗随机化补丁
-    /// 改造后：通过 SilksongItemRandomizerAPI 的总开关控制是否生效
+    /// 改造后：通过 SilksongItemRandomizerAPI 的总开关 + 独立开关（SilkRandomEnabled，默认关闭）双重控制
     /// 保留所有原有功能：获得量随机（90%几率1，10%几率2-9），消耗量按权重随机（1-9，分布偏大值）
     /// </summary>
     [HarmonyPatch(typeof(PlayerData))]
@@ -49,6 +49,7 @@ namespace SilksongItemRandomizer
         private static bool PrefixAddSilk(PlayerData __instance, ref int amount)
         {
             if (!SilksongItemRandomizerAPI.IsEnabled()) return true;
+            if (!SilksongItemRandomizerAPI.IsSilkRandomEnabled()) return true;
             EnsureRng();
             amount = GetRandomGainAmount();
             return true;
@@ -59,6 +60,7 @@ namespace SilksongItemRandomizer
         private static bool PrefixTakeSilk(PlayerData __instance, ref int amount)
         {
             if (!SilksongItemRandomizerAPI.IsEnabled()) return true;
+            if (!SilksongItemRandomizerAPI.IsSilkRandomEnabled()) return true;
             EnsureRng();
             amount = GetRandomCostAmount();
             return true;

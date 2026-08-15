@@ -70,8 +70,9 @@ namespace SilksongItemRandomizer
 
             RandomSeed = Config.Bind("General", "RandomSeed", 0, "随机种子 (0 表示随机)");
             ItemRandomEnabled = Config.Bind("General", "ItemRandomEnabled", true, "Enable/disable item randomization");
-            CrestRandomEnabled = Config.Bind("General", "CrestRandomEnabled", true, "启用纹章随机（独立开关，仅在物品随机总开关开启时生效）");
-            SilkRandomizerEnabled = Config.Bind("Silk Randomizer", "Enabled", true, "启用灵丝获得/消耗随机化");
+            CrestRandomEnabled = Config.Bind("General", "CrestRandomEnabled", false, "启用纹章随机（独立开关，仅在物品随机总开关开启时生效）");
+
+            SilkRandomizerEnabled = Config.Bind("Silk Randomizer", "Enabled", false, "启用灵丝获得/消耗随机化（默认关闭，仅在物品随机总开关开启时生效）");
             SilkRandomMin = Config.Bind("Silk Randomizer", "MinAmount", 1, "随机获得/消耗的最小灵丝数量（1-9）");
             SilkRandomMax = Config.Bind("Silk Randomizer", "MaxAmount", 9, "随机获得/消耗的最大灵丝数量（1-9）");
 
@@ -137,11 +138,9 @@ namespace SilksongItemRandomizer
                 InfinitePool = new InfinitePoolSettings
                 {
                     Silk = ItemLimitConfig.EnableInfSilk,
-                    FullRestore = ItemLimitConfig.EnableInfFullRestore,
                     BlueHealth = ItemLimitConfig.EnableInfBlueHealth,
                     Geo300 = ItemLimitConfig.EnableInfGeo300,
                     Shards300 = ItemLimitConfig.EnableInfShards300,
-                    SilkParts = ItemLimitConfig.EnableInfSilkParts,
                 }
             };
             SilksongItemRandomizerAPI.Initialize(apiConfig);
@@ -226,13 +225,8 @@ namespace SilksongItemRandomizer
             CrestRandomizePatch.OnSceneLoaded(scene, mode);
             MapStationUnlockPatch.OnSceneLoaded(scene);
             LoreTriggerPatch.OnSceneLoaded(scene);
-
-            // 强制重置 Mapper 字段（兜底，防其他模组/游戏内代码绕过补丁）
-            try { MapperPermanentPatch.ForceResetMapperFields(); }
-            catch (Exception ex) { Log.LogWarning($"Mapper 字段重置异常: {ex.Message}"); }
-
-            // 沙克拉商人保活：延迟重置静态商店单例，保证该场景商人生成自己的商店可购买
-            StartCoroutine(ShakraMerchantKeeper.RefreshAfterSceneLoad(scene));
+            MossberryRandomizer.OnSceneLoaded(scene, mode);
+            HeroRespawnReset.CheckAfterSceneLoad(scene.name);   // ★ 出梦境重生修复：检测冻结状态温和恢复
         }
 
         private IEnumerator SpawnTrapsAfterSceneLoad()
@@ -259,7 +253,7 @@ namespace SilksongItemRandomizer
 
         private void Update()
         {
-            RecentItemsUI.UpdateAutoHide();
+            FsmMasterGuard.Tick();
             CheckAutoSave();
         }
 
@@ -421,7 +415,7 @@ namespace SilksongItemRandomizer
         public static void AddDestroyedPickupKey(string key)
         {
             SaveData.DestroyedPickupKeys.Add(key);
-            SaveGlobalDataNow(); // 销毁标记即时落盘
+            SaveGlobalData(); // 去抖落盘（OnDestroy 兜底强制落盘）
         }
 
         public static void ResetDestroyedPickupKeys()

@@ -60,7 +60,6 @@ namespace SilksongItemRandomizer
             sheet[key] = displayName;
             _registeredKeys.Add(key);
 
-            Plugin.Log.LogDebug($"[ItemLocalization] 注册物品名称: {key} -> {displayName}");
             return true;
         }
 
@@ -105,6 +104,39 @@ namespace SilksongItemRandomizer
         /// </summary>
         private static string GetItemDisplayNameSafe(SavedItem item)
         {
+            // CollectableItemStates 在无状态满足时调用 GetPopupName 会触发游戏本体
+            // "Item state was less than 0" 错误日志；改为直接读取首个状态的显示名
+            if (item is CollectableItemStates statesItem)
+            {
+                try
+                {
+                    var statesField = typeof(CollectableItemStates).GetField("states", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var states = statesField?.GetValue(statesItem) as Array;
+                    if (states != null && states.Length > 0)
+                    {
+                        for (int i = 0; i < states.Length; i++)
+                        {
+                            var state = states.GetValue(i);
+                            if (state == null) continue;
+                            var dnField = state.GetType().GetField("DisplayName",
+                                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                            var dn = dnField?.GetValue(state);
+                            if (dn is LocalisedString ls)
+                            {
+                                string text = ToLocalisedString(ls);
+                                if (!string.IsNullOrEmpty(text))
+                                    return text;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // 反射失败则回退到 item.name
+                }
+                return item.name;
+            }
+
             // 通过反射检查 GetPopupName 方法是否被重写（即 DeclaringType 不是 SavedItem）
             var method = typeof(SavedItem).GetMethod("GetPopupName", BindingFlags.Instance | BindingFlags.Public);
             if (method != null)
@@ -126,6 +158,22 @@ namespace SilksongItemRandomizer
             catch
             {
                 return item.name;
+            }
+        }
+
+        // 通过反射调用 LocalisedString 的隐式转换（op_Implicit），避免直接强转
+        private static string ToLocalisedString(LocalisedString ls)
+        {
+            try
+            {
+                var op = typeof(LocalisedString).GetMethod("op_Implicit", new[] { typeof(LocalisedString) });
+                if (op != null && op.IsStatic)
+                    return (string)op.Invoke(null, new object[] { ls });
+                return ls.ToString();
+            }
+            catch
+            {
+                return null;
             }
         }
 

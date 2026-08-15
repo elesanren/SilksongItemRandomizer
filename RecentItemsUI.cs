@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using StartingAbilityPicker;
 using UnityEngine;
 
@@ -15,7 +14,6 @@ namespace SilksongItemRandomizer
     {
         private static readonly Queue<IRandomReward> RecentRewards = new();
         private const int MaxItems = 5;
-        private static Rect _windowRect = new(20f, 300f, 700f, 600f);
         private static bool _showWindow;
         private static float _hideTime;
 
@@ -31,7 +29,7 @@ namespace SilksongItemRandomizer
             RecentRewards.Enqueue(reward);
             while (RecentRewards.Count > MaxItems) RecentRewards.Dequeue();
             _showWindow = true;
-            _hideTime = Time.time + 10f;
+            _hideTime = float.MaxValue;
         }
 
         public static void Toggle()
@@ -40,58 +38,78 @@ namespace SilksongItemRandomizer
             if (_showWindow) _hideTime = float.MaxValue;
         }
 
-        public static void UpdateAutoHide()
-        {
-            if (_showWindow && Time.time >= _hideTime) _showWindow = false;
-        }
-
         public static void Draw()
         {
             if (!_showWindow) return;
-            _windowRect = GUILayout.Window(999, _windowRect, DrawWindow, GUIContent.none, GetWindowStyle());
+            // 固定吸附右上角；背景透明，高度由内容自适应
+            const float w = 500f;
+            GUILayout.BeginArea(new Rect(Screen.width - w - 6f, 6f, w, Mathf.Max(Screen.height - 12f, 80f)));
+            try
+            {
+                GUILayout.BeginVertical();
+                GUILayout.Label("Recent Item", GetTitleStyle());
+                GUILayout.Space(4f);
+                foreach (var reward in RecentRewards)
+                {
+                    try
+                    {
+                        DrawRewardItem(reward);
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Log.LogError($"绘制奖励失败: {reward?.Id} - {ex.Message}");
+                        GUILayout.Label("❌ 显示错误");
+                    }
+                }
+                GUILayout.EndVertical();
+            }
+            finally
+            {
+                GUILayout.EndArea();
+            }
         }
 
-        /// <summary>
-        /// 透明、无边框、无标题栏的窗口样式（背景置空 + 去掉上下边框，使标题栏塌陷）
-        /// </summary>
-        private static GUIStyle _transparentWindowStyle;
-        private static GUIStyle GetWindowStyle()
+        private static GUIStyle _bodyLabelStyle;
+        private static GUIStyle GetBodyLabelStyle()
         {
-            if (_transparentWindowStyle == null)
+            if (_bodyLabelStyle == null)
             {
-                _transparentWindowStyle = new GUIStyle(GUI.skin.window);
-                _transparentWindowStyle.normal.background = null;
-                _transparentWindowStyle.onNormal.background = null;
-                _transparentWindowStyle.border = new RectOffset(0, 0, 0, 0);
-                _transparentWindowStyle.padding = new RectOffset(0, 0, 0, 0);
-                _transparentWindowStyle.margin = new RectOffset(0, 0, 0, 0);
+                _bodyLabelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 22,
+                    alignment = TextAnchor.MiddleLeft,
+                };
             }
-            return _transparentWindowStyle;
+            return _bodyLabelStyle;
         }
 
-        private static void DrawWindow(int id)
+        private static GUIStyle _titleStyle;
+        private static GUIStyle GetTitleStyle()
         {
-            var originalFontSize = GUI.skin.label.fontSize;
-            GUI.skin.label.fontSize = 32;
-
-            GUILayout.BeginVertical();
-            // 直接遍历 Queue 避免每帧 ToList() 分配
-            foreach (var reward in RecentRewards)
+            if (_titleStyle == null)
             {
-                try
+                _titleStyle = new GUIStyle(GUI.skin.label)
                 {
-                    DrawRewardItem(reward);
-                }
-                catch (Exception ex)
-                {
-                    Plugin.Log.LogError($"绘制奖励失败: {reward?.Id} - {ex.Message}");
-                    GUILayout.Label("❌ 显示错误");
-                }
+                    fontSize = 26,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter,
+                };
             }
-            GUILayout.EndVertical();
+            return _titleStyle;
+        }
 
-            GUI.DragWindow();
-            GUI.skin.label.fontSize = originalFontSize;
+        private static GUIStyle _fallbackQuestionStyle;
+        private static GUIStyle GetFallbackQuestionStyle()
+        {
+            if (_fallbackQuestionStyle == null)
+            {
+                _fallbackQuestionStyle = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 28,
+                };
+            }
+            return _fallbackQuestionStyle;
         }
 
         private static void DrawRewardItem(IRandomReward reward)
@@ -101,38 +119,36 @@ namespace SilksongItemRandomizer
             Sprite icon = GetIconForReward(reward);
             if (icon == null) icon = GetDefaultFallbackIcon();
 
-            float iconWidth = 96f;
-            float iconHeight = 96f;
+            const float iconWidth = 96f;
+            const float iconHeight = 96f;
             Rect texCoords = new Rect(0, 0, 1, 1);
-
+            Rect texRect;
             if (icon != null && icon.texture != null)
             {
-                Rect texRect = icon.textureRect;
+                texRect = icon.textureRect;
                 float texW = icon.texture.width;
                 float texH = icon.texture.height;
                 texCoords = new Rect(texRect.x / texW, texRect.y / texH, texRect.width / texW, texRect.height / texH);
-                if (texRect.width > 0 && texRect.height > 0)
-                {
-                    iconHeight = iconWidth * (texRect.height / texRect.width);
-                    if (iconHeight > 180f) iconHeight = 180f;
-                }
             }
 
             Rect iconRect = GUILayoutUtility.GetRect(iconWidth, iconHeight, GUILayout.Width(iconWidth), GUILayout.Height(iconHeight));
             if (icon != null && icon.texture != null)
+            {
+                if (icon.name == "bellbench_toll_machine")
+                    texCoords = new Rect(texCoords.x + texCoords.width, texCoords.y + texCoords.height, -texCoords.width, -texCoords.height);
                 GUI.DrawTextureWithTexCoords(iconRect, icon.texture, texCoords);
+            }
             else
             {
                 GUI.Box(iconRect, "");
-                GUI.Label(iconRect, "?", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 36 });
+                GUI.Label(iconRect, "?", GetFallbackQuestionStyle());
             }
 
             string displayName;
             try { displayName = reward.DisplayName; }
             catch { displayName = reward.Id; }
-            // 文字往后挪一点，去掉前面的圆点
-            GUILayout.Space(15f);
-            GUILayout.Label(displayName, GUILayout.Height(iconHeight));
+            GUILayout.Space(12f);
+            GUILayout.Label(displayName, GetBodyLabelStyle(), GUILayout.Height(iconHeight));
             GUILayout.EndHorizontal();
         }
 
@@ -140,11 +156,23 @@ namespace SilksongItemRandomizer
         {
             try
             {
+                // 类型图标覆盖（lore 触发按对象分类的图标）优先，且不参与按 Id 的缓存
+                if (reward is IconOverrideReward overrideReward)
+                    return overrideReward.Icon;
+
                 if (reward is SavedItemReward saved)
                 {
                     try { return saved.Icon; }
                     catch { return null; }
                 }
+
+                // 奖励自带图标优先（虚拟奖励/权限奖励配置的图标），仅在为空时回退到 displayName 关键字匹配
+                try
+                {
+                    Sprite own = reward.Icon;
+                    if (own != null) return own;
+                }
+                catch (Exception) { }
 
                 if (_iconCache.TryGetValue(reward.Id, out var cached))
                     return cached;

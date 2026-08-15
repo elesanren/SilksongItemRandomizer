@@ -157,7 +157,6 @@ namespace SilksongItemRandomizer
                 {
                     if (Mathf.Abs(pos.x - px) <= tolerance && Mathf.Abs(pos.y - py) <= tolerance)
                     {
-                        Plugin.Log.LogInfo($"[Extracurrencypickup] 坐标 ({pos.x:F2},{pos.y:F2}) 匹配已记录 ({px:F2},{py:F2})，跳过生成");
                         return true;
                     }
                 }
@@ -226,7 +225,6 @@ namespace SilksongItemRandomizer
             if (pbi != null) pbi.enabled = false;
 
             newObj.SetActive(true);
-            Plugin.Log.LogInfo($"[Extracurrencypickup] Spawned pickup at {position}, item {itemId}");
         }
 
         // ========== Harmony 补丁（记录物品获得坐标） ==========
@@ -244,7 +242,6 @@ namespace SilksongItemRandomizer
             if (_saveData.GetPickedPositions().Add(key))
             {
                 _saveData.SavePickedPositions(_saveData.GetPickedPositions());
-                Plugin.Log.LogInfo($"[Extracurrencypickup] 记录物品获得坐标: {key}");
             }
         }
     }

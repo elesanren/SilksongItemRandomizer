@@ -81,6 +81,11 @@ namespace SilksongItemRandomizer
 
                 string originalName = __instance.name;
 
+                // ★ 丝轴/面具碎片类收集物被随机化替换时，标记原生丝轴静默窗口：
+                //   后续被驱动的 Silk Spool UI 动画流程不播动画/不加碎片/不加上限，但正常走完不卡死。
+                if (originalName.IndexOf("Spool", StringComparison.OrdinalIgnoreCase) >= 0)
+                    SilkSpoolState.MarkNativeIntercept(5f);
+
                 // ★ 预生成映射：拾取点（PickupPatch）已设置 PendingKey，命中则直接按表给予，
                 // 不消耗随机池；其余来源（商店/任务等无点 key）仍走动态随机。
                 IRandomReward reward = null;
@@ -89,8 +94,6 @@ namespace SilksongItemRandomizer
                 {
                     PreGeneratedMap.PendingKey = null;
                     reward = PreGeneratedMap.ResolveReward(preKey);
-                    if (reward != null)
-                        Plugin.Log.LogInfo($"[TryGetPatch] 按预生成映射给予 {preKey} -> {reward.DisplayName}");
                 }
 
                 // 获取随机奖励（预生成未命中时回退动态随机）
@@ -115,7 +118,6 @@ namespace SilksongItemRandomizer
                     // 添加到 UI 显示
                     RecentItemsUI.AddItem(reward);
 
-                    Plugin.Log.LogInfo($"[TryGetPatch] 获得: {reward.DisplayName} (已获得次数: {ItemRandomizer.GetGivenCount(reward.Id)})");
                 }
                 catch (Exception ex)
                 {

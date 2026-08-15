@@ -34,6 +34,13 @@ namespace SilksongItemRandomizer
             return sprite;
         }
 
+        /// <summary>返回当前缓存的全部 Sprite 名单（同名已去重），供全量图标搜索使用。</summary>
+        public static IEnumerable<Sprite> GetAll()
+        {
+            EnsureBuilt();
+            return _cache.Values;
+        }
+
         public static void Reset()
         {
             _cache = null;

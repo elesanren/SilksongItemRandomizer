@@ -78,7 +78,6 @@ namespace SilksongItemRandomizer
                         foreach (var anim in t.GetComponents<Animator>()) anim.enabled = false;
                         foreach (var rend in t.GetComponents<Renderer>()) rend.enabled = false;
                         disabledCount++;
-                        Plugin.Log.LogInfo($"  已禁用: {t.gameObject.name}");
                     }
                 }
             }
@@ -91,7 +90,13 @@ namespace SilksongItemRandomizer
             // 总开关关闭 → 直接放行原解锁
             if (!CrestRandomizer.IsEnabled)
             {
-                Plugin.Log.LogInfo($"[CrestRandomizePatch] 纹章随机总开关关闭，放行原纹章: {__instance.name}");
+                return true;
+            }
+
+            // ★ 只在教堂类场景触发纹章随机替换，避免梦境/剧情等场景误触发（如 Hunter 升级链被当作新纹章映射）
+            string activeScene = SceneManager.GetActiveScene().name;
+            if (!activeScene.StartsWith("Chapel", StringComparison.OrdinalIgnoreCase))
+            {
                 return true;
             }
 
@@ -105,7 +110,6 @@ namespace SilksongItemRandomizer
                 string targetName = CrestRandomizer.GetMappedCrestName(sourceName);
                 if (string.IsNullOrEmpty(targetName) || targetName == sourceName)
                 {
-                    Plugin.Log.LogInfo($"纹章 {sourceName} 映射到自身，放行原解锁");
                     return true;
                 }
 

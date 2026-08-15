@@ -66,9 +66,10 @@ namespace SilksongItemRandomizer
         public HashSet<string> ShopAssignedItemIds = new();
         // ===== 来自 StartingAbilityPicker =====
         public Dictionary<int, bool> ProfileCompletionDisplay = new Dictionary<int, bool>();
-        public bool AbilityUpward = false;
-        public bool AbilityLeft = false;
-        public bool AbilityRight = false;
+        public bool AbilityUpward = true;
+        public bool AbilityLeft = true;
+        public bool AbilityRight = true;
+        public bool AttackDirectionsSet = false;
 
         // ===== 来自 SkillTriggerMod =====
         public HashSet<string> SkillTriggerRecords = new HashSet<string>();
@@ -77,6 +78,19 @@ namespace SilksongItemRandomizer
         // 进入游戏后从随机池提前摸出具体奖励并落盘，遇点时直接按表给予。
         // key 格式：拾取点=场景_F2坐标，Lore=场景:对象名，车站=check:bool
         public Dictionary<string, string> PreGeneratedMappings = new();
+
+        // 生成 PreGeneratedMappings 时使用的配置指纹。
+        // 启动时若当前配置（珍贵额度、种子等影响映射的内容）与此不一致，
+        // PreGeneratedMap 会自动失效旧映射并重新生成，保证配置改动自动生效。
+        public string MappingsConfigStamp = "";
+
+        // MossberryRandomizer：捡过苔莓的房间名集合（房间级：捡过后该房间藤蔓不再长苔莓）
+        public HashSet<string> MossberryCollectedRooms = new();
+
+        // 原生碎片/苔莓顺序发放计数器（按获取顺序依次给对应编号的映射奖励）
+        public int HeartSeq = 0; // 已发放面具碎片映射个数（heart:01~20）
+        public int SpoolSeq = 0; // 已发放丝轴碎片映射个数（spool:01~18）
+        public int MossSeq = 0;  // 已发放苔莓映射个数（moss:01~06）
     }
 
     // 仅用于旧数据迁移的内部类

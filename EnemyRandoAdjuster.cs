@@ -31,7 +31,7 @@ namespace SilksongItemRandomizer
         private static FieldInfo _replacementsField;
 
         // 配置属性（可通过 API 设置）
-        private static bool _enabled = true;
+        private static bool _enabled = false;
         public static bool Enabled
         {
             get => _enabled;
@@ -48,8 +48,8 @@ namespace SilksongItemRandomizer
         }
 
         public static bool ScaleRandomEnabled { get; set; } = true;
-        public static float ScaleMin { get; set; } = 0.5f;
-        public static float ScaleMax { get; set; } = 2.0f;
+        public static float ScaleMin { get; set; } = 1.0f;
+        public static float ScaleMax { get; set; } = 1.0f;
 
         static EnemyRandoAdjuster()
         {
@@ -106,12 +106,9 @@ namespace SilksongItemRandomizer
             if (_settingsType == null) return;
             try
             {
-                if (_enemyRandoTypeField != null)
-                    _originalEnemyRandoType = _enemyRandoTypeField.GetValue(null);
-                if (_bossRandoTypeField != null)
-                    _originalBossRandoType = _bossRandoTypeField.GetValue(null);
-                if (_miscRandoTypeField != null)
-                    _originalMiscRandoType = _miscRandoTypeField.GetValue(null);
+                _originalEnemyRandoType = GetFieldRandoValue(_enemyRandoTypeField);
+                _originalBossRandoType = GetFieldRandoValue(_bossRandoTypeField);
+                _originalMiscRandoType = GetFieldRandoValue(_miscRandoTypeField);
             }
             catch (Exception ex)
             {
@@ -119,27 +116,105 @@ namespace SilksongItemRandomizer
             }
         }
 
+        // EnemyRando 的 RandoType 字段可能是裸枚举，也可能是 BepInEx 的 ConfigEntry<T>。
+        // 统一通过 Value 属性读写，避免把枚举直接 SetValue 到 ConfigEntry 字段导致类型转换异常。
+        private static object GetFieldRandoValue(FieldInfo field)
+        {
+            if (field == null) return null;
+            object entry = TryGetFieldEntry(field);
+            return IsConfigEntry(entry) ? field.FieldType.GetProperty("Value")?.GetValue(entry) : entry;
+        }
+
+        private static bool SetFieldRandoValue(FieldInfo field, object value)
+        {
+            if (field == null) return true;
+            Type fieldType = field.FieldType;
+            // 按字段【声明类型】判断是否为 ConfigEntry<T>（不依赖实例值，避免启动早期字段未初始化导致误判）
+            if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition().Name == "ConfigEntry`1")
+            {
+                object entry = TryGetFieldEntry(field);
+                if (entry == null)
+                {
+                    Plugin.Log.LogWarning("[EnemyRandoAdjuster] EnemyRando 配置尚未初始化，跳过本次写入（MarkGameReady 后会重放）");
+                    return false;
+                }
+                fieldType.GetProperty("Value")?.SetValue(entry, value);
+                return true;
+            }
+            else
+            {
+                field.SetValue(null, value);
+                return true;
+            }
+        }
+
+        // 读取 ConfigEntry 实例；为 null 时强制触发 EnemyRando.Settings 静态构造函数后再取一次
+        private static object TryGetFieldEntry(FieldInfo field)
+        {
+            try
+            {
+                object entry = field.GetValue(null);
+                if (entry == null && field.DeclaringType != null)
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(field.DeclaringType.TypeHandle);
+                    entry = field.GetValue(null);
+                }
+                return entry;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[EnemyRandoAdjuster] 读取配置字段失败: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static bool _configApplied;
+        private static bool _pendingEnabled;
+
+        // 启动早期 EnemyRando 尚未初始化时写入会被跳过；MarkGameReady 后调用本方法重放一次
+        public static void ReapplyConfig()
+        {
+            if (_configApplied || !_pendingEnabled) return;
+            SetEnemyRandoConfig(_pendingEnabled);
+        }
+
+        private static bool IsConfigEntry(object value)
+        {
+            return value != null && value.GetType().IsGenericType
+                && value.GetType().GetGenericTypeDefinition().Name == "ConfigEntry`1";
+        }
+
         private static void SetEnemyRandoConfig(bool enabled)
         {
             if (_settingsType == null || _randoTypeEnum == null) return;
+            _pendingEnabled = enabled;
             try
             {
                 object disabledValue = Enum.Parse(_randoTypeEnum, "Disabled");
                 object anyValue = Enum.Parse(_randoTypeEnum, "Any");
 
+                bool applied;
                 if (enabled)
                 {
-                    _enemyRandoTypeField?.SetValue(null, _originalEnemyRandoType ?? anyValue);
-                    _bossRandoTypeField?.SetValue(null, _originalBossRandoType ?? anyValue);
-                    _miscRandoTypeField?.SetValue(null, _originalMiscRandoType ?? anyValue);
+                    applied = SetFieldRandoValue(_enemyRandoTypeField, _originalEnemyRandoType ?? anyValue);
+                    applied &= SetFieldRandoValue(_bossRandoTypeField, _originalBossRandoType ?? anyValue);
+                    applied &= SetFieldRandoValue(_miscRandoTypeField, _originalMiscRandoType ?? anyValue);
                 }
                 else
                 {
-                    _enemyRandoTypeField?.SetValue(null, disabledValue);
-                    _bossRandoTypeField?.SetValue(null, disabledValue);
-                    _miscRandoTypeField?.SetValue(null, disabledValue);
+                    applied = SetFieldRandoValue(_enemyRandoTypeField, disabledValue);
+                    applied &= SetFieldRandoValue(_bossRandoTypeField, disabledValue);
+                    applied &= SetFieldRandoValue(_miscRandoTypeField, disabledValue);
                 }
-                Plugin.Log.LogInfo($"[EnemyRandoAdjuster] 设置随机配置: {(enabled ? "开启" : "关闭")}");
+                if (applied)
+                {
+                    _configApplied = true;
+                    Plugin.Log.LogInfo($"[EnemyRandoAdjuster] 设置随机配置: {(enabled ? "开启" : "关闭")}");
+                }
+                else
+                {
+                    Plugin.Log.LogInfo("[EnemyRandoAdjuster] 配置已排队，等待 EnemyRando 就绪后重放");
+                }
             }
             catch (Exception ex)
             {

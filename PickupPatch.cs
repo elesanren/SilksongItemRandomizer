@@ -120,33 +120,41 @@ namespace SilksongItemRandomizer
         public static void ApplyStateToScene(Scene scene)
         {
             if (!_isEnabled) return;
+            ApplyStateToSceneCore(scene, null);
+        }
+
+        private static HashSet<CollectableItemPickup> ApplyStateToSceneCore(Scene scene, HashSet<CollectableItemPickup> seen)
+        {
             var pickups = Resources.FindObjectsOfTypeAll<CollectableItemPickup>()
                 .Where(p => p.gameObject.scene == scene).ToList();
+            var processed = seen ?? new HashSet<CollectableItemPickup>();
             var pickedKeys = _saveData?.GetPickedPickupKeys() ?? new HashSet<string>();
             foreach (var p in pickups)
             {
+                if (seen != null && !processed.Add(p)) continue;
                 var key = GetPickupKey(p);
                 bool isPicked = pickedKeys.Contains(key);
                 p.gameObject.SetActive(!isPicked);
             }
             Plugin.Log.LogInfo($"应用拾取点状态: 场景 {scene.name}, 共 {pickups.Count} 个点, 已捡 {pickedKeys.Count} 个");
+            return processed;
         }
 
         public static void ApplyStateToSceneWithDelay(Scene scene, float delay = 0.2f)
         {
             if (!_isEnabled) return;
-            ApplyStateToScene(scene);
+            var firstPass = ApplyStateToSceneCore(scene, null);
             if (Plugin.Instance != null)
-                Plugin.Instance.StartCoroutine(DelayedApply(scene, delay));
+                Plugin.Instance.StartCoroutine(DelayedApply(scene, delay, firstPass));
         }
 
-        private static IEnumerator DelayedApply(Scene scene, float delay)
+        private static IEnumerator DelayedApply(Scene scene, float delay, HashSet<CollectableItemPickup> firstPass)
         {
             yield return new WaitForSeconds(delay);
             if (SceneManager.GetActiveScene().name == scene.name)
             {
-                ApplyStateToScene(scene);
-                Plugin.Log.LogInfo("强制重生：延迟应用拾取点状态完成");
+                ApplyStateToSceneCore(scene, firstPass);
+                Plugin.Log.LogInfo("强制重生：延迟增量应用拾取点状态完成");
             }
         }
 
@@ -160,7 +168,6 @@ namespace SilksongItemRandomizer
                 _isDirty = true;
                 SavePickedKeys();
                 pickup.gameObject.SetActive(false);
-                Plugin.Log.LogInfo($"标记点为已捡: {key}");
             }
         }
 
@@ -176,30 +183,6 @@ namespace SilksongItemRandomizer
             Plugin.Log.LogInfo("已捡记录已清空，所有拾取点将重新出现");
             // 注释掉传送回重生点的调用，重置种子世界时不再自动传送
             // WarpToLastBench();
-        }
-
-        /// <summary>
-        /// 单独传送回最后椅子（供外部需要时调用）
-        /// </summary>
-        public static void WarpToLastBench()
-        {
-            try
-            {
-                var pd = PlayerData.instance;
-                if (pd == null) return;
-                var sceneName = pd.respawnScene;
-                if (string.IsNullOrEmpty(sceneName)) return;
-                Plugin.Log.LogInfo($"[Warp] 传送至重生点: {sceneName}");
-                var gm = GameManager.instance;
-                gm.SaveGame(success =>
-                {
-                    if (success) gm.LoadGameFromUI(gm.profileID);
-                });
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.LogError($"传送失败: {ex}");
-            }
         }
 
         // ========== Harmony 补丁 ==========
@@ -246,7 +229,6 @@ namespace SilksongItemRandomizer
                 }
                 if (isArchitectCall)
                 {
-                    Plugin.Log.LogInfo($"[PickupPatch] 检测到 Architect Hook 调用，放行: {__instance.name}");
                     return;  // 放行，不执行随机逻辑
                 }
 

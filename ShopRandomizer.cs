@@ -48,7 +48,6 @@ namespace SilksongItemRandomizer
             _allShopItems = null;
             if (_saveData != null)
                 _saveData.GetAssignedItemIds().Clear();
-            Plugin.Log.LogInfo("商店随机缓存已重置（下次访问时将重新构建物品池）");
         }
 
         public static void ResetAssignedItems()
@@ -86,12 +85,10 @@ namespace SilksongItemRandomizer
             var virtualRewards = GetVirtualRewardsForShop();
             foreach (var reward in virtualRewards)
             {
-                var proxy = new ProxySavedItem();
+                var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
                 proxy.Init(reward);
                 _allShopItems.Add(proxy);
             }
-
-            Plugin.Log.LogInfo($"商店物品池构建完成：原版 {originalItems?.Count ?? 0} 个，虚拟 {virtualRewards.Count} 个，总计 {_allShopItems.Count} 个");
         }
 
         private static List<IRandomReward> GetVirtualRewardsForShop()
@@ -121,17 +118,12 @@ namespace SilksongItemRandomizer
             // 有限购的虚拟奖励
             list.Add(new LimitedVirtualReward("virt:HeartPiece", Locale.Get("面具碎片"), FindSprite("mask_first"), () =>
             {
-                var pd = PlayerData.instance;
-                if (pd != null) pd.heartPieces++;
-                EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
-            }, 2));
+                NativePickupGiver.GiveHeartPiece();
+            }, ItemLimitConfig.LimitHeartPiece));
             list.Add(new LimitedVirtualReward("virt:SpoolPart", Locale.Get("丝轴碎片"), FindSprite("spool_upgrade_pickup"), () =>
             {
-                var pd = PlayerData.instance;
-                if (pd != null) pd.silkSpoolParts++;
-                GameCameras.instance?.silkSpool?.RefreshSilk();
-                EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
-            }, 2));
+                Plugin.Instance?.StartCoroutine(NativePickupGiver.GiveSpoolPart());
+            }, ItemLimitConfig.LimitSpoolPart));
             list.Add(new LimitedVirtualReward("virt:MaxSilkRegenUp", Locale.Get("丝线恢复上限 +1"), FindSprite("prompt_silkheart"),
                 () => HeroController.instance?.AddToMaxSilkRegen(1), 2));
 
@@ -152,11 +144,11 @@ namespace SilksongItemRandomizer
         private static SavedItem GetRandomCoinItem(string permanentId, out int price)
         {
             price = 1;
-            int amount = UnityEngine.Random.Range(50, 301);
+            int amount = ItemRandomizer.Rng.Next(0, 91);
             string displayName = string.Format(Locale.Get("随机念珠"), amount);
             var reward = new VirtualReward($"virt:RandomCoin_{amount}", displayName, FindSprite("coinget_01"),
                 () => HeroController.instance?.AddGeo(amount), () => false);
-            var proxy = new ProxySavedItem();
+            var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
             proxy.Init(reward);
             return proxy;
         }
@@ -168,7 +160,7 @@ namespace SilksongItemRandomizer
             string displayName = string.Format(Locale.Get("随机蓝血"), total);
             var reward = new VirtualReward($"virt:BlueHealth_{total}", displayName, FindSprite("Icon_Inv_Blue_Health_Blood"),
                 () => Plugin.Instance?.StartCoroutine(GiveBlueHealthOverTime(total)), () => false);
-            var proxy = new ProxySavedItem();
+            var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
             proxy.Init(reward);
             return proxy;
         }
@@ -179,23 +171,18 @@ namespace SilksongItemRandomizer
             var capTypes = new List<(string id, string name, Sprite icon, Action giveAction)>
             {
                 ("virt:HeartPiece", Locale.Get("面具碎片"), FindSprite("mask_first"), () => {
-                    var pd = PlayerData.instance;
-                    if (pd != null) pd.heartPieces++;
-                    EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
+                    NativePickupGiver.GiveHeartPiece();
                 }),
                 ("virt:SpoolPart", Locale.Get("丝轴碎片"), FindSprite("spool_upgrade_pickup"), () => {
-                    var pd = PlayerData.instance;
-                    if (pd != null) pd.silkSpoolParts++;
-                    GameCameras.instance?.silkSpool?.RefreshSilk();
-                    EventRegister.SendEvent(EventRegisterEvents.EquipsChangedEvent, null);
+                    Plugin.Instance?.StartCoroutine(NativePickupGiver.GiveSpoolPart());
                 }),
                 ("virt:MaxSilkRegenUp", Locale.Get("丝线恢复上限 +1"), FindSprite("prompt_silkheart"), () => {
                     HeroController.instance?.AddToMaxSilkRegen(1);
                 })
             };
             var selected = capTypes[UnityEngine.Random.Range(0, capTypes.Count)];
-            var reward = new LimitedVirtualReward(selected.id, selected.name, selected.icon, selected.giveAction, 2);
-            var proxy = new ProxySavedItem();
+            var reward = new LimitedVirtualReward(selected.id, selected.name, selected.icon, selected.giveAction, selected.id == "virt:HeartPiece" ? ItemLimitConfig.LimitHeartPiece : selected.id == "virt:SpoolPart" ? ItemLimitConfig.LimitSpoolPart : 2);
+            var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
             proxy.Init(reward);
             return proxy;
         }
@@ -238,7 +225,7 @@ namespace SilksongItemRandomizer
                     price = GenerateRandomPrice(rng);
                 }
 
-                var proxy = new ProxySavedItem();
+                var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
                 proxy.Init(preReward);
                 _shopItemCache[permanentId] = proxy;
                 _shopPriceCache[permanentId] = price;
@@ -252,11 +239,11 @@ namespace SilksongItemRandomizer
                 "virt:FallbackCoin",
                 Locale.Get("随机货币"),
                 FindSprite("coinget_01"),
-                () => HeroController.instance?.AddGeo(UnityEngine.Random.Range(1, 6)),
+                () => HeroController.instance?.AddGeo(ItemRandomizer.Rng.Next(1, 6)),
                 () => false
             );
             price = 1;
-            var fallbackProxy = new ProxySavedItem();
+            var fallbackProxy = ScriptableObject.CreateInstance<ProxySavedItem>();
             fallbackProxy.Init(fallbackReward);
             _shopItemCache[permanentId] = fallbackProxy;
             _shopPriceCache[permanentId] = price;
@@ -285,7 +272,7 @@ namespace SilksongItemRandomizer
                 price = 10;
                 var fallbackReward = new VirtualReward("virt:FallbackGeo", Locale.Get("保底念珠"), FindSprite("coinget_01"),
                     () => HeroController.instance?.AddGeo(10), () => false);
-                var proxy = new ProxySavedItem();
+                var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
                 proxy.Init(fallbackReward);
                 return proxy;
             }
@@ -328,19 +315,6 @@ namespace SilksongItemRandomizer
         private static int GenerateRandomPrice(Random rng)
         {
             return rng.Next(2) == 0 ? rng.Next(1, 100) : rng.Next(100, 301);
-        }
-
-        // ========== 内部辅助类（只保留 ProxySavedItem，其他已在 RewardTypes 中定义）==========
-        private class ProxySavedItem : SavedItem
-        {
-            private IRandomReward _reward;
-            public void Init(IRandomReward reward) { _reward = reward; name = _reward.Id; }
-            public override string GetPopupName() => _reward.DisplayName;
-            public override Sprite GetPopupIcon() => _reward.Icon;
-            public override void Get(bool showPopup = true) => _reward.Give();
-            public override bool CanGetMore() => !_reward.IsAtMax();
-            public override int GetSavedAmount() => 0;
-            public override bool IsUnique => false;
         }
     }
 }

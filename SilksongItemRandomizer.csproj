@@ -71,6 +71,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\TeamCherry.Localization.dll</HintPath>
     </Reference>
+    <Reference Include="TeamCherry.SharedUtils">
+      <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\TeamCherry.SharedUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Addressables">
       <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\Unity.Addressables.dll</HintPath>
     </Reference>
@@ -133,17 +136,19 @@
     <Compile Include="CurrencyCollectPatch.cs" />
     <Compile Include="EnemyRandoAdjuster.cs" />
     <Compile Include="Extracurrencypickup.cs" />
+    <Compile Include="FsmMasterGuard.cs" />
     <Compile Include="GlobalSaveData.cs" />
     <Compile Include="HeroRespawnReset.cs" />
     <Compile Include="HotkeyHandler.cs" />
+    <Compile Include="InspectPermitRewards.cs" />
     <Compile Include="ItemLimitConfig.cs" />
     <Compile Include="ItemLocalizationRegistrar.cs" />
     <Compile Include="ItemRandomizer.cs" />
     <Compile Include="LoreRandomizer.cs" />
-    <Compile Include="LoreTriggerPatch.cs" />
     <Compile Include="MapperPermanentPatch.cs" />
     <Compile Include="MapStationRewards.cs" />
-    <Compile Include="MapStationUnlockPatch.cs" />
+    <Compile Include="MossberryRandomizer.cs" />
+    <Compile Include="NativePickupGiver.cs" />
     <Compile Include="ItemTypeRandomFilter.cs" />
     <Compile Include="PickupPatch.cs" />
     <Compile Include="Plugin.cs" />
@@ -157,6 +162,7 @@
     <Compile Include="ShopRandomizer.cs" />
     <Compile Include="SilkRandomizerPatch.cs" />
     <Compile Include="SilksongItemRandomizerAPI.cs" />
+    <Compile Include="SilkSpoolPartsPatch.cs" />
     <Compile Include="SpriteCache.cs" />
     <Compile Include="SilkSpearPityPatch.cs" />
     <Compile Include="ToolEffectRandomizer.cs" />

@@ -29,6 +29,7 @@ public class TrapMover : MonoBehaviour
 
     private float _currentSpeed;
     private int _cycleCount;
+    private int _speedTick;
     private Vector2 _startPos;
     private Vector2 _leftEdge, _rightEdge;
     private int _moveDir = 1;
@@ -104,6 +105,8 @@ public class TrapMover : MonoBehaviour
 
     private void UpdateSpeed()
     {
+        _speedTick++;
+        if ((_speedTick & 31) != 0 && _currentSpeed > 0f) return; // 每 32 帧刷新一次随机速度，避免每帧 Random 分配（_currentSpeed=0 时为首帧初始化，必须执行）
         _currentSpeed = personality switch
         {
             TrapPersonality.Friendly => baseSpeed * (0.15f + UnityEngine.Random.value * 0.1f),
