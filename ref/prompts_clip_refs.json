@@ -1,0 +1,638 @@
+{
+ "Hunter_Crest_Evolve": {
+  "bindings": 11,
+  "pptrTotal": 5,
+  "pptrCurves": [
+   {
+    "path": 1567512304,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -7471279579151897185
+   },
+   {
+    "path": 1477731544,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -737384274731395297
+   },
+   {
+    "path": 2994568784,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": 2966511913761457738
+   },
+   {
+    "path": 2573718708,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3424062666172188234
+   },
+   {
+    "path": 3053519580,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3424062666172188234
+   }
+  ]
+ },
+ "Hunter_Crest_Evolve Final": {
+  "bindings": 11,
+  "pptrTotal": 5,
+  "pptrCurves": [
+   {
+    "path": 1567512304,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -737384274731395297
+   },
+   {
+    "path": 1477731544,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -6229887259083766488
+   },
+   {
+    "path": 2994568784,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3424062666172188234
+   },
+   {
+    "path": 2573718708,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -2684368238300797385
+   },
+   {
+    "path": 3053519580,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3424062666172188234
+   }
+  ]
+ },
+ "Ancestral_Art_Get_UI Disappear": {
+  "bindings": 26,
+  "pptrTotal": 15,
+  "pptrCurves": [
+   {
+    "path": 610654245,
+    "attr": 1,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 5824294326689876405
+   },
+   {
+    "path": 516962186,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -3220647172990275446
+   },
+   {
+    "path": 610654245,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1566195041948307804
+   },
+   {
+    "path": 1394747402,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1310270120602481159
+   },
+   {
+    "path": 2449632601,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -6212677804145564690
+   },
+   {
+    "path": 900684996,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 654228374973848999
+   },
+   {
+    "path": 308506294,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 2643195512,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 6,
+    "pathID": 2471273968648047063
+   },
+   {
+    "path": 1303661865,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 6,
+    "pathID": -770739541700005618
+   },
+   {
+    "path": 893699105,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 6,
+    "pathID": -181042469565139178
+   },
+   {
+    "path": 320544807,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 6,
+    "pathID": -4372316255857371243
+   },
+   {
+    "path": 2515227,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 6,
+    "pathID": -105429393239796454
+   },
+   {
+    "path": 2941256238,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 22,
+    "pathID": 6108775244244932448
+   },
+   {
+    "path": 3478282366,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 22,
+    "pathID": -8258269276548754798
+   },
+   {
+    "path": 2517212586,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 22,
+    "pathID": -996159737611526544
+   }
+  ]
+ },
+ "Tool_Socket_Evolve_lvl2": {
+  "bindings": 29,
+  "pptrTotal": 12,
+  "pptrCurves": [
+   {
+    "path": 2041014207,
+    "attr": 1,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 5861291369773483387
+   },
+   {
+    "path": 2321535777,
+    "attr": 1,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 8130865527090629518
+   },
+   {
+    "path": 1567512304,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": -8097027654562317897
+   },
+   {
+    "path": 1477731544,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": -9037047991664946921
+   },
+   {
+    "path": 1477731544,
+    "attr": 2883525743,
+    "typeID": 198,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 2994568784,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 8694583291475902578
+   },
+   {
+    "path": 2573718708,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 3053519580,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 10,
+    "pathID": -489125952317282630
+   },
+   {
+    "path": 3956173811,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 10,
+    "pathID": -489125952317282630
+   },
+   {
+    "path": 2573718708,
+    "attr": 4197328169,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 10,
+    "pathID": 3749194059102487801
+   },
+   {
+    "path": 2573718708,
+    "attr": 2368279999,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 8694583291475902578
+   },
+   {
+    "path": 2041014207,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 4502267684585774897
+   }
+  ]
+ },
+ "Tool Tutorial Msg Hide": {
+  "bindings": 5,
+  "pptrTotal": 0,
+  "pptrCurves": []
+ },
+ "Tool_Socket_Evolve": {
+  "bindings": 21,
+  "pptrTotal": 8,
+  "pptrCurves": [
+   {
+    "path": 1567512304,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": -8590325209985059858
+   },
+   {
+    "path": 3956173811,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 5861291369773483387
+   },
+   {
+    "path": 1477731544,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 1477731544,
+    "attr": 2883525743,
+    "typeID": 198,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": -8097027654562317897
+   },
+   {
+    "path": 2994568784,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 2573718708,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 10,
+    "pathID": -489125952317282630
+   },
+   {
+    "path": 3053519580,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 0
+   },
+   {
+    "path": 3956173811,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 0,
+    "pathID": 8694583291475902578
+   }
+  ]
+ },
+ "Tool Tutorial Msg Fade Up": {
+  "bindings": 5,
+  "pptrTotal": 0,
+  "pptrCurves": []
+ },
+ "Tool Tutorial Msg Show": {
+  "bindings": 10,
+  "pptrTotal": 4,
+  "pptrCurves": [
+   {
+    "path": 270069109,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 20,
+    "pathID": 8393976977370781385
+   },
+   {
+    "path": 3050877469,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 20,
+    "pathID": 3900504189494183949
+   },
+   {
+    "path": 4177333597,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 20,
+    "pathID": -4677325047557810755
+   },
+   {
+    "path": 1238688301,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 20,
+    "pathID": 4400760341038150162
+   }
+  ]
+ },
+ "Ancestral_Art_Ancestor_Get_Appear": {
+  "bindings": 21,
+  "pptrTotal": 7,
+  "pptrCurves": [
+   {
+    "path": 610654245,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 654228374973848999
+   },
+   {
+    "path": 3461803453,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 654228374973848999
+   },
+   {
+    "path": 308506294,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -6212677804145564690
+   },
+   {
+    "path": 2515227,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1310270120602481159
+   },
+   {
+    "path": 4155638949,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1566195041948307804
+   },
+   {
+    "path": 1798237003,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -3220647172990275446
+   },
+   {
+    "path": 2941256238,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 5824294326689876405
+   }
+  ]
+ },
+ "Ancestral_Art_Ancestor_Get_Disappear": {
+  "bindings": 18,
+  "pptrTotal": 1,
+  "pptrCurves": [
+   {
+    "path": 610654245,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 5824294326689876405
+   }
+  ]
+ },
+ "Ancestral_Art_Get_UI Disappear NoEquip": {
+  "bindings": 21,
+  "pptrTotal": 1,
+  "pptrCurves": [
+   {
+    "path": 610654245,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 5824294326689876405
+   }
+  ]
+ },
+ "Ancestral_Art_Get_UI Appear": {
+  "bindings": 23,
+  "pptrTotal": 7,
+  "pptrCurves": [
+   {
+    "path": 610654245,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 654228374973848999
+   },
+   {
+    "path": 308506294,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 654228374973848999
+   },
+   {
+    "path": 2515227,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -6212677804145564690
+   },
+   {
+    "path": 4155638949,
+    "attr": 304273561,
+    "typeID": 212,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1310270120602481159
+   },
+   {
+    "path": 1798237003,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 1566195041948307804
+   },
+   {
+    "path": 2941256238,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": -3220647172990275446
+   },
+   {
+    "path": 3478282366,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 19,
+    "pathID": 5824294326689876405
+   }
+  ]
+ },
+ "Cursed_Crest_Evolve": {
+  "bindings": 15,
+  "pptrTotal": 5,
+  "pptrCurves": [
+   {
+    "path": 1567512304,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3428469410531320841
+   },
+   {
+    "path": 3053519580,
+    "attr": 3,
+    "typeID": 4,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": 1002361946889247535
+   },
+   {
+    "path": 1477731544,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": 5947826686750804895
+   },
+   {
+    "path": 2994568784,
+    "attr": 2086281974,
+    "typeID": 1,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": 3442660082393921282
+   },
+   {
+    "path": 2573718708,
+    "attr": 3504355690,
+    "typeID": 114,
+    "isPPtrCurve": 0,
+    "fileID": 13,
+    "pathID": -3424062666172188234
+   }
+  ]
+ }
+}

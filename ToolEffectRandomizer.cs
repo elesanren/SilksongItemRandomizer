@@ -183,7 +183,7 @@ namespace SilksongItemRandomizer
                 string fieldName = kv.Key;
                 var field = kv.Value;
                 if (!_originalHeroValues.TryGetValue(fieldName, out float original)) continue;
-                if (!mults.TryGetValue(fieldName, out float mult)) continue;
+                if (!mults.TryGetValue(fieldName, out var mult)) continue;
 
                 float newValue = original * mult;
                 if (fieldName.Contains("Cooldown") || fieldName.Contains("Time"))

@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using static SilksongItemRandomizer.BenchRespawnPatch;
-using static SilksongItemRandomizer.CrestRandomizePatch;
 using static SilksongItemRandomizer.CurrencyCollectPatch;
 using static SilksongItemRandomizer.Extracurrencypickup;
 using static SilksongItemRandomizer.PickupPatch;
@@ -32,7 +30,7 @@ namespace SilksongItemRandomizer
         public bool RelicRandomEnabled = true;
         public int CurrencyFirstThreshold = 30;
         public int CurrencySecondThreshold = 1000;
-        public int SilkSpearPityCount = 10;
+        public int SilkSpearPityCount = 5;
         public float VirtualUnlimitedProbability = 0.1f;
         public float CrestUnlockerProbability = 0.1f;
         public float NormalLimitedProbability = 0.8f;
@@ -201,6 +199,7 @@ namespace SilksongItemRandomizer
                 SpoolPart = ItemLimitConfig.LimitSpoolPart,
                 MaxSilkRegenUp = ItemLimitConfig.LimitMaxSilkRegenUp,
                 UnlockCrestSlot = ItemLimitConfig.LimitUnlockCrestSlot,
+                SimpleKey = ItemLimitConfig.LimitSimpleKey,
             };
         }
 
@@ -220,7 +219,6 @@ namespace SilksongItemRandomizer
             // ★ 存档已重建，预生成表清空：重新从随机池摸全部检查点奖励
             PreGeneratedMap.Initialize();
 
-            CrestRandomizePatch.ResetProcessedIds();
             CurrencyCollectPatch.ResetCounters();
             SilkSpearPityPatch.ResetSilkSpearState();
             PickupPatch.ResetAll();
@@ -228,7 +226,6 @@ namespace SilksongItemRandomizer
             Extracurrencypickup.ResetAll();
             ShopMenuStock_BuildItemList_Patch.ResetAllCounts();
             TrapRandomizer.ClearAll();
-            BenchRespawnPatch.ResetCooldown();
         }
 
         // ========== 内部实现 ==========
@@ -303,6 +300,10 @@ namespace SilksongItemRandomizer
             ToolEffectRandomizer.SetEnabled(_cachedConfig.CrestEnabled);
             ShopRandomizer.ResetCache();
 
+            // 能力门控随物品随机化总开关启停（回血/二段跳/抗寒/游泳；与 SAP 全随机模式解耦）
+            StartingAbilityPicker.StartingAbilityPickerAPI.SetAbilityGates(
+                _cachedConfig.Enabled, _cachedConfig.Enabled, _cachedConfig.Enabled, _cachedConfig.Enabled);
+
             if (_cachedConfig.Enabled && !_harmonyPatched)
             {
                 ApplyHarmonyPatches();
@@ -357,7 +358,9 @@ namespace SilksongItemRandomizer
             typeof(PickupPatch),
             typeof(CurrencyCollectPatch),
             typeof(TryGetPatch),
-            typeof(CrestRandomizePatch),
+            typeof(ChurchRandomizePatch),
+            typeof(ChurchGateCheckPatch),
+            typeof(SkillRegionRandomizePatch),
             typeof(ShopOwnerBase_SpawnUpdateShop_Patch),
             typeof(ShopMenuStock_BuildItemList_Patch),
             typeof(ShopItemStats_Purchase_Patch),
@@ -380,12 +383,18 @@ namespace SilksongItemRandomizer
             typeof(iTweenMoveTo_OnEnter_Patch),
             typeof(iTweenScaleTo_OnEnter_Patch),
             typeof(AudioPlayerOneShotSingle_OnEnter_Patch),
+            typeof(SetGravity2dScale_OnEnter_Patch),
+            typeof(SetGravity2dScaleV2_OnEnter_Patch),
             typeof(PlayParticleEmitter_OnEnter_Patch),
             typeof(StopParticleEmitter_OnEnter_Patch),
+            typeof(PlayerDataVariableTest_OnEnter_Patch),
+            typeof(SendEventToRegister_OnEnter_Patch),
+            typeof(SendEventByName_OnEnter_Patch),
             typeof(HeroController_AddToMaxSilk_Patch),
             typeof(HeroController_AddToMaxHealth_Patch),
+            typeof(AddHeroInputBlocker_OnEnter_Patch),
+            typeof(CheckIsCharacterGrounded_OnEnter_Patch),
             typeof(MossberryRandomizer.CollectableItem_Collect_Patch),
-            typeof(BenchRespawnPatch),
             typeof(SilkRandomizerPatch),
             typeof(LoreTriggerPatch),
             typeof(MapStationUnlockPatch),
@@ -444,10 +453,8 @@ namespace SilksongItemRandomizer
 
             // 按类注册持久化数据访问器
             PickupPatch.Initialize(new PluginSaveDataAccessor());
-            CrestRandomizePatch.Initialize(new PluginSaveDataAccessor());
             ShopMenuStock_BuildItemList_Patch.Initialize(new PluginSaveDataAccessor());
             SilkSpearPityPatch.Initialize(new PluginSaveDataAccessor());
-            BenchRespawnPatch.Initialize(new PluginSaveDataAccessor());
             Extracurrencypickup.Initialize(new PluginSaveDataAccessor());
 
             try { EnemyRandoAdjuster.TryPatch(_harmony); }
@@ -489,7 +496,7 @@ namespace SilksongItemRandomizer
         // ========== 内部数据访问适配器 ==========
         public class PluginSaveDataAccessor : ISaveDataAccessor, IShopSaveDataAccessor, ICurrencySaveDataAccessor,
             ISilkSpearSaveDataAccessor, ICrestSaveDataAccessor, IPickupSaveDataAccessor, IExtraPickupSaveDataAccessor,
-            IBenchRespawnSaveDataAccessor, ICrestPatchSaveDataAccessor, IToolEffectSaveDataAccessor,
+            IToolEffectSaveDataAccessor,
             ShopMenuStock_BuildItemList_Patch.IShopSlotCountAccessor
         {
             public Dictionary<string, int> GetItemGivenCounts() => Plugin.SaveData.ItemGivenCounts;
@@ -532,9 +539,6 @@ namespace SilksongItemRandomizer
             public void SavePickedPositions(HashSet<string> positions) { Plugin.SaveData.PickedPositions = positions; Plugin.SaveGlobalData(); }
 
             public string GetLastUnlockedCrestForRespawn() => Plugin.SaveData.LastUnlockedCrest;
-
-            public HashSet<string> GetDisabledChapels() => Plugin.SaveData.DisabledChapels;
-            public void SaveDisabledChapels(HashSet<string> disabledChapels) { Plugin.SaveData.DisabledChapels = disabledChapels; Plugin.SaveGlobalData(); }
 
             public Dictionary<string, Dictionary<string, float>> GetCrestEffects() => Plugin.SaveData.CrestEffects;
             public void SaveCrestEffects(Dictionary<string, Dictionary<string, float>> effects) { Plugin.SaveData.CrestEffects = effects; Plugin.SaveGlobalData(); }

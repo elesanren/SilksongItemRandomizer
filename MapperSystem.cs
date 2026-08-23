@@ -1,5 +1,8 @@
 using HarmonyLib;
+using System.Reflection;
+using System;
 using UnityEngine;
+
 
 namespace SilksongItemRandomizer
 {
@@ -21,6 +24,26 @@ namespace SilksongItemRandomizer
     /// </summary>
     public static class MapperPermanentPatch
     {
+        /// <summary>缓存过滤后的 MapperLeft*/SeenMapper* 字段列表（一次性反射，避免每次场景进出全量扫描）。</summary>
+        private static readonly FieldInfo[] CachedMapperFields = BuildMapperFields();
+
+        private static FieldInfo[] BuildMapperFields()
+        {
+            try
+            {
+                var fields = typeof(PlayerData).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                var list = new System.Collections.Generic.List<FieldInfo>(fields.Length);
+                foreach (var fi in fields)
+                {
+                    if (fi.FieldType != typeof(bool)) continue;
+                    if (!(fi.Name.StartsWith("MapperLeft") || fi.Name.StartsWith("SeenMapper"))) continue;
+                    list.Add(fi);
+                }
+                return list.ToArray();
+            }
+            catch { return Array.Empty<FieldInfo>(); }
+        }
+
         /// <summary>一次性兜底重置：清存档残留的离开/暂离标记（不打断任何流程）。</summary>
         public static void ForceResetMapperFields()
         {
@@ -29,12 +52,14 @@ namespace SilksongItemRandomizer
 
             try { pd.mapperAway = false; } catch { }
 
-            var fields = typeof(PlayerData).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            foreach (var fi in fields)
+            foreach (var fi in CachedMapperFields)
             {
-                if (fi.FieldType != typeof(bool)) continue;
-                if (!(fi.Name.StartsWith("MapperLeft") || fi.Name.StartsWith("SeenMapper"))) continue;
-                try { fi.SetValue(pd, false); } catch { }
+                try
+                {
+                    if ((bool)fi.GetValue(pd))
+                        fi.SetValue(pd, false);
+                }
+                catch { }
             }
         }
 
@@ -116,6 +141,51 @@ namespace SilksongItemRandomizer
             }
             catch { }
             return true;
+        }
+    }
+}
+
+
+namespace SilksongItemRandomizer
+{
+    /// <summary>
+    /// 沙克拉商人（Mapper）商店单例辅助。
+    /// 商人常驻由 MapperPermanentPatch 负责（Postfix 拉回 mapperAway/MapperLeft* 并拦截场景隐藏组件），
+    /// 本类只保留商店单例重建能力（供 HotkeyHandler 调试使用）。
+    /// </summary>
+    public static class ShakraMerchantKeeper
+    {
+        private static bool _reflectionReady;
+        private static FieldInfo _spawnedShopField;
+
+        private static void InitReflection()
+        {
+            if (_reflectionReady) return;
+            _reflectionReady = true;
+            try
+            {
+                var t = typeof(ShopOwnerBase);
+                _spawnedShopField = t.GetField("_spawnedShop", BindingFlags.Static | BindingFlags.NonPublic);
+            }
+            catch { }
+        }
+
+        /// <summary>重置 ShopOwnerBase._spawnedShop 静态单例：销毁残留商店 UI 并置 null，强制当前商人生成自己的商店。</summary>
+        public static void ResetSpawnedShopSingleton()
+        {
+            InitReflection();
+            if (_spawnedShopField == null) return;
+            try
+            {
+                var existing = _spawnedShopField.GetValue(null) as UnityEngine.Object;
+                if (existing != null)
+                    UnityEngine.Object.DestroyImmediate(existing);
+                _spawnedShopField.SetValue(null, null);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[Shakra] 重置 _spawnedShop 失败: {ex.Message}");
+            }
         }
     }
 }

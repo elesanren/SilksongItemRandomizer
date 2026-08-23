@@ -267,7 +267,7 @@ namespace SilksongItemRandomizer
                     if (replaced != null)
                         UnityEngine.Object.Destroy(replaced);
                 }
-                Plugin.Log.LogInfo($"[EnemyRandoAdjuster] Disabled, restored {source.name} hp to {hp}");
+                // 每个敌人生成都会走到这里，不打日志（避免刷屏与字符串分配）
                 return false;
             }
             return true;

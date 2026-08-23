@@ -13,8 +13,8 @@ namespace SilksongItemRandomizer
         public HashSet<string> UnlockedCrests = new();
         public string LastUnlockedCrest = "";
 
-        // CrestRandomizePatch
-        public HashSet<string> DisabledChapels = new();
+        // ChurchRandomizePatch：已完成平替（随机奖励已触发）的教堂纹章，用于门场景关门判定
+        public HashSet<string> ChapelRandomizedCrests = new();
 
         // Extracurrencypickup
         public HashSet<string> PickedPositions = new();
@@ -51,7 +51,7 @@ namespace SilksongItemRandomizer
         public int SilkSpearTryGetCount = 0;
         public bool SilkSpearGiven = false;
         // 新增：丝矛保底触发次数配置
-        public int SilkSpearPityCount = 10;
+        public int SilkSpearPityCount = 5;
 
         // TrapRandomizer
         public bool TrapEnabled = false;
@@ -86,6 +86,10 @@ namespace SilksongItemRandomizer
 
         // MossberryRandomizer：捡过苔莓的房间名集合（房间级：捡过后该房间藤蔓不再长苔莓）
         public HashSet<string> MossberryCollectedRooms = new();
+
+        // SkillRegionRandomizePatch：已完成技能地区平替（随机奖励已触发）的场景名集合，
+        // 已平替区域持久化标记，跨会话永久不再触发（只走原生演出收尾）。
+        public HashSet<string> SkillRandomizedRegions = new();
 
         // 原生碎片/苔莓顺序发放计数器（按获取顺序依次给对应编号的映射奖励）
         public int HeartSeq = 0; // 已发放面具碎片映射个数（heart:01~20）

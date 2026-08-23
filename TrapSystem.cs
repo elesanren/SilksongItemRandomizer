@@ -1,9 +1,10 @@
-using System;
+using Random = System.Random;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System;
 using UnityEngine;
-using Random = System.Random;
+
 
 namespace SilksongItemRandomizer
 {
@@ -307,6 +308,28 @@ namespace SilksongItemRandomizer
             foreach (var t in ActiveTraps)
                 if (t) UnityEngine.Object.Destroy(t);
             ActiveTraps.Clear();
+            CleanupArchitectDict();
+        }
+
+        // 本 mod 经 ArchitectSpawn 写入 PlacementManager.Objects 的 pid 记录，
+        // ClearAll 销毁对象后同步移除，避免字典滞留已销毁对象的引用（无界增长）。
+        private static readonly System.Collections.Generic.List<string> _spawnedArchitectPids = new System.Collections.Generic.List<string>();
+
+        private static void CleanupArchitectDict()
+        {
+            if (_spawnedArchitectPids.Count == 0) return;
+            try
+            {
+                var pmType = Type.GetType("Architect.Placements.PlacementManager, Architect");
+                var objDict = pmType?.GetField("Objects", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) as System.Collections.IDictionary;
+                if (objDict != null)
+                {
+                    foreach (var pid in _spawnedArchitectPids)
+                        objDict.Remove(pid);
+                }
+            }
+            catch { }
+            _spawnedArchitectPids.Clear();
         }
 
         public static void ClearAndRescan()
@@ -714,7 +737,11 @@ namespace SilksongItemRandomizer
                     var pmType = Type.GetType("Architect.Placements.PlacementManager, Architect");
                     var objDict = pmType?.GetField("Objects", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) as System.Collections.IDictionary;
                     var pid = placementType.GetProperty("ID")?.GetValue(placement) as string;
-                    if (objDict != null && pid != null) objDict[pid] = obj;
+                    if (objDict != null && pid != null)
+                    {
+                        objDict[pid] = obj;
+                        _spawnedArchitectPids.Add(pid);
+                    }
                     ActiveTraps.Add(obj);
 
                     if (obj != null && _movementEnabled)
@@ -799,4 +826,731 @@ namespace SilksongItemRandomizer
             }
         }
     }
+}
+
+// TrapPreloader.cs
+
+namespace SilksongItemRandomizer
+{
+
+public static class TrapPreloader
+{
+    public enum TrapDifficulty { Beginner, Focused, Overflow }
+
+    // 完整陷阱池
+    public static readonly List<string> TrapPool = new()
+    {
+        "fan_hazard", "spike_cog_1", "spike_cog_2", "spike_cog_3", "spike_cog_4", "spike_cog_5",
+        "hot_coal", "lava_area", "falling_lava", "bone_boulder",
+        "hunter_landmine", "pilgrim_trap_spike", "wisp_flame_lantern",
+        "falling_bell", "shellwood_thorns",
+        "coral_lightning_rock", "coral_lightning_orb", "voltgrass",
+        "coral_crust_s", "coral_crust_m", "coral_crust_l",
+        "coral_spike", "coral_spike_fall", "stomp_spire",
+        "rubble_field", "steam_vent", "junk_pipe",
+        "slab_trap", "slab_spike_ball", "slab_prob_blade", "hunter_sickle_trap",
+        "bilewater_trap", "falling_spike_ball", "swing_trap_small", "swing_trap_spike",
+        "dust_trap_spike_plate", "dust_trap_spike_dropper", "mite_trap",
+        "organ_spikes", "cradle_spikes",
+        "brown_vines", "abyss_tendrils", "void_wave",
+        "mill_trap", "craw_chain",
+        "frost_marker", "white_thorns", "jelly_egg", "wp_trap_spikes"
+    };
+
+    // 场景黑名单
+    public static readonly HashSet<string> ExcludedScenes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Belltown_04",
+        "Bellshrine", "Bellshrine_02", "Bellshrine_03", "Bellshrine_05",
+        "Bone_East_Umbrella",
+        "Room_Pinstress",
+    };
+
+    public static readonly HashSet<string> NoLavaScenes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Hang_01", "Hang_02", "Hang_10"
+    };
+
+    public static readonly HashSet<string> LargeRooms = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Song_20", "Arborium_01", "Cog_04", "Song_11", "Song_05", "Song_01", "Coral_35b"
+    };
+
+    // 特殊陷阱集
+    public static readonly HashSet<string> LargeTraps = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "fan_hazard", "steam_vent", "mill_trap",
+        "spike_cog_2", "spike_cog_3", "spike_cog_1", "spike_cog_4", "spike_cog_5", "voltgrass",
+        "junk_pipe"
+    };
+
+    public static List<string> TrapPoolNoLava => TrapPool.Where(t => t != LavaTrapId).ToList();
+
+    public static readonly HashSet<string> ThornTraps = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "brown_vines", "shellwood_thorns", "white_thorns"
+    };
+
+    // 小平台（不缩放）
+    public static readonly HashSet<string> SmallPlatforms = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "small_grey_coral_plat",
+        "small_red_coral_plat",
+        "shell_small"
+    };
+
+    public static readonly HashSet<string> LoweredSpikeTraps = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "pilgrim_trap_spike", "organ_spikes", "cradle_spikes"
+    };
+
+    public static readonly HashSet<string> HammerTraps = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "slab_spike_ball"
+    };
+
+    // 常量
+    public const string LavaTrapId = "lava_area";
+    public const string FallingLavaId = "falling_lava";
+    public const float MinDistance = 8f;
+    public const float PickupSafeRadius = 5f;
+    public const float DoorSafeRadius = 7f;
+    public const int LargeTrapRadius = 5;
+    public const float LargeTrapYOffset = 1.5f;
+    public const int ThornTrapMinWidth = 4;
+    public const float SpikeYOffset = 1.8f;
+    public const int HammerTrapMinHeight = 7;
+    public const float WallPointMatchDistance = 1f;
+    public const float DarkThunderChainDistance = 4f;
+    public const int MaxDarkThunderCount = 4;
+
+    // 陷阱元数据
+    public static readonly Dictionary<string, TrapMeta> TrapMetaDict = new()
+    {
+        // 无特殊配置的陷阱
+        ["fan_hazard"] = new(),
+        ["spike_cog_1"] = new(),
+        ["spike_cog_2"] = new(),
+        ["spike_cog_3"] = new(),
+        ["spike_cog_4"] = new(),
+        ["spike_cog_5"] = new(),
+        ["hot_coal"] = new(),
+        ["lava_area"] = new(),
+        ["falling_lava"] = new(),
+        ["voltgrass"] = new(),
+        ["steam_vent"] = new(),
+        ["slab_trap"] = new(),
+        ["slab_prob_blade"] = new(),
+        ["slab_spike_ball"] = new(),
+        ["dust_trap_spike_plate"] = new(),
+        ["dust_trap_spike_dropper"] = new(),
+        ["mite_trap"] = new(),
+        ["organ_spikes"] = new(),
+        ["cradle_spikes"] = new(),
+        ["mill_trap"] = new(),
+        ["coral_lightning_rock"] = new(),
+        ["coral_crust_s"] = new(),
+        ["coral_crust_m"] = new(),
+        ["coral_crust_l"] = new(),
+        ["abyss_tendrils"] = new(),
+        ["bone_boulder"] = new(),
+        ["void_wave"] = new(),
+        ["coral_lightning_orb"] = new(),
+
+        // 有配置的陷阱
+        ["wisp_flame_lantern"] = new(new() { ["breakable_on"] = "True" }),
+        ["falling_bell"] = new(new() { ["bell_reset"] = "1" }),
+        ["shellwood_thorns"] = new(new() { ["vines_hurt_player"] = "True" }),
+        ["brown_vines"] = new(new() { ["vines_hurt_player"] = "True" }),
+        ["white_thorns"] = new(new() { ["vines_hurt_player"] = "True" }),
+        ["junk_pipe"] = new(new() { ["junk_pipe_terrain"] = "True" }),
+        ["frost_marker"] = new(new() { ["frost_speed"] = "10" }),
+        ["jelly_egg"] = new(new() { ["egg_regen"] = "-1" }),
+        ["wp_trap_spikes"] = new(
+            new() { ["wp_spikes_up"] = "True", ["wp_spikes_delay"] = "0", ["wp_spikes_speed"] = "1" },
+            positionOffset: new Vector3(0f, 5f, 0f)
+        ),
+
+        // 需要触发器的陷阱
+        ["pilgrim_trap_spike"] = new(needsActivator: true, activatorId: "pilgrim_trap_wire"),
+        ["rubble_field"] = new(needsActivator: true, activatorId: "slab_pressure_plate", positionOffset: new Vector3(0f, 0.5f, 0f)),
+        ["bilewater_trap"] = new(needsActivator: true, activatorId: "slab_pressure_plate", positionOffset: new Vector3(10f, 0f, 0f)),
+        ["falling_spike_ball"] = new(needsActivator: true, activatorId: "slab_pressure_plate"),
+        ["swing_trap_small"] = new(needsActivator: true, activatorId: "slab_pressure_plate", positionOffset: new Vector3(0f, 8f, 0f)),
+        ["swing_trap_spike"] = new(needsActivator: true, activatorId: "slab_pressure_plate", positionOffset: new Vector3(0f, 15f, 0f)),
+        ["hunter_landmine"] = new(needsActivator: true, activatorId: "hunter_trap_plate", positionOffset: new Vector3(0f, -1f, 0f), positionRotate: new Vector3(0f, 0f, 180f)),
+        ["hunter_sickle_trap"] = new(needsActivator: true, activatorId: "hunter_trap_plate", positionOffset: new Vector3(0f, 6f, 0f)),
+        ["craw_chain"] = new(needsActivator: true, activatorId: "trigger_zone"),
+        ["coral_spike"] = new(needsActivator: true, activatorId: "trigger_zone"),
+        ["coral_spike_fall"] = new(needsActivator: true, activatorId: "trigger_zone"),
+        ["stomp_spire"] = new(needsActivator: true, activatorId: "trigger_zone"),
+    };
+
+    // 功能分类（墙壁已禁用）
+    public static readonly Dictionary<string, List<string>> TrapCategories = new()
+    {
+        ["暗雷"] = new() { "hunter_landmine", "dust_trap_spike_plate", "slab_trap", "slab_prob_blade", "hunter_sickle_trap" },
+        ["跳跳乐"] = new() { "spike_cog_1", "spike_cog_2", "spike_cog_3", "spike_cog_4", "spike_cog_5" },
+        ["平台类"] = new() { "spike_cog_1", "spike_cog_2", "spike_cog_3", "spike_cog_4", "spike_cog_5", "fan_hazard", "mill_trap" },
+        ["尖刺类"] = new() { "wp_trap_spikes", "organ_spikes", "coral_spike", "pilgrim_trap_spike", "cradle_spikes", "slab_spike_ball" },
+        ["墙壁"] = new(),
+        ["天花板"] = new() { "falling_bell", "bone_boulder", "dust_trap_spike_dropper", "falling_lava", "coral_lightning_orb", "coral_lightning_rock", "steam_vent", "junk_pipe" },
+        ["障碍物"] = new()
+        {
+            "coral_crust_s", "coral_crust_m", "coral_crust_l",
+            "hot_coal",
+            "march_pogo", "bounce_bloom", "wisp_bounce_pod",
+            "sprintmaster_pod", "swap_bounce_pod", "celeste_bumper"
+        },
+        ["装饰物"] = new()
+        {
+            "clover_pod", "abyss_pod",
+            "lilypad", "cradle_nut",
+            "karaka_statue", "judge_statue", "clover_statue",
+            "shard_statue_1", "shard_statue_2", "shard_statue_3",
+            "shard_statue_4", "shard_statue_5", "flick_statue",
+            "fayforn_npc", "snow_chunk", "float_crystal",
+            "white_palace_fly", "pond_skipper_body", "winged_lifeseed",
+            "life_pustule", "bounce_flea", "dodge_flea",
+            "hornet_cocoon", "bellbeast_child",
+            "bell_s", "bell_l", "bell_lock",
+            "greymoor_balloon_small", "greymoor_balloon_mid", "greymoor_balloon_large",
+            "swamp_mosquito", "swamp_mosquito_skinny", "mothleaf",
+            "imoba", "garpid",
+            "crystal_drifter", "crystal_drifter_giant",
+            "stilkin", "stilkin_trapper", "dock_bomber"
+        },
+        ["触发型"] = new() { "swing_trap_small", "coral_spike_fall", "stomp_spire", "falling_spike_ball", "rubble_field", "mite_trap", "bilewater_trap", "craw_chain", "swing_trap_spike" },
+        ["追逐型"] = new() { "wisp_flame_lantern" },
+        ["场景伤害"] = new() { "abyss_tendrils", "voltgrass", "void_wave", "frost_marker" },
+
+        ["跳跳乐1"] = new()
+        {
+            "march_pogo", "bounce_bloom", "wisp_bounce_pod", "sprintmaster_pod",
+            "swap_bounce_pod", "clover_pod", "abyss_pod", "celeste_bumper",
+            "lilypad", "cradle_nut",
+            "karaka_statue", "judge_statue", "clover_statue",
+            "shard_statue_1", "shard_statue_2", "shard_statue_3",
+            "shard_statue_4", "shard_statue_5", "flick_statue",
+            "fayforn_npc", "snow_chunk", "float_crystal",
+            "white_palace_fly", "pond_skipper_body", "winged_lifeseed",
+            "life_pustule", "bounce_flea", "dodge_flea",
+            "hornet_cocoon", "bellbeast_child",
+            "bell_s", "bell_l", "bell_lock",
+            "greymoor_balloon_small", "greymoor_balloon_mid", "greymoor_balloon_large",
+            "swamp_mosquito", "swamp_mosquito_skinny", "mothleaf",
+            "imoba", "garpid",
+            "crystal_drifter", "crystal_drifter_giant","stilkin", "stilkin_trapper", "dock_bomber"
+        },
+
+        ["平台类1"] = new()
+        {
+            "coral_plat_float", "small_grey_coral_plat", "small_red_coral_plat",
+            "mid_red_coral_plat", "large_red_coral_plat",
+            "abyss_plat_mid", "abyss_plat_wide",
+            "deepnest_platform_01", "deepnest_platform_02",
+            "deepnest_platform_03", "deepnest_platform_04", "deepnest_platform_05",
+            "hive_platform_01", "hive_platform_02", "hive_platform_03",
+            "shell_small", "shell_mid", "shell_large",
+        },
+    };
+
+    // 难度配额
+    private static readonly Dictionary<TrapDifficulty, Dictionary<string, int>> Quotas = new()
+    {
+        [TrapDifficulty.Beginner] = new()
+        {
+            ["暗雷"] = 2,
+            ["跳跳乐"] = 1,
+            ["平台类"] = 2,
+            ["尖刺类"] = 2,
+            ["墙壁"] = 0,
+            ["天花板"] = 5,
+            ["障碍物"] = 4,
+            ["装饰物"] = 3,
+            ["触发型"] = 5,
+            ["追逐型"] = 0,
+            ["场景伤害"] = 0
+        },
+        [TrapDifficulty.Focused] = new()
+        {
+            ["暗雷"] = 4,
+            ["跳跳乐"] = 3,
+            ["平台类"] = 4,
+            ["尖刺类"] = 4,
+            ["墙壁"] = 0,
+            ["天花板"] = 6,
+            ["障碍物"] = 5,
+            ["装饰物"] = 4,
+            ["触发型"] = 6,
+            ["追逐型"] = 1,
+            ["场景伤害"] = 1
+        },
+        [TrapDifficulty.Overflow] = new()
+        {
+            ["暗雷"] = 6,
+            ["跳跳乐"] = 5,
+            ["平台类"] = 6,
+            ["尖刺类"] = 6,
+            ["墙壁"] = 0,
+            ["天花板"] = 8,
+            ["障碍物"] = 6,
+            ["装饰物"] = 5,
+            ["触发型"] = 8,
+            ["追逐型"] = 2,
+            ["场景伤害"] = 2
+        }
+    };
+
+    public static Dictionary<string, int> GetCategoryQuotas(TrapDifficulty difficulty)
+    {
+        return Quotas.TryGetValue(difficulty, out var quota) ? new Dictionary<string, int>(quota) : new Dictionary<string, int>(Quotas[TrapDifficulty.Beginner]);
+    }
+
+    // 分类顺序
+    public static readonly string[] CategoryOrder =
+    {
+        "暗雷", "跳跳乐", "平台类", "尖刺类", "墙壁", "天花板", "障碍物", "装饰物", "触发型", "追逐型", "场景伤害"
+    };
+
+    public static double GetFrostProbability(TrapDifficulty difficulty) =>
+        difficulty switch
+        {
+            TrapDifficulty.Focused => 0.10,
+            TrapDifficulty.Overflow => 0.20,
+            _ => 0.0
+        };
+}
+
+public class TrapMeta
+{
+    public Dictionary<string, string> Config { get; set; }
+    public bool NeedsActivator { get; set; }
+    public string ActivatorId { get; set; }
+    public Vector3 PositionOffset { get; set; }
+    public Vector3 PositionRotate { get; set; }
+
+    public TrapMeta(
+        Dictionary<string, string> config = null,
+        bool needsActivator = false,
+        string activatorId = null,
+        Vector3? positionOffset = null,
+        Vector3? positionRotate = null)
+    {
+        Config = config ?? new Dictionary<string, string>();
+        NeedsActivator = needsActivator;
+        ActivatorId = activatorId;
+        PositionOffset = positionOffset ?? Vector3.zero;
+        PositionRotate = positionRotate ?? Vector3.zero;
+    }
+}
+}
+
+namespace SilksongItemRandomizer
+{
+
+public enum TrapPersonality { Friendly, Playful, Sinister }
+
+public enum MoveStyle
+{
+    SurfacePatrol,
+    ZigzagLoop,
+    NeedleSwing,
+    Spin,
+    Pulse,
+    Flicker,
+    Jitter,
+    Bounce
+}
+
+public class TrapMover : MonoBehaviour
+{
+    public MoveStyle style;
+    public TrapPersonality personality;
+    public float baseSpeed = 1f;
+
+    public float SwingMinAngle { get; set; } = -30f;
+    public float SwingMaxAngle { get; set; } = 30f;
+
+    private float _currentSpeed;
+    private int _cycleCount;
+    private int _speedTick;
+    private Vector2 _startPos;
+    private Vector2 _leftEdge, _rightEdge;
+    private int _moveDir = 1;
+    private List<Vector2> _path;
+    private int _pathIndex;
+    private float _pathProgress;
+    private float _swingTimer;
+    private float _startAngle;
+    private float _spinAngle;
+    private int _spinDir = 1;
+    private Vector3 _originalScale;
+    private float _pulseTimer;
+    private SpriteRenderer _spriteRenderer;
+    private float _flickerTimer;
+    private bool _isVisible = true;
+    private Vector3 _originalPos;
+    private float _jitterTimer;
+    private float _bounceTimer;
+
+    private void Start()
+    {
+        _startPos = transform.position;
+        _startAngle = transform.eulerAngles.z;
+        _originalScale = transform.localScale;
+        _originalPos = transform.position;
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+
+        switch (style)
+        {
+            case MoveStyle.SurfacePatrol:
+                (_leftEdge, _rightEdge) = ScanPlatformEdges(_startPos);
+                break;
+            case MoveStyle.ZigzagLoop:
+                if (UnityEngine.Random.value < 0.5f)
+                    _path = GeneratePresetPath(_startPos);
+                else
+                    _path = GenerateZigzagLoop(_startPos, 5, 10, 8f, 6f);
+                break;
+            case MoveStyle.Spin:
+                _spinDir = UnityEngine.Random.Range(0, 2) == 0 ? 1 : -1;
+                break;
+            case MoveStyle.Pulse:
+                _pulseTimer = UnityEngine.Random.Range(0f, 2f);
+                break;
+            case MoveStyle.Flicker:
+                _flickerTimer = UnityEngine.Random.Range(0f, 3f);
+                break;
+            case MoveStyle.Jitter:
+                _jitterTimer = UnityEngine.Random.Range(0f, 1f);
+                break;
+            case MoveStyle.Bounce:
+                _bounceTimer = UnityEngine.Random.Range(0f, Mathf.PI * 2);
+                break;
+        }
+        UpdateSpeed();
+    }
+
+    private void Update()
+    {
+        UpdateSpeed();
+        switch (style)
+        {
+            case MoveStyle.SurfacePatrol: DoSurfacePatrol(); break;
+            case MoveStyle.ZigzagLoop: DoZigzagLoop(); break;
+            case MoveStyle.NeedleSwing: DoNeedleSwing(); break;
+            case MoveStyle.Spin: DoSpin(); break;
+            case MoveStyle.Pulse: DoPulse(); break;
+            case MoveStyle.Flicker: DoFlicker(); break;
+            case MoveStyle.Jitter: DoJitter(); break;
+            case MoveStyle.Bounce: DoBounce(); break;
+        }
+    }
+
+    private void UpdateSpeed()
+    {
+        _speedTick++;
+        if ((_speedTick & 31) != 0 && _currentSpeed > 0f) return; // 每 32 帧刷新一次随机速度，避免每帧 Random 分配（_currentSpeed=0 时为首帧初始化，必须执行）
+        _currentSpeed = personality switch
+        {
+            TrapPersonality.Friendly => baseSpeed * (0.15f + UnityEngine.Random.value * 0.1f),
+            TrapPersonality.Playful => baseSpeed * (0.6f + UnityEngine.Random.value * 0.4f),
+            TrapPersonality.Sinister => UpdateSinisterSpeed(),
+            _ => _currentSpeed
+        };
+    }
+
+    private float UpdateSinisterSpeed()
+    {
+        _cycleCount++;
+        if (_cycleCount >= 180)
+        {
+            _cycleCount = 0;
+            return baseSpeed * (UnityEngine.Random.value > 0.5f ? 0.75f : 0.15f);
+        }
+        return _currentSpeed;
+    }
+
+    private void DoSurfacePatrol()
+    {
+        var target = _moveDir > 0 ? _rightEdge : _leftEdge;
+        transform.position = Vector2.MoveTowards(transform.position, target, _currentSpeed * Time.deltaTime);
+        if (Vector2.Distance(transform.position, target) < 0.1f) _moveDir *= -1;
+    }
+
+    private (Vector2 left, Vector2 right) ScanPlatformEdges(Vector2 origin)
+    {
+        var mask = LayerMask.GetMask("Terrain");
+        var y = origin.y + 0.5f;
+        var left = origin.x;
+        var right = origin.x;
+
+        for (var i = 0; i < 40; i++)
+        {
+            if (Physics2D.Raycast(new Vector2(left - 0.5f, y), Vector2.down, 1f, mask))
+                left -= 0.5f;
+            else break;
+        }
+        for (var i = 0; i < 40; i++)
+        {
+            if (Physics2D.Raycast(new Vector2(right + 0.5f, y), Vector2.down, 1f, mask))
+                right += 0.5f;
+            else break;
+        }
+        return (new Vector2(left, origin.y), new Vector2(right, origin.y));
+    }
+
+    private void DoZigzagLoop()
+    {
+        if (_path == null || _path.Count < 2) return;
+        _pathProgress += _currentSpeed * Time.deltaTime;
+        while (_pathProgress > 1f && _pathIndex < _path.Count - 1)
+        {
+            _pathProgress -= 1f;
+            _pathIndex++;
+        }
+        if (_pathIndex >= _path.Count - 1)
+        {
+            _pathIndex = 0;
+            _pathProgress = 0f;
+        }
+        transform.position = Vector2.Lerp(_path[_pathIndex], _path[_pathIndex + 1], _pathProgress);
+    }
+
+    private void DoNeedleSwing()
+    {
+        _swingTimer += Time.deltaTime * _currentSpeed;
+        var angle = Mathf.Lerp(SwingMinAngle, SwingMaxAngle, (Mathf.Sin(_swingTimer) + 1f) / 2f);
+        transform.rotation = Quaternion.Euler(0, 0, _startAngle + angle);
+    }
+
+    private void DoSpin()
+    {
+        _spinAngle += 90f * _currentSpeed * Time.deltaTime * _spinDir;
+        transform.rotation = Quaternion.Euler(0, 0, _spinAngle);
+    }
+
+    private void DoPulse()
+    {
+        _pulseTimer += Time.deltaTime * _currentSpeed * 2f;
+        var scale = 1f + Mathf.Sin(_pulseTimer) * 0.2f;
+        transform.localScale = _originalScale * scale;
+    }
+
+    private void DoFlicker()
+    {
+        _flickerTimer += Time.deltaTime * _currentSpeed;
+        var period = 0.5f;
+        var shouldBeVisible = (Mathf.FloorToInt(_flickerTimer / period) % 2) == 0;
+        if (shouldBeVisible == _isVisible) return;
+        _isVisible = shouldBeVisible;
+        if (_spriteRenderer != null)
+            _spriteRenderer.enabled = _isVisible;
+        else
+            gameObject.SetActive(_isVisible);
+    }
+
+    private void DoJitter()
+    {
+        _jitterTimer += Time.deltaTime * 10f;
+        var offsetX = (Mathf.PerlinNoise(_jitterTimer, 0) - 0.5f) * 0.2f;
+        var offsetY = (Mathf.PerlinNoise(0, _jitterTimer) - 0.5f) * 0.2f;
+        transform.position = _originalPos + new Vector3(offsetX, offsetY, 0);
+    }
+
+    private void DoBounce()
+    {
+        _bounceTimer += Time.deltaTime * _currentSpeed * 2f;
+        var offsetY = Mathf.Sin(_bounceTimer) * 0.3f;
+        transform.position = new Vector3(_originalPos.x, _originalPos.y + offsetY, _originalPos.z);
+    }
+
+    // ----- 路径生成（静态方法，无状态）-----
+    private static List<Vector2> GeneratePresetPath(Vector2 origin)
+    {
+        const float radius = 4f;
+        var shapes = new List<System.Func<List<Vector2>>>
+        {
+            () => Square(origin, radius),
+            () => Hexagon(origin, radius),
+            () => Hexagram(origin, radius),
+            () => Triangle(origin, radius),
+            () => Pentagram(origin, radius),
+            () => Circle(origin, radius, 14),
+            () => Figure8(origin, radius, 12),
+            () => Diamond(origin, radius),
+            () => Cross(origin, radius),
+        };
+        return shapes[UnityEngine.Random.Range(0, shapes.Count)]();
+    }
+
+    private static List<Vector2> Square(Vector2 o, float r) =>
+        new() { o + new Vector2(-r, r), o + new Vector2(r, r), o + new Vector2(r, -r), o + new Vector2(-r, -r), o + new Vector2(-r, r), o };
+
+    private static List<Vector2> Hexagon(Vector2 o, float r)
+    {
+        var pts = new List<Vector2>();
+        for (var i = 0; i <= 6; i++)
+        {
+            var angle = Mathf.Deg2Rad * (60f * i - 30f);
+            pts.Add(o + new Vector2(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Hexagram(Vector2 o, float r)
+    {
+        var pts = new List<Vector2>();
+        for (var i = 0; i < 6; i++)
+        {
+            var angle = Mathf.Deg2Rad * (60f * i - 90f);
+            pts.Add(o + new Vector2(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Triangle(Vector2 o, float r)
+    {
+        var pts = new List<Vector2>();
+        for (var i = 0; i < 3; i++)
+        {
+            var angle = Mathf.Deg2Rad * (120f * i - 90f);
+            pts.Add(o + new Vector2(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Pentagram(Vector2 o, float r)
+    {
+        var pts = new List<Vector2>();
+        var r2 = r * 0.382f;
+        for (var i = 0; i < 5; i++)
+        {
+            var angle = Mathf.Deg2Rad * (72f * i - 90f);
+            pts.Add(o + new Vector2(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r));
+            pts.Add(o + new Vector2(Mathf.Cos(angle + Mathf.Deg2Rad * 36f) * r2, Mathf.Sin(angle + Mathf.Deg2Rad * 36f) * r2));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Circle(Vector2 o, float r, int segments)
+    {
+        var pts = new List<Vector2>();
+        for (var i = 0; i <= segments; i++)
+        {
+            var angle = Mathf.Deg2Rad * (360f * i / segments);
+            pts.Add(o + new Vector2(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Figure8(Vector2 o, float r, int segments)
+    {
+        var pts = new List<Vector2>();
+        for (var i = 0; i <= segments / 2; i++)
+        {
+            var angle = Mathf.Deg2Rad * (360f * i / segments);
+            pts.Add(o + new Vector2(r + Mathf.Cos(angle) * r, Mathf.Sin(angle) * r * 1.5f));
+        }
+        for (var i = segments / 2; i <= segments; i++)
+        {
+            var angle = Mathf.Deg2Rad * (360f * i / segments);
+            pts.Add(o + new Vector2(-r + Mathf.Cos(angle) * r, Mathf.Sin(angle) * r * 1.5f));
+        }
+        pts.Add(o);
+        return pts;
+    }
+
+    private static List<Vector2> Diamond(Vector2 o, float r) =>
+        new() { o + new Vector2(0, r), o + new Vector2(r, 0), o + new Vector2(0, -r), o + new Vector2(-r, 0), o + new Vector2(0, r), o };
+
+    private static List<Vector2> Cross(Vector2 o, float r)
+    {
+        var half = r * 0.4f;
+        return new List<Vector2>
+        {
+            o + new Vector2(0, r),
+            o + new Vector2(half, r * 0.6f),
+            o + new Vector2(half, half),
+            o + new Vector2(r * 0.6f, half),
+            o + new Vector2(r, 0),
+            o + new Vector2(r * 0.6f, -half),
+            o + new Vector2(half, -half),
+            o + new Vector2(half, -r * 0.6f),
+            o + new Vector2(0, -r),
+            o + new Vector2(-half, -r * 0.6f),
+            o + new Vector2(-half, -half),
+            o + new Vector2(-r * 0.6f, -half),
+            o + new Vector2(-r, 0),
+            o + new Vector2(-r * 0.6f, half),
+            o + new Vector2(-half, half),
+            o + new Vector2(-half, r * 0.6f),
+            o
+        };
+    }
+
+    private static List<Vector2> GenerateZigzagLoop(Vector2 start, int minSeg, int maxSeg, float maxW, float maxH)
+    {
+        var rng = new System.Random();
+        var n = rng.Next(minSeg, maxSeg);
+        var list = new List<Vector2> { start };
+        var x = start.x;
+        var y = start.y;
+        for (var i = 0; i < n - 1; i++)
+        {
+            var dx = (rng.Next(2) == 0 ? 1 : -1) * (5f + (float)rng.NextDouble() * 7f);
+            var dy = (rng.Next(2) == 0 ? 1 : -1) * (3f + (float)rng.NextDouble() * 5f);
+            x += dx;
+            y += dy;
+            list.Add(new Vector2(x, y));
+        }
+        list.Add(start);
+        return list;
+    }
+}
+
+public static class TrapMovement
+{
+    private const float GlobalMoveChance = 0.4f;
+
+    private static readonly List<MoveStyle> AllStyles = new()
+    {
+        MoveStyle.SurfacePatrol,
+        MoveStyle.ZigzagLoop,
+        MoveStyle.NeedleSwing,
+        MoveStyle.Spin,
+        MoveStyle.Pulse,
+        MoveStyle.Flicker,
+        MoveStyle.Jitter,
+        MoveStyle.Bounce
+    };
+
+    private static readonly HashSet<string> ExcludedTraps = new() { "lava_area" };
+
+    public static void ApplyTrapMovement(GameObject trapObj, string trapId, Random rng)
+    {
+        if (ExcludedTraps.Contains(trapId)) return;
+        if (rng.NextDouble() > GlobalMoveChance) return;
+
+        var style = AllStyles[rng.Next(AllStyles.Count)];
+        var personality = (TrapPersonality)rng.Next(0, 3);
+
+        var mover = trapObj.AddComponent<TrapMover>();
+        mover.style = style;
+        mover.personality = personality;
+        mover.baseSpeed = 2f;
+
+        if (style == MoveStyle.NeedleSwing)
+        {
+            mover.SwingMinAngle = -30f + (float)rng.NextDouble() * 10f - 5f;
+            mover.SwingMaxAngle = 30f + (float)rng.NextDouble() * 10f - 5f;
+        }
+    }
+}
 }

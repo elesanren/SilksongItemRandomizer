@@ -42,6 +42,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="AssetChainFixer">
+      <HintPath>..\AssetChainFixer\bin\Debug\AssetChainFixer.dll</HintPath>
+    </Reference>
     <Reference Include="Benchwarp">
       <HintPath>C:\Users\28267\AppData\Roaming\r2modmanPlus-local\HollowKnightSilksong\profiles\Default\BepInEx\plugins\homothety-Benchwarp\Benchwarp.dll</HintPath>
     </Reference>
@@ -59,9 +62,6 @@
     </Reference>
     <Reference Include="PlayMaker">
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\PlayMaker.dll</HintPath>
-    </Reference>
-    <Reference Include="SkillRandomizerMod">
-      <HintPath>..\SkillRandomizerMod\bin\Release\SkillRandomizerMod.dll</HintPath>
     </Reference>
     <Reference Include="StartingAbilityPicker">
       <HintPath>..\StartingAbilityPicker\bin\Release\StartingAbilityPicker.dll</HintPath>
@@ -122,6 +122,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\UnityEngine.UIModule.dll</HintPath>
@@ -129,48 +132,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="BenchRespawnPatch.cs" />
-    <Compile Include="BenchwarpTranslator.cs" />
-    <Compile Include="CrestRandomizer.cs" />
-    <Compile Include="CrestRandomizePatch.cs" />
-    <Compile Include="CurrencyCollectPatch.cs" />
+    <Compile Include="CrestSystem.cs" />
     <Compile Include="EnemyRandoAdjuster.cs" />
-    <Compile Include="Extracurrencypickup.cs" />
-    <Compile Include="FsmMasterGuard.cs" />
     <Compile Include="GlobalSaveData.cs" />
-    <Compile Include="HeroRespawnReset.cs" />
     <Compile Include="HotkeyHandler.cs" />
-    <Compile Include="InspectPermitRewards.cs" />
-    <Compile Include="ItemLimitConfig.cs" />
-    <Compile Include="ItemLocalizationRegistrar.cs" />
-    <Compile Include="ItemRandomizer.cs" />
-    <Compile Include="LoreRandomizer.cs" />
-    <Compile Include="MapperPermanentPatch.cs" />
-    <Compile Include="MapStationRewards.cs" />
-    <Compile Include="MossberryRandomizer.cs" />
-    <Compile Include="NativePickupGiver.cs" />
-    <Compile Include="ItemTypeRandomFilter.cs" />
-    <Compile Include="PickupPatch.cs" />
+    <Compile Include="ItemConfig.cs" />
+    <Compile Include="MapLoreRewards.cs" />
+    <Compile Include="MapperSystem.cs" />
+    <Compile Include="MiscPatches.cs" />
+    <Compile Include="PickupSystem.cs" />
     <Compile Include="Plugin.cs" />
-    <Compile Include="PreGeneratedMap.cs" />
     <Compile Include="PrefabIdList.cs.cs" />
     <Compile Include="RecentItemsUI.cs" />
-    <Compile Include="RewardTypes.cs" />
-    <Compile Include="ShopItemStats_Purchase_Patch.cs" />
-    <Compile Include="ShopOwnerRegistry.cs" />
-    <Compile Include="ShopMenuStock_BuildItemList_Patch.cs" />
-    <Compile Include="ShopRandomizer.cs" />
-    <Compile Include="SilkRandomizerPatch.cs" />
+    <Compile Include="RegionReplacePatch.cs" />
+    <Compile Include="RewardCore.cs" />
+    <Compile Include="ShopSystem.cs" />
     <Compile Include="SilksongItemRandomizerAPI.cs" />
-    <Compile Include="SilkSpoolPartsPatch.cs" />
-    <Compile Include="SpriteCache.cs" />
-    <Compile Include="SilkSpearPityPatch.cs" />
+    <Compile Include="SilkSystem.cs" />
     <Compile Include="ToolEffectRandomizer.cs" />
-    <Compile Include="TrapMovement.cs" />
-    <Compile Include="TrapPreloader.cs" />
-    <Compile Include="TrapRandomizer.cs" />
+    <Compile Include="TrapSystem.cs" />
     <Compile Include="TryGetPatch.cs" />
-    <Compile Include="ShakraMerchantKeeper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

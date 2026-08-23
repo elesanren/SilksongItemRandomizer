@@ -1,0 +1,2607 @@
+[
+ {
+  "cab": "CAB-bf54a70ab04d641cdc3c945b2a30ad8d",
+  "bundle": "abyss.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bf54a70ab04d641cdc3c945b2a30ad8d.resS",
+  "bundle": "abyss.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b5f52c1a0e3846e01aca834aaecc831c",
+  "bundle": "abyssmasssummon.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyssmasssummon.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b5f52c1a0e3846e01aca834aaecc831c.resS",
+  "bundle": "abyssmasssummon.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyssmasssummon.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5c7cf911008a29561cec9ce9166fb065",
+  "bundle": "abyssthreadcorepatch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyssthreadcorepatch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5c7cf911008a29561cec9ce9166fb065.resS",
+  "bundle": "abyssthreadcorepatch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyssthreadcorepatch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d64d073e88b2b9ddc24735e67158c4a1",
+  "bundle": "abyss_attacks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_attacks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d64d073e88b2b9ddc24735e67158c4a1.resS",
+  "bundle": "abyss_attacks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_attacks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f11d0ce7d439055eb13b97448975f61",
+  "bundle": "abyss_last_dive.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_last_dive.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f11d0ce7d439055eb13b97448975f61.resS",
+  "bundle": "abyss_last_dive.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_last_dive.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d9b03466b381b9e2d49c632d3124afc3",
+  "bundle": "abyss_tendrils_low.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_tendrils_low.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d9b03466b381b9e2d49c632d3124afc3.resS",
+  "bundle": "abyss_tendrils_low.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\abyss_tendrils_low.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fa19266dce5159e7cbf317cad922950f",
+  "bundle": "achievement_icons_hornet.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\achievement_icons_hornet.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fa19266dce5159e7cbf317cad922950f.resS",
+  "bundle": "achievement_icons_hornet.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\achievement_icons_hornet.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7857d40a0409ca49b3f597789c65b7ad",
+  "bundle": "acid_top.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\acid_top.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7857d40a0409ca49b3f597789c65b7ad.resS",
+  "bundle": "acid_top.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\acid_top.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a74e0c55f94b8d3162ecc073865226c2",
+  "bundle": "ancestral_art_prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ancestral_art_prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a74e0c55f94b8d3162ecc073865226c2.resS",
+  "bundle": "ancestral_art_prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ancestral_art_prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d94e4c60a0c1fbd1c59a17871e5018a6",
+  "bundle": "ant.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d94e4c60a0c1fbd1c59a17871e5018a6.resS",
+  "bundle": "ant.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0fcba5cdf0d3f479d626cc79097c08ae",
+  "bundle": "antbg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\antbg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0fcba5cdf0d3f479d626cc79097c08ae.resS",
+  "bundle": "antbg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\antbg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7e4a4a73a2ab394dcb8c2ceb8197a3dc",
+  "bundle": "antwindow.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\antwindow.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7e4a4a73a2ab394dcb8c2ceb8197a3dc.resS",
+  "bundle": "antwindow.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\antwindow.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d7633b461d18b1e5dfe18a8a02848a7a",
+  "bundle": "ant_opera.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_opera.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d7633b461d18b1e5dfe18a8a02848a7a.resS",
+  "bundle": "ant_opera.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_opera.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-94398ed670c78e581a15afa6fa2c2cf1",
+  "bundle": "ant_queen_npc.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_queen_npc.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-94398ed670c78e581a15afa6fa2c2cf1.resS",
+  "bundle": "ant_queen_npc.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_queen_npc.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9a16a2af93fb214cc3d1eeac2ba8530e",
+  "bundle": "ant_statue.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_statue.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9a16a2af93fb214cc3d1eeac2ba8530e.resS",
+  "bundle": "ant_statue.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_statue.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-42b43a437006e8ee71cf117f7407d0c2",
+  "bundle": "ant_traps.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_traps.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-42b43a437006e8ee71cf117f7407d0c2.resS",
+  "bundle": "ant_traps.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ant_traps.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7cc3e2a2885e9815825abeb7e166e4b6",
+  "bundle": "areaartpatch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\areaartpatch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7cc3e2a2885e9815825abeb7e166e4b6.resS",
+  "bundle": "areaartpatch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\areaartpatch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4c07171d3fc609a49b76d0dc19fc5bf2",
+  "bundle": "area_art.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\area_art.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4c07171d3fc609a49b76d0dc19fc5bf2.resS",
+  "bundle": "area_art.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\area_art.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d896f33a39161276b0441e429de5a41",
+  "bundle": "aspid.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\aspid.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d896f33a39161276b0441e429de5a41.resS",
+  "bundle": "aspid.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\aspid.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d3937e0759e1697cb4c658a50928a9ef",
+  "bundle": "bank.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bank.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d3937e0759e1697cb4c658a50928a9ef.resS",
+  "bundle": "bank.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bank.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b3d7c21b727b684897107b1eb864ee5e",
+  "bundle": "beast_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\beast_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b3d7c21b727b684897107b1eb864ee5e.resS",
+  "bundle": "beast_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\beast_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9b324d8e72dfa4d50e69d7ecdac1d4ad",
+  "bundle": "bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9b324d8e72dfa4d50e69d7ecdac1d4ad.resS",
+  "bundle": "bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e62b5848eb2235c7780f27a557f34031",
+  "bundle": "bellhouse.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellhouse.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e62b5848eb2235c7780f27a557f34031.resS",
+  "bundle": "bellhouse.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellhouse.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5e1feb63d4a6fb03264b8a87997ec9ef",
+  "bundle": "bellshrine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellshrine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5e1feb63d4a6fb03264b8a87997ec9ef.resS",
+  "bundle": "bellshrine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellshrine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0601f2384e5a3e522761932cb68900c",
+  "bundle": "bellway_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellway_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0601f2384e5a3e522761932cb68900c.resS",
+  "bundle": "bellway_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bellway_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-566eb2d7fa7f9c9129958b4bd44584f3",
+  "bundle": "big_metal_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\big_metal_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-566eb2d7fa7f9c9129958b4bd44584f3.resS",
+  "bundle": "big_metal_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\big_metal_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a94fb169044b3c9c96e210473a1411ad",
+  "bundle": "bind_bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bind_bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a94fb169044b3c9c96e210473a1411ad.resS",
+  "bundle": "bind_bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bind_bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3f0a65e149e740a782a4d1d905061c91",
+  "bundle": "black_thread_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3f0a65e149e740a782a4d1d905061c91.resS",
+  "bundle": "black_thread_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b9e12a5d6190cd37eb4c79c79effffca",
+  "bundle": "black_thread_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b9e12a5d6190cd37eb4c79c79effffca.resS",
+  "bundle": "black_thread_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e059e9bdb5106199f867325f2e9e22e6",
+  "bundle": "black_thread_world.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_world.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e059e9bdb5106199f867325f2e9e22e6.resS",
+  "bundle": "black_thread_world.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\black_thread_world.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-94f97e6806e0ec4a408918ff21a885c6",
+  "bundle": "blue_plants.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\blue_plants.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-94f97e6806e0ec4a408918ff21a885c6.resS",
+  "bundle": "blue_plants.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\blue_plants.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6a51f29e7d3a2c283e9a4eccb753ecd1",
+  "bundle": "blue_scientist.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\blue_scientist.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6a51f29e7d3a2c283e9a4eccb753ecd1.resS",
+  "bundle": "blue_scientist.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\blue_scientist.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4d079de964861d744e73301ed25b471b",
+  "bundle": "bonetown.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bonetown.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4d079de964861d744e73301ed25b471b.resS",
+  "bundle": "bonetown.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bonetown.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ef82e76a29adbcdf499f39c50b80d538",
+  "bundle": "break_wall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\break_wall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ef82e76a29adbcdf499f39c50b80d538.resS",
+  "bundle": "break_wall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\break_wall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aab8eece8d7c1cf584c203173f25ac81",
+  "bundle": "bshrine_window.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bshrine_window.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aab8eece8d7c1cf584c203173f25ac81.resS",
+  "bundle": "bshrine_window.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\bshrine_window.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f4eb8edea203af9aa8839e0b549ad920",
+  "bundle": "buttons_main.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\buttons_main.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f4eb8edea203af9aa8839e0b549ad920.resS",
+  "bundle": "buttons_main.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\buttons_main.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-de12f8cba9c1b97b769b6a8562b32c48",
+  "bundle": "cage.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cage.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-de12f8cba9c1b97b769b6a8562b32c48.resS",
+  "bundle": "cage.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cage.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c52df7af7df0ce0ed59c655f9e58c125",
+  "bundle": "caravan.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c52df7af7df0ce0ed59c655f9e58c125.resS",
+  "bundle": "caravan.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c7fb2f99f3d09b4ac4cfb4c88dac0e7e",
+  "bundle": "caravan_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c7fb2f99f3d09b4ac4cfb4c88dac0e7e.resS",
+  "bundle": "caravan_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8cb8eb336bd491d44dceaa2130d31582",
+  "bundle": "caravan_spa.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan_spa.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8cb8eb336bd491d44dceaa2130d31582.resS",
+  "bundle": "caravan_spa.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\caravan_spa.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b8cfd123a27bf94c5512e00b0ed16e27",
+  "bundle": "carriage.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\carriage.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b8cfd123a27bf94c5512e00b0ed16e27.resS",
+  "bundle": "carriage.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\carriage.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cac3162d433b9a8bc1d192acdb5e2720",
+  "bundle": "catacombs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\catacombs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cac3162d433b9a8bc1d192acdb5e2720.resS",
+  "bundle": "catacombs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\catacombs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4e329ed03347baa1d5a50f50e2b874b1",
+  "bundle": "chapel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\chapel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4e329ed03347baa1d5a50f50e2b874b1.resS",
+  "bundle": "chapel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\chapel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-227d5f9c22af54d456cadaed221e2d84",
+  "bundle": "chef.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\chef.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-227d5f9c22af54d456cadaed221e2d84.resS",
+  "bundle": "chef.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\chef.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ec3a5031f3f1b75a74fc22e1e800276a",
+  "bundle": "church.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\church.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ec3a5031f3f1b75a74fc22e1e800276a.resS",
+  "bundle": "church.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\church.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f6b59ef9ce10593dd9210415bd9ebf9a",
+  "bundle": "city.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f6b59ef9ce10593dd9210415bd9ebf9a.resS",
+  "bundle": "city.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5969a500ee5d254dce45ec02f192d559",
+  "bundle": "city_spa.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_spa.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5969a500ee5d254dce45ec02f192d559.resS",
+  "bundle": "city_spa.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_spa.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-564e8cf1f144231813fb24d8819d3367",
+  "bundle": "city_station.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_station.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-564e8cf1f144231813fb24d8819d3367.resS",
+  "bundle": "city_station.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_station.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-02da192e2ffcf8c354a4cf3969171c35",
+  "bundle": "city_tracking_trails.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_tracking_trails.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-02da192e2ffcf8c354a4cf3969171c35.resS",
+  "bundle": "city_tracking_trails.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\city_tracking_trails.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-515bd5328226a9be62ab5ef1f6ffdd57",
+  "bundle": "cliffs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cliffs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-515bd5328226a9be62ab5ef1f6ffdd57.resS",
+  "bundle": "cliffs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cliffs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9f123af7bbc37d794b5a36f971d99f8d",
+  "bundle": "clover.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\clover.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9f123af7bbc37d794b5a36f971d99f8d.resS",
+  "bundle": "clover.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\clover.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-060d935e21919a5c4062fea0b187deab",
+  "bundle": "clover_extras.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\clover_extras.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-060d935e21919a5c4062fea0b187deab.resS",
+  "bundle": "clover_extras.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\clover_extras.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a078e55fe4ff8dcf4e8f4149698d62be",
+  "bundle": "cog.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cog.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a078e55fe4ff8dcf4e8f4149698d62be.resS",
+  "bundle": "cog.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cog.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-096a542fb88f333dc5b8580a2569ed17",
+  "bundle": "conductor_room.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\conductor_room.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-096a542fb88f333dc5b8580a2569ed17.resS",
+  "bundle": "conductor_room.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\conductor_room.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c77250d4d13f83eba9592d7fb0fa31a5",
+  "bundle": "controller_prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\controller_prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c77250d4d13f83eba9592d7fb0fa31a5.resS",
+  "bundle": "controller_prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\controller_prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4a314371092888a4db836e16b0aa2e1e",
+  "bundle": "controller_prompts_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\controller_prompts_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4a314371092888a4db836e16b0aa2e1e.resS",
+  "bundle": "controller_prompts_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\controller_prompts_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0f534ba729b52f285e3e7c279331f720",
+  "bundle": "coral.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0f534ba729b52f285e3e7c279331f720.resS",
+  "bundle": "coral.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27ed20bf6e59c4165ab1539c4a8ed2a3",
+  "bundle": "coraltower.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coraltower.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27ed20bf6e59c4165ab1539c4a8ed2a3.resS",
+  "bundle": "coraltower.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coraltower.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f9f9a2c7e2e48f8d1390400f3663e37c",
+  "bundle": "coral_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f9f9a2c7e2e48f8d1390400f3663e37c.resS",
+  "bundle": "coral_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ff2ee9559992d1aaee4557d8adad6ef9",
+  "bundle": "coral_crust_walls.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral_crust_walls.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ff2ee9559992d1aaee4557d8adad6ef9.resS",
+  "bundle": "coral_crust_walls.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\coral_crust_walls.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2fb97d4c85ddc6fb13286b4f318fa33f",
+  "bundle": "core.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\core.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2fb97d4c85ddc6fb13286b4f318fa33f.resS",
+  "bundle": "core.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\core.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bc8e0c8628c13c454a06971440e1c327",
+  "bundle": "core_glows.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\core_glows.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bc8e0c8628c13c454a06971440e1c327.resS",
+  "bundle": "core_glows.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\core_glows.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7d7150704a76dbb82dcafb62e5c53c4e",
+  "bundle": "corpses.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\corpses.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7d7150704a76dbb82dcafb62e5c53c4e.resS",
+  "bundle": "corpses.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\corpses.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b4abc57a84294e6b41bc2a0a59ca57ec",
+  "bundle": "cradle.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cradle.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b4abc57a84294e6b41bc2a0a59ca57ec.resS",
+  "bundle": "cradle.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\cradle.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5978ade00340e619187506fbeb5156f0",
+  "bundle": "crawl.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crawl.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5978ade00340e619187506fbeb5156f0.resS",
+  "bundle": "crawl.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crawl.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-29bd9fc80ea15695c7c0bf6493668461",
+  "bundle": "credits_plates.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\credits_plates.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-29bd9fc80ea15695c7c0bf6493668461.resS",
+  "bundle": "credits_plates.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\credits_plates.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d383ff8493643ab294250ed4a0b9d0a3",
+  "bundle": "crest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d383ff8493643ab294250ed4a0b9d0a3.resS",
+  "bundle": "crest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c67b53f9ead92f2cd6300ff918e82b16",
+  "bundle": "crest_get.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crest_get.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c67b53f9ead92f2cd6300ff918e82b16.resS",
+  "bundle": "crest_get.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crest_get.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-339432becc0c78edd98a8245714db9cf",
+  "bundle": "crow.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crow.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-339432becc0c78edd98a8245714db9cf.resS",
+  "bundle": "crow.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\crow.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3b3535fd37b95e7e1f891a2d1e41f4fe",
+  "bundle": "currency.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\currency.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3b3535fd37b95e7e1f891a2d1e41f4fe.resS",
+  "bundle": "currency.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\currency.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-049d5b518daa29f89bc3dbe811ba25c4",
+  "bundle": "dancer_blades.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dancer_blades.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-049d5b518daa29f89bc3dbe811ba25c4.resS",
+  "bundle": "dancer_blades.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dancer_blades.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cbd0608ece9ada4a52274a233c453da0",
+  "bundle": "dial_door.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dial_door.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cbd0608ece9ada4a52274a233c453da0.resS",
+  "bundle": "dial_door.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dial_door.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3ccb6cff00f5d5eef5320773dffc096c",
+  "bundle": "diving_bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\diving_bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3ccb6cff00f5d5eef5320773dffc096c.resS",
+  "bundle": "diving_bell.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\diving_bell.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0c54b1082b589f57e036bf418f2d4d6",
+  "bundle": "dock.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dock.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0c54b1082b589f57e036bf418f2d4d6.resS",
+  "bundle": "dock.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dock.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6735c56fff5714ed111bc069ce97255a",
+  "bundle": "dock_dial_room.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dock_dial_room.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6735c56fff5714ed111bc069ce97255a.resS",
+  "bundle": "dock_dial_room.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dock_dial_room.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a685ce375e94343f031baa16d1f16603",
+  "bundle": "dust.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dust.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a685ce375e94343f031baa16d1f16603.resS",
+  "bundle": "dust.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\dust.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8d8956db64b9c3161d943edc872a75d1",
+  "bundle": "edge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\edge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8d8956db64b9c3161d943edc872a75d1.resS",
+  "bundle": "edge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\edge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-536c4321c30ade53956330558f62dee9",
+  "bundle": "effects.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\effects.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-536c4321c30ade53956330558f62dee9.resS",
+  "bundle": "effects.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\effects.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6b224207a7b41003f31182d251067c4a",
+  "bundle": "egg_blast.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\egg_blast.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6b224207a7b41003f31182d251067c4a.resS",
+  "bundle": "egg_blast.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\egg_blast.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b89e4527bd7a9e294a4c39283f378925",
+  "bundle": "enclave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enclave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b89e4527bd7a9e294a4c39283f378925.resS",
+  "bundle": "enclave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enclave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2981487623bd4465b521873c62fdafd7",
+  "bundle": "enclave_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enclave_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2981487623bd4465b521873c62fdafd7.resS",
+  "bundle": "enclave_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enclave_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e6a9fb4cb0672f6af1c80af0b17830df",
+  "bundle": "enemy_death_threads.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enemy_death_threads.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e6a9fb4cb0672f6af1c80af0b17830df.resS",
+  "bundle": "enemy_death_threads.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\enemy_death_threads.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-88242b4ed1dc7eac8c881b45733880e0",
+  "bundle": "extend_bridge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\extend_bridge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-88242b4ed1dc7eac8c881b45733880e0.resS",
+  "bundle": "extend_bridge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\extend_bridge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-03536ef75c1c01babe6169c19046e100",
+  "bundle": "extra_bone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\extra_bone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-03536ef75c1c01babe6169c19046e100.resS",
+  "bundle": "extra_bone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\extra_bone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-78a45a4631fd8a84dff5686e97f906d1",
+  "bundle": "fayforn_after_sit.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fayforn_after_sit.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-78a45a4631fd8a84dff5686e97f906d1.resS",
+  "bundle": "fayforn_after_sit.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fayforn_after_sit.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ffa96f272fb0b90c6b16d1dfc2a692f2",
+  "bundle": "fay_appear.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fay_appear.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ffa96f272fb0b90c6b16d1dfc2a692f2.resS",
+  "bundle": "fay_appear.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fay_appear.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-953b10f33ff2111f003017e0a65e7a52",
+  "bundle": "festival.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\festival.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-953b10f33ff2111f003017e0a65e7a52.resS",
+  "bundle": "festival.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\festival.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-22b7f22743497cdc455358b2066ca946",
+  "bundle": "fleascoreboard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fleascoreboard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-22b7f22743497cdc455358b2066ca946.resS",
+  "bundle": "fleascoreboard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\fleascoreboard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f6ca10c0892768a2344669725d9843fb",
+  "bundle": "flea_travel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\flea_travel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f6ca10c0892768a2344669725d9843fb.resS",
+  "bundle": "flea_travel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\flea_travel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7eb5a96de58404d46131265b1284fb88",
+  "bundle": "flower.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\flower.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7eb5a96de58404d46131265b1284fb88.resS",
+  "bundle": "flower.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\flower.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-589e7eb8570c21ec129593ac71fe5e3b",
+  "bundle": "furnace.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\furnace.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-589e7eb8570c21ec129593ac71fe5e3b.resS",
+  "bundle": "furnace.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\furnace.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d97cba2429955b935c71c36c61c1651",
+  "bundle": "furniture.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\furniture.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d97cba2429955b935c71c36c61c1651.resS",
+  "bundle": "furniture.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\furniture.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5eb0ef67e5cc7f15241bee3054be0ede",
+  "bundle": "f_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\f_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5eb0ef67e5cc7f15241bee3054be0ede.resS",
+  "bundle": "f_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\f_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5b4ce157e76a1292a8a4f3899a818622",
+  "bundle": "gallery.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\gallery.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5b4ce157e76a1292a8a4f3899a818622.resS",
+  "bundle": "gallery.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\gallery.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c93cdcf8ac8509b46c96699a3c98c00d",
+  "bundle": "glass.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\glass.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c93cdcf8ac8509b46c96699a3c98c00d.resS",
+  "bundle": "glass.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\glass.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a69df4ba729ef9ea86211e3c48c31851",
+  "bundle": "grate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a69df4ba729ef9ea86211e3c48c31851.resS",
+  "bundle": "grate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-19e97c8a81cc6610b7d9f713d7f2bc5e",
+  "bundle": "grey.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-19e97c8a81cc6610b7d9f713d7f2bc5e.resS",
+  "bundle": "grey.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-77f25ce4fc5a46ff72e2fb954e1b2d7f",
+  "bundle": "grey_clover.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_clover.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-77f25ce4fc5a46ff72e2fb954e1b2d7f.resS",
+  "bundle": "grey_clover.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_clover.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-25aec6ae34cb6cfe36696a103aea5ff1",
+  "bundle": "grey_grave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_grave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-25aec6ae34cb6cfe36696a103aea5ff1.resS",
+  "bundle": "grey_grave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_grave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-836585af1c0cc56945cc20fbc5a4d8e8",
+  "bundle": "grey_masks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_masks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-836585af1c0cc56945cc20fbc5a4d8e8.resS",
+  "bundle": "grey_masks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_masks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-db1c34f7b2a4d9d18425c0b3d74dde3b",
+  "bundle": "grey_waterwheel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_waterwheel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-db1c34f7b2a4d9d18425c0b3d74dde3b.resS",
+  "bundle": "grey_waterwheel.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_waterwheel.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-806d9a1b2822d6f7eaacf1356c9f507f",
+  "bundle": "grey_windmill.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_windmill.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-806d9a1b2822d6f7eaacf1356c9f507f.resS",
+  "bundle": "grey_windmill.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\grey_windmill.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c04e069e8c4f9161ab53c5e43c46fbcb",
+  "bundle": "halfway.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\halfway.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c04e069e8c4f9161ab53c5e43c46fbcb.resS",
+  "bundle": "halfway.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\halfway.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ef0bcb8cb5735b2fcde20436b6ff03ef",
+  "bundle": "halfway_frame.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\halfway_frame.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ef0bcb8cb5735b2fcde20436b6ff03ef.resS",
+  "bundle": "halfway_frame.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\halfway_frame.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-eadb7f4d98a7bafe7f07a63c25cf3fc1",
+  "bundle": "hang.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hang.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-eadb7f4d98a7bafe7f07a63c25cf3fc1.resS",
+  "bundle": "hang.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hang.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0b12349038fa582231bec4b2a70bedab",
+  "bundle": "hbone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hbone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0b12349038fa582231bec4b2a70bedab.resS",
+  "bundle": "hbone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hbone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a13b10bcf7a09108bf583b3f6588285a",
+  "bundle": "heart_deaths.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\heart_deaths.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a13b10bcf7a09108bf583b3f6588285a.resS",
+  "bundle": "heart_deaths.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\heart_deaths.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-40eabd853620487d4bcac5d6d028a604",
+  "bundle": "hornet.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-40eabd853620487d4bcac5d6d028a604.resS",
+  "bundle": "hornet.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e8e22c7974d201bef95b73f3feba00e1",
+  "bundle": "hornetsuperjumpsilk.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornetsuperjumpsilk.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e8e22c7974d201bef95b73f3feba00e1.resS",
+  "bundle": "hornetsuperjumpsilk.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornetsuperjumpsilk.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e89c298134d50bf7cac0a6885c1f4fce",
+  "bundle": "hornetwatersplashlarge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornetwatersplashlarge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e89c298134d50bf7cac0a6885c1f4fce.resS",
+  "bundle": "hornetwatersplashlarge.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornetwatersplashlarge.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6305dfae47369f66e9164b378c4f4547",
+  "bundle": "hornet_frost_death_cloakless.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_frost_death_cloakless.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6305dfae47369f66e9164b378c4f4547.resS",
+  "bundle": "hornet_frost_death_cloakless.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_frost_death_cloakless.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-268ff8f15004fd98b8f0c59dde9bcf6d",
+  "bundle": "hornet_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-268ff8f15004fd98b8f0c59dde9bcf6d.resS",
+  "bundle": "hornet_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-566d2beb03baa20ba0899165b1b2c1d0",
+  "bundle": "hornet_map_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_map_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-566d2beb03baa20ba0899165b1b2c1d0.resS",
+  "bundle": "hornet_map_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hornet_map_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7add8ec4e629f0105e0065bfc3652be9",
+  "bundle": "hud_evolve.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hud_evolve.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7add8ec4e629f0105e0065bfc3652be9.resS",
+  "bundle": "hud_evolve.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hud_evolve.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1491fc0d84b41956324b2cc9af706b5a",
+  "bundle": "hud_final_halo.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hud_final_halo.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1491fc0d84b41956324b2cc9af706b5a.resS",
+  "bundle": "hud_final_halo.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\hud_final_halo.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6e4bdca4b124df498dfe167af65eecee",
+  "bundle": "huntress.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\huntress.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6e4bdca4b124df498dfe167af65eecee.resS",
+  "bundle": "huntress.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\huntress.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-848b284f1521c2989233683c990a16f0",
+  "bundle": "incensesmoke.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\incensesmoke.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-848b284f1521c2989233683c990a16f0.resS",
+  "bundle": "incensesmoke.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\incensesmoke.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8b08e661248d7023d0e2cb8b933dd273",
+  "bundle": "inventory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8b08e661248d7023d0e2cb8b933dd273.resS",
+  "bundle": "inventory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-df0617c2334278042e9eba42e78174d8",
+  "bundle": "inventory_furniture_items.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_furniture_items.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-df0617c2334278042e9eba42e78174d8.resS",
+  "bundle": "inventory_furniture_items.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_furniture_items.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-acb84980bf7d9685b88c0d4d6e45967d",
+  "bundle": "inventory_needles.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_needles.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-acb84980bf7d9685b88c0d4d6e45967d.resS",
+  "bundle": "inventory_needles.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_needles.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9154bc7ae34124b26f9e6206e20c06e0",
+  "bundle": "inventory_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9154bc7ae34124b26f9e6206e20c06e0.resS",
+  "bundle": "inventory_patch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_patch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0afae70fc52a35caf986c67eb905ffd",
+  "bundle": "inventory_ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f0afae70fc52a35caf986c67eb905ffd.resS",
+  "bundle": "inventory_ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\inventory_ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-298a750f23b08224cd852a106029bde0",
+  "bundle": "jail.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\jail.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-298a750f23b08224cd852a106029bde0.resS",
+  "bundle": "jail.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\jail.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-55aebe114fe93f8019605607b65309c8",
+  "bundle": "jail_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\jail_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-55aebe114fe93f8019605607b65309c8.resS",
+  "bundle": "jail_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\jail_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f142024711bcd60ddb9cf448570bdc05",
+  "bundle": "journal_enemy_icons.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\journal_enemy_icons.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f142024711bcd60ddb9cf448570bdc05.resS",
+  "bundle": "journal_enemy_icons.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\journal_enemy_icons.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5b3f119d3fdba3f40c268a503f52a4ce",
+  "bundle": "journal_enemy_images.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\journal_enemy_images.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5b3f119d3fdba3f40c268a503f52a4ce.resS",
+  "bundle": "journal_enemy_images.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\journal_enemy_images.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c13433c544b0fed9cf63da4765a32583",
+  "bundle": "lace.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c13433c544b0fed9cf63da4765a32583.resS",
+  "bundle": "lace.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bdf41077ec05ee3c6c4a2db2908ce8fe",
+  "bundle": "lace_cross_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace_cross_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bdf41077ec05ee3c6c4a2db2908ce8fe.resS",
+  "bundle": "lace_cross_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace_cross_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-078bddb19d5df15737c3434604e965a1",
+  "bundle": "lace_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-078bddb19d5df15737c3434604e965a1.resS",
+  "bundle": "lace_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lace_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-dc7d7122a3203d302bf58fb442604bbe",
+  "bundle": "ladybug.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ladybug.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-dc7d7122a3203d302bf58fb442604bbe.resS",
+  "bundle": "ladybug.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ladybug.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-631ca551aaa9e16ef5e2f89547527e32",
+  "bundle": "lava.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lava.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-631ca551aaa9e16ef5e2f89547527e32.resS",
+  "bundle": "lava.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lava.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-09a7ebcfa572afbb1ab6fd5bcbda7b61",
+  "bundle": "library.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\library.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-09a7ebcfa572afbb1ab6fd5bcbda7b61.resS",
+  "bundle": "library.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\library.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f72a3baecb022cf86cab3a27b69ae01e",
+  "bundle": "lightning.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lightning.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f72a3baecb022cf86cab3a27b69ae01e.resS",
+  "bundle": "lightning.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lightning.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b3c533d74b65929bbc38c8660c98cbc1",
+  "bundle": "load_icon_knight.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\load_icon_knight.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b3c533d74b65929bbc38c8660c98cbc1.resS",
+  "bundle": "load_icon_knight.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\load_icon_knight.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8547fba00357a16db1b081887522a394",
+  "bundle": "lock.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lock.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8547fba00357a16db1b081887522a394.resS",
+  "bundle": "lock.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lock.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-07add8f52987bdc543dbbaf713c4f6f4",
+  "bundle": "longsaveicon.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\longsaveicon.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-07add8f52987bdc543dbbaf713c4f6f4.resS",
+  "bundle": "longsaveicon.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\longsaveicon.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-eb236345e5cd9c8720581622a7faff7b",
+  "bundle": "lore_board.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lore_board.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-eb236345e5cd9c8720581622a7faff7b.resS",
+  "bundle": "lore_board.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\lore_board.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3ea0801c349c050e634b70105df94960",
+  "bundle": "mapper_effects.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mapper_effects.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3ea0801c349c050e634b70105df94960.resS",
+  "bundle": "mapper_effects.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mapper_effects.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8821efa3a8c93e75d28871e195b9bdfa",
+  "bundle": "map_machines.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\map_machines.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8821efa3a8c93e75d28871e195b9bdfa.resS",
+  "bundle": "map_machines.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\map_machines.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cb7a173901c02f6c51dc1b4adf0b3f51",
+  "bundle": "masks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\masks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cb7a173901c02f6c51dc1b4adf0b3f51.resS",
+  "bundle": "masks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\masks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ec0857a0611a5c231444ac1ef1e23208",
+  "bundle": "materium.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\materium.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ec0857a0611a5c231444ac1ef1e23208.resS",
+  "bundle": "materium.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\materium.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-41f81f6f7e5ad63a9717e629db63fe0d",
+  "bundle": "mausoleum.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mausoleum.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-41f81f6f7e5ad63a9717e629db63fe0d.resS",
+  "bundle": "mausoleum.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mausoleum.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0d8c227db67c4c7fd67d46b79a67ee26",
+  "bundle": "mausoleumwall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mausoleumwall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0d8c227db67c4c7fd67d46b79a67ee26.resS",
+  "bundle": "mausoleumwall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mausoleumwall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9d9ade2aeb0fefcc7e0b8f6e9a695003",
+  "bundle": "memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9d9ade2aeb0fefcc7e0b8f6e9a695003.resS",
+  "bundle": "memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-67b6a79c8e937185152820087e04bc1c",
+  "bundle": "memory_cradle.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_cradle.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-67b6a79c8e937185152820087e04bc1c.resS",
+  "bundle": "memory_cradle.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_cradle.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-922d3ef3e496e98ff6bea6650fc092a5",
+  "bundle": "memory_deepnest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_deepnest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-922d3ef3e496e98ff6bea6650fc092a5.resS",
+  "bundle": "memory_deepnest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_deepnest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c3068b0083391987d5325996481079e1",
+  "bundle": "memory_first_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_first_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-c3068b0083391987d5325996481079e1.resS",
+  "bundle": "memory_first_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_first_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-149498030a6cc7933d92fa3a3fe17de8",
+  "bundle": "memory_orb.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_orb.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-149498030a6cc7933d92fa3a3fe17de8.resS",
+  "bundle": "memory_orb.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_orb.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-44d34ee6181fd102e4e627dfb907052d",
+  "bundle": "memory_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-44d34ee6181fd102e4e627dfb907052d.resS",
+  "bundle": "memory_weaver.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\memory_weaver.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5628afc768655184e0d8dd017956a0ce",
+  "bundle": "menu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\menu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5628afc768655184e0d8dd017956a0ce.resS",
+  "bundle": "menu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\menu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6832aeb9192502b7a6be740a1b84385b",
+  "bundle": "merchant_tracking_trail.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\merchant_tracking_trail.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-6832aeb9192502b7a6be740a1b84385b.resS",
+  "bundle": "merchant_tracking_trail.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\merchant_tracking_trail.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-48e15a191cf46d9c44ca0eba19c5e80a",
+  "bundle": "misc.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\misc.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-48e15a191cf46d9c44ca0eba19c5e80a.resS",
+  "bundle": "misc.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\misc.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8c7faacc4e450b357503b1d7763c0924",
+  "bundle": "mist.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mist.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8c7faacc4e450b357503b1d7763c0924.resS",
+  "bundle": "mist.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mist.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-62021c252cdd1d7865b13284f293ee74",
+  "bundle": "mr_mush.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mr_mush.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-62021c252cdd1d7865b13284f293ee74.resS",
+  "bundle": "mr_mush.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\mr_mush.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8bad0b3892a99dedeb1397cdd207732e",
+  "bundle": "music_box.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\music_box.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8bad0b3892a99dedeb1397cdd207732e.resS",
+  "bundle": "music_box.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\music_box.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f15473d32dea27ebbe0f93aec7a0a77b",
+  "bundle": "organ.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\organ.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f15473d32dea27ebbe0f93aec7a0a77b.resS",
+  "bundle": "organ.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\organ.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a6548f1c273fcddf3adc402bafaa2f9d",
+  "bundle": "parry_flash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\parry_flash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a6548f1c273fcddf3adc402bafaa2f9d.resS",
+  "bundle": "parry_flash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\parry_flash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1a543adfe7f1eb7a12489c84479c8cbb",
+  "bundle": "peak.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\peak.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1a543adfe7f1eb7a12489c84479c8cbb.resS",
+  "bundle": "peak.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\peak.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c0edbc75bf546dda8a8756e45012da0",
+  "bundle": "phantom_blast.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\phantom_blast.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c0edbc75bf546dda8a8756e45012da0.resS",
+  "bundle": "phantom_blast.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\phantom_blast.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3c71ee2936fcdaad67a88a018856bccd",
+  "bundle": "pilgrims_rest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrims_rest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3c71ee2936fcdaad67a88a018856bccd.resS",
+  "bundle": "pilgrims_rest.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrims_rest.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d26a473f675a66730a13737f3dd9d505",
+  "bundle": "pilgrims_rest_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrims_rest_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d26a473f675a66730a13737f3dd9d505.resS",
+  "bundle": "pilgrims_rest_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrims_rest_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5ec5e4291d49eaff2af504b778a2aa53",
+  "bundle": "pilgrim_sleepers.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrim_sleepers.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5ec5e4291d49eaff2af504b778a2aa53.resS",
+  "bundle": "pilgrim_sleepers.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pilgrim_sleepers.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c8d53e2ae84c84f8800f6cde94433cd",
+  "bundle": "pinstress_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pinstress_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c8d53e2ae84c84f8800f6cde94433cd.resS",
+  "bundle": "pinstress_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\pinstress_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7ef47e25506246fc494e9b0f4b2853b7",
+  "bundle": "premenu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\premenu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-7ef47e25506246fc494e9b0f4b2853b7.resS",
+  "bundle": "premenu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\premenu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f7aa9d5f8ff44f3ec84bc769122bdeae",
+  "bundle": "prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f7aa9d5f8ff44f3ec84bc769122bdeae.resS",
+  "bundle": "prompts.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\prompts.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d86c2216f73eec0d5231950061e0c58",
+  "bundle": "quest_ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\quest_ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2d86c2216f73eec0d5231950061e0c58.resS",
+  "bundle": "quest_ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\quest_ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ea98ad21d4c060113cdff35b3d38cf2c",
+  "bundle": "rage_burst_effect.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rage_burst_effect.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ea98ad21d4c060113cdff35b3d38cf2c.resS",
+  "bundle": "rage_burst_effect.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rage_burst_effect.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-819cf3820681ec4e4f3a1cf51c41987c",
+  "bundle": "red_memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\red_memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-819cf3820681ec4e4f3a1cf51c41987c.resS",
+  "bundle": "red_memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\red_memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b221dc0f0bec2cdf5bcc9203cb448cad",
+  "bundle": "restaurant.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\restaurant.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b221dc0f0bec2cdf5bcc9203cb448cad.resS",
+  "bundle": "restaurant.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\restaurant.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4cb9e08218d2d775ae65a102d9e0fdde",
+  "bundle": "ring.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ring.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4cb9e08218d2d775ae65a102d9e0fdde.resS",
+  "bundle": "ring.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ring.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9016a51110b7d33479d1eae07dfc0202",
+  "bundle": "rock_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rock_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9016a51110b7d33479d1eae07dfc0202.resS",
+  "bundle": "rock_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rock_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-272feccd986a6ee335e242b6a8aa17c1",
+  "bundle": "room_doctor.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_doctor.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-272feccd986a6ee335e242b6a8aa17c1.resS",
+  "bundle": "room_doctor.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_doctor.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3b2fb9fb39d3daa46cb4179ab7ea8b2e",
+  "bundle": "room_pinsmith.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_pinsmith.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3b2fb9fb39d3daa46cb4179ab7ea8b2e.resS",
+  "bundle": "room_pinsmith.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_pinsmith.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8ad9977acc8e43c1d60b84bd87305d90",
+  "bundle": "room_pinstress_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_pinstress_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8ad9977acc8e43c1d60b84bd87305d90.resS",
+  "bundle": "room_pinstress_interior.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_pinstress_interior.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8cc294c1e3f1568d6653e890f6d18d77",
+  "bundle": "room_relic.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_relic.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8cc294c1e3f1568d6653e890f6d18d77.resS",
+  "bundle": "room_relic.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\room_relic.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-628a8ad71e7f020017401a4c2b78da10",
+  "bundle": "rune.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rune.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-628a8ad71e7f020017401a4c2b78da10.resS",
+  "bundle": "rune.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\rune.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-868f038531da88d14b6ea0d429efb977",
+  "bundle": "sand.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sand.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-868f038531da88d14b6ea0d429efb977.resS",
+  "bundle": "sand.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sand.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b507cca2e2dafdc2f3e69c8f177ab1f1",
+  "bundle": "sand_centipede.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sand_centipede.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b507cca2e2dafdc2f3e69c8f177ab1f1.resS",
+  "bundle": "sand_centipede.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sand_centipede.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-abdae52f668c2c626d1260066c279ddc",
+  "bundle": "sauna.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sauna.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-abdae52f668c2c626d1260066c279ddc.resS",
+  "bundle": "sauna.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sauna.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bb168fab19033d6ee5689657273d4efe",
+  "bundle": "scarecraw.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\scarecraw.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bb168fab19033d6ee5689657273d4efe.resS",
+  "bundle": "scarecraw.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\scarecraw.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1ebba83b0da4b4385e48926d81e92ddb",
+  "bundle": "shaman_spell_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shaman_spell_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1ebba83b0da4b4385e48926d81e92ddb.resS",
+  "bundle": "shaman_spell_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shaman_spell_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56b13448afb13f8e9ace96ae02bad30c",
+  "bundle": "shellwood.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shellwood.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56b13448afb13f8e9ace96ae02bad30c.resS",
+  "bundle": "shellwood.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shellwood.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56123b2e6963dfcaf45d655c1b53d9af",
+  "bundle": "shell_shard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shell_shard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56123b2e6963dfcaf45d655c1b53d9af.resS",
+  "bundle": "shell_shard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shell_shard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f61a54f2e099f8949996456785cb9554",
+  "bundle": "shiny_item_anims.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shiny_item_anims.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f61a54f2e099f8949996456785cb9554.resS",
+  "bundle": "shiny_item_anims.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\shiny_item_anims.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4c2bdaae47b5967486bc712108798d79",
+  "bundle": "sign.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sign.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4c2bdaae47b5967486bc712108798d79.resS",
+  "bundle": "sign.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sign.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0290c02957d78663fb0ff24531205229",
+  "bundle": "signs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\signs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-0290c02957d78663fb0ff24531205229.resS",
+  "bundle": "signs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\signs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f655b59bf6c7074b39ab080d99eecbb",
+  "bundle": "silk.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f655b59bf6c7074b39ab080d99eecbb.resS",
+  "bundle": "silk.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-49cd9c43251d8e694ae529ba407fdc47",
+  "bundle": "silkeater_farm.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silkeater_farm.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-49cd9c43251d8e694ae529ba407fdc47.resS",
+  "bundle": "silkeater_farm.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silkeater_farm.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-799bf5fd752afa12326338a58546f79f",
+  "bundle": "silk_abyss.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_abyss.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-799bf5fd752afa12326338a58546f79f.resS",
+  "bundle": "silk_abyss.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_abyss.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bb39163c913ce6e854b831c3651404e0",
+  "bundle": "silk_beast_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_beast_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bb39163c913ce6e854b831c3651404e0.resS",
+  "bundle": "silk_beast_slash.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_beast_slash.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-647abcfaa25670fb1d18e4a54dcf896f",
+  "bundle": "silk_death_cursed.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_death_cursed.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-647abcfaa25670fb1d18e4a54dcf896f.resS",
+  "bundle": "silk_death_cursed.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\silk_death_cursed.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f2259820249869428e2eba9251e0fe47",
+  "bundle": "simple_shop_menu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\simple_shop_menu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f2259820249869428e2eba9251e0fe47.resS",
+  "bundle": "simple_shop_menu.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\simple_shop_menu.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-590835fafc5bff525bfab1c89e1824e4",
+  "bundle": "sin.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sin.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-590835fafc5bff525bfab1c89e1824e4.resS",
+  "bundle": "sin.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sin.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aa45eef472f0e563d1021332dc6de3e4",
+  "bundle": "skull_cave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\skull_cave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aa45eef472f0e563d1021332dc6de3e4.resS",
+  "bundle": "skull_cave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\skull_cave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d8bc2c0f037240b7d3ab70351f3e33b5",
+  "bundle": "slab.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\slab.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d8bc2c0f037240b7d3ab70351f3e33b5.resS",
+  "bundle": "slab.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\slab.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-494b6f385a96aa703fb9e0965d192cbc",
+  "bundle": "slab_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\slab_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-494b6f385a96aa703fb9e0965d192cbc.resS",
+  "bundle": "slab_runes.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\slab_runes.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cfe17d6ee3d19af6718c3713262aae33",
+  "bundle": "snail_memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\snail_memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-cfe17d6ee3d19af6718c3713262aae33.resS",
+  "bundle": "snail_memory.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\snail_memory.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d8d84c4f8290854a7e0c1d75e69faf95",
+  "bundle": "song.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d8d84c4f8290854a7e0c1d75e69faf95.resS",
+  "bundle": "song.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-02588268ed361d430d924e825dbbd8bb",
+  "bundle": "song_shrine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song_shrine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-02588268ed361d430d924e825dbbd8bb.resS",
+  "bundle": "song_shrine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song_shrine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d3d9e8ddf6333a3dd8b798e96f485378",
+  "bundle": "song_station.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song_station.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d3d9e8ddf6333a3dd8b798e96f485378.resS",
+  "bundle": "song_station.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\song_station.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4596847571f30643b2f8cd63369f48f8",
+  "bundle": "soul_snare.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\soul_snare.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4596847571f30643b2f8cd63369f48f8.resS",
+  "bundle": "soul_snare.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\soul_snare.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aef8b60d22dd4e05794a320148b808de",
+  "bundle": "sparks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sparks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aef8b60d22dd4e05794a320148b808de.resS",
+  "bundle": "sparks.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sparks.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-69c3b5d3975583512524c5adb6f858af",
+  "bundle": "spinner_thread_pull.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\spinner_thread_pull.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-69c3b5d3975583512524c5adb6f858af.resS",
+  "bundle": "spinner_thread_pull.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\spinner_thread_pull.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-31bc1bfca3f4eb1fda98b1fbb591e90c",
+  "bundle": "splateffectsimple.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\splateffectsimple.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-31bc1bfca3f4eb1fda98b1fbb591e90c.resS",
+  "bundle": "splateffectsimple.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\splateffectsimple.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9623257812f202836546248df148d451",
+  "bundle": "sprintmaster.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sprintmaster.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9623257812f202836546248df148d451.resS",
+  "bundle": "sprintmaster.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sprintmaster.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aaf9019a4d6a3866dca76550b32b6cb6",
+  "bundle": "sprintmaster_cave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sprintmaster_cave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-aaf9019a4d6a3866dca76550b32b6cb6.resS",
+  "bundle": "sprintmaster_cave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\sprintmaster_cave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-32b72bafcdb29fe03caa268ad3ff6762",
+  "bundle": "stone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\stone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-32b72bafcdb29fe03caa268ad3ff6762.resS",
+  "bundle": "stone.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\stone.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8a71af6c83330541312593eac7e8b068",
+  "bundle": "surface.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\surface.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8a71af6c83330541312593eac7e8b068.resS",
+  "bundle": "surface.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\surface.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9e7e1c87f71d239ef44aaf2ff8f9feb0",
+  "bundle": "swamp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9e7e1c87f71d239ef44aaf2ff8f9feb0.resS",
+  "bundle": "swamp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ae88fc7fe05acdd59eda909d04063d75",
+  "bundle": "swamp_bell_bench.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_bell_bench.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ae88fc7fe05acdd59eda909d04063d75.resS",
+  "bundle": "swamp_bell_bench.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_bell_bench.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f4e6da72ca0a6f5406224647823ddcd8",
+  "bundle": "swamp_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f4e6da72ca0a6f5406224647823ddcd8.resS",
+  "bundle": "swamp_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27259f7553fdcd91cb96b84bf98f7a6d",
+  "bundle": "swamp_stalkers.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_stalkers.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27259f7553fdcd91cb96b84bf98f7a6d.resS",
+  "bundle": "swamp_stalkers.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\swamp_stalkers.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-873cb266a20a22d00526b5f8ea27a6f4",
+  "bundle": "tent.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tent.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-873cb266a20a22d00526b5f8ea27a6f4.resS",
+  "bundle": "tent.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tent.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-385ae4e8cd6b52b29d7c20eb7d1a2c24",
+  "bundle": "tents.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tents.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-385ae4e8cd6b52b29d7c20eb7d1a2c24.resS",
+  "bundle": "tents.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tents.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8750a8e5c68dd771a4ace42a4ea49b1e",
+  "bundle": "theatre.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\theatre.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8750a8e5c68dd771a4ace42a4ea49b1e.resS",
+  "bundle": "theatre.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\theatre.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8a1be8d53d19428fdb9342af9b012743",
+  "bundle": "threads.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\threads.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-8a1be8d53d19428fdb9342af9b012743.resS",
+  "bundle": "threads.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\threads.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-af671411c10f7e8dfd493e665ffb2c80",
+  "bundle": "title.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\title.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-af671411c10f7e8dfd493e665ffb2c80.resS",
+  "bundle": "title.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\title.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9ce5ea4852c6b5d1f932db23818a90de",
+  "bundle": "titlefleurs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\titlefleurs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9ce5ea4852c6b5d1f932db23818a90de.resS",
+  "bundle": "titlefleurs.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\titlefleurs.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d32a825e3df661b650cfb55cff5493f7",
+  "bundle": "toll.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\toll.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d32a825e3df661b650cfb55cff5493f7.resS",
+  "bundle": "toll.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\toll.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f1c6f480be5b128fd804c47d733e5184",
+  "bundle": "tools.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tools.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-f1c6f480be5b128fd804c47d733e5184.resS",
+  "bundle": "tools.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tools.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-482dc479d5c6a69f09ea2ed0536a532e",
+  "bundle": "traders.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\traders.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-482dc479d5c6a69f09ea2ed0536a532e.resS",
+  "bundle": "traders.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\traders.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b193491d48cde01eb0fac4aa2d15d38c",
+  "bundle": "tube.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tube.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b193491d48cde01eb0fac4aa2d15d38c.resS",
+  "bundle": "tube.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tube.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e4bdcbe73a7557f15cab24afade9fba2",
+  "bundle": "tube_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tube_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-e4bdcbe73a7557f15cab24afade9fba2.resS",
+  "bundle": "tube_map.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\tube_map.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-77bfac598d02490e4fda9853b4b67efb",
+  "bundle": "ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-77bfac598d02490e4fda9853b4b67efb.resS",
+  "bundle": "ui.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-78144f0d1f780f12348c25d591890c82",
+  "bundle": "ui_dialogue.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui_dialogue.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-78144f0d1f780f12348c25d591890c82.resS",
+  "bundle": "ui_dialogue.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui_dialogue.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56eb38abb2365b8cc27624fd6af0d62a",
+  "bundle": "ui_dialogue_backboard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui_dialogue_backboard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-56eb38abb2365b8cc27624fd6af0d62a.resS",
+  "bundle": "ui_dialogue_backboard.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ui_dialogue_backboard.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-dc6112d7a3305062a5e5c53b90590a59",
+  "bundle": "umbrella.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\umbrella.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-dc6112d7a3305062a5e5c53b90590a59.resS",
+  "bundle": "umbrella.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\umbrella.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a06f503d9862ba50b4242fbafe14ad21",
+  "bundle": "umbrellaswamp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\umbrellaswamp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a06f503d9862ba50b4242fbafe14ad21.resS",
+  "bundle": "umbrellaswamp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\umbrellaswamp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c8d58d6e54f5a18d4e10f220843fade",
+  "bundle": "under.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-9c8d58d6e54f5a18d4e10f220843fade.resS",
+  "bundle": "under.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1895783ef4335c97fa82241181d4a779",
+  "bundle": "understore.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\understore.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-1895783ef4335c97fa82241181d4a779.resS",
+  "bundle": "understore.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\understore.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-496a963c9161b6f13fb61d496f2b1d6d",
+  "bundle": "under_big_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under_big_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-496a963c9161b6f13fb61d496f2b1d6d.resS",
+  "bundle": "under_big_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under_big_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-66b566050a1a9f8a0b70c85e63f196b8",
+  "bundle": "under_small_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under_small_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-66b566050a1a9f8a0b70c85e63f196b8.resS",
+  "bundle": "under_small_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\under_small_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f38981940c1d7a2033dcfdde4f591a3",
+  "bundle": "vents.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vents.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-4f38981940c1d7a2033dcfdde4f591a3.resS",
+  "bundle": "vents.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vents.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ab2692dd002e9dcac1c5cc46e72b58fe",
+  "bundle": "vignette.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vignette.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ab2692dd002e9dcac1c5cc46e72b58fe.resS",
+  "bundle": "vignette.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vignette.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3fa83ca02a67959bc93b73fb7c930acb",
+  "bundle": "vignettewhite.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vignettewhite.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3fa83ca02a67959bc93b73fb7c930acb.resS",
+  "bundle": "vignettewhite.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\vignettewhite.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2977773eaf1379e956566ae0f961d8cb",
+  "bundle": "ward.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ward.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2977773eaf1379e956566ae0f961d8cb.resS",
+  "bundle": "ward.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ward.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bfed17032e493669023edc1911761199",
+  "bundle": "ward_machine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ward_machine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bfed17032e493669023edc1911761199.resS",
+  "bundle": "ward_machine.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\ward_machine.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-20ff22abb37d58b3fc0780fb6d885c74",
+  "bundle": "water.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-20ff22abb37d58b3fc0780fb6d885c74.resS",
+  "bundle": "water.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-69a3b5ee4f6071895d1ecaed5c1607f1",
+  "bundle": "waterfall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\waterfall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-69a3b5ee4f6071895d1ecaed5c1607f1.resS",
+  "bundle": "waterfall.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\waterfall.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b03a5343f336b5c603d1859fd6f78ade",
+  "bundle": "waterfall_corner.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\waterfall_corner.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-b03a5343f336b5c603d1859fd6f78ade.resS",
+  "bundle": "waterfall_corner.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\waterfall_corner.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3a2b2d4a8e01f88052188e69c2a8ee24",
+  "bundle": "watertopripple.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\watertopripple.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-3a2b2d4a8e01f88052188e69c2a8ee24.resS",
+  "bundle": "watertopripple.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\watertopripple.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-73d39ca4fb9f22e93f9b9792d3e63d5f",
+  "bundle": "water_cut_01.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water_cut_01.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-73d39ca4fb9f22e93f9b9792d3e63d5f.resS",
+  "bundle": "water_cut_01.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water_cut_01.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d47d027f889f80e814080e184bb82be3",
+  "bundle": "water_cut_02.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water_cut_02.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d47d027f889f80e814080e184bb82be3.resS",
+  "bundle": "water_cut_02.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\water_cut_02.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-31605e4fe3d582d586f80b454895b001",
+  "bundle": "weave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-31605e4fe3d582d586f80b454895b001.resS",
+  "bundle": "weave.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2378bf160726717e96f2b8e2b332c16b",
+  "bundle": "weaver_bomb.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_bomb.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2378bf160726717e96f2b8e2b332c16b.resS",
+  "bundle": "weaver_bomb.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_bomb.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5ed74309b0ccef104c34c60db4d3e994",
+  "bundle": "weaver_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-5ed74309b0ccef104c34c60db4d3e994.resS",
+  "bundle": "weaver_lift.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_lift.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2ea0ab32b7d89e4ae680cb84a595990a",
+  "bundle": "weaver_rune_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_rune_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2ea0ab32b7d89e4ae680cb84a595990a.resS",
+  "bundle": "weaver_rune_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weaver_rune_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2e40fbfe9ebd6726a81da4293d33d675",
+  "bundle": "weave_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2e40fbfe9ebd6726a81da4293d33d675.resS",
+  "bundle": "weave_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d02e2ecea214672359b90cec87235321",
+  "bundle": "weave_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d02e2ecea214672359b90cec87235321.resS",
+  "bundle": "weave_gate.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_gate.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a462bfe74411972539dd04d7f1994e23",
+  "bundle": "weave_prompt_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_prompt_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-a462bfe74411972539dd04d7f1994e23.resS",
+  "bundle": "weave_prompt_bg.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\weave_prompt_bg.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fb82891d49b3ff8fb8edca222713ab2f",
+  "bundle": "web.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\web.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fb82891d49b3ff8fb8edca222713ab2f.resS",
+  "bundle": "web.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\web.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-25e0906501a3f6c77475585dae618c5b",
+  "bundle": "widow_forum.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\widow_forum.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-25e0906501a3f6c77475585dae618c5b.resS",
+  "bundle": "widow_forum.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\widow_forum.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2c019a6635bbb532208b03c83b2e3acd",
+  "bundle": "wish.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\wish.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2c019a6635bbb532208b03c83b2e3acd.resS",
+  "bundle": "wish.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\wish.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d148d3ee21acf47513221693b76ef444",
+  "bundle": "wisp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\wisp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-d148d3ee21acf47513221693b76ef444.resS",
+  "bundle": "wisp.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\wisp.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fe786e450899a3dd1226f4e6ce969d54",
+  "bundle": "witch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-fe786e450899a3dd1226f4e6ce969d54.resS",
+  "bundle": "witch.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2f54ed80d32aea3332bd4025347367df",
+  "bundle": "witch_cursed_fly_death.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch_cursed_fly_death.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-2f54ed80d32aea3332bd4025347367df.resS",
+  "bundle": "witch_cursed_fly_death.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch_cursed_fly_death.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ff86987642a44f52f440101e0ecc8d0e",
+  "bundle": "witch_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-ff86987642a44f52f440101e0ecc8d0e.resS",
+  "bundle": "witch_hut.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\witch_hut.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27613c43196b802f76af4fbc9f8222ee",
+  "bundle": "zap.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\zap.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-27613c43196b802f76af4fbc9f8222ee.resS",
+  "bundle": "zap.spriteatlas.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\atlases_assets_assets\\sprites\\_atlases\\zap.spriteatlas.bundle"
+ },
+ {
+  "cab": "CAB-bd14b9f6efbfc05f609cd172e7555448",
+  "bundle": "prompts_assets_all.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\prompts_assets_all.bundle"
+ },
+ {
+  "cab": "CAB-bd14b9f6efbfc05f609cd172e7555448.resS",
+  "bundle": "prompts_assets_all.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\prompts_assets_all.bundle"
+ },
+ {
+  "cab": "CAB-bd14b9f6efbfc05f609cd172e7555448.resource",
+  "bundle": "prompts_assets_all.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\prompts_assets_all.bundle"
+ },
+ {
+  "cab": "CAB-924c1fadd8492c31c49c7c745c3c8902",
+  "bundle": "promptspatch_assets_all.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\promptspatch_assets_all.bundle"
+ },
+ {
+  "cab": "CAB-924c1fadd8492c31c49c7c745c3c8902.resS",
+  "bundle": "promptspatch_assets_all.bundle",
+  "path": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\StandaloneWindows64\\promptspatch_assets_all.bundle"
+ }
+]

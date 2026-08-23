@@ -1,6 +1,12 @@
-// ItemLimitConfig.cs - 修改为可写属性，保持原有功能
 using BepInEx.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System;
+using TeamCherry.Localization;
+using UnityEngine;
+
+// ItemLimitConfig.cs - 修改为可写属性，保持原有功能
 
 namespace SilksongItemRandomizer
 {
@@ -12,15 +18,16 @@ namespace SilksongItemRandomizer
     {
         private static BepInEx.Configuration.ConfigFile _configFile;
 
-        // ========== 普通物品 ==========
-        public static int LimitSkillItem { get; set; } = 2;
-        public static int LimitRelic { get; set; } = 2;
-        public static int LimitOtherItem { get; set; } = 2;
+        // ========== 普通物品（映射模式每物品恰好 1 次全覆盖，此处为动态兜底上限） ==========
+        public static int LimitSkillItem { get; set; } = 1;
+        public static int LimitRelic { get; set; } = 1;
+        public static int LimitOtherItem { get; set; } = 1;
 
         // ========== 方向权限 ==========
-        public static int LimitUpSlash { get; set; } = 1;
-        public static int LimitLeftSlash { get; set; } = 1;
-        public static int LimitRightSlash { get; set; } = 1;
+        // 攻击/回血权限与能力一致按"双倍"处理（默认 2 份），移动方向权限默认 1 份
+        public static int LimitUpSlash { get; set; } = 2;
+        public static int LimitLeftSlash { get; set; } = 2;
+        public static int LimitRightSlash { get; set; } = 2;
         public static int LimitDashLeft { get; set; } = 1;
         public static int LimitDashRight { get; set; } = 1;
         public static int LimitHarpoonLeft { get; set; } = 1;
@@ -29,32 +36,38 @@ namespace SilksongItemRandomizer
         public static int LimitFloatRight { get; set; } = 1;
         public static int LimitWallJumpLeft { get; set; } = 1;
         public static int LimitWallJumpRight { get; set; } = 1;
-        public static int LimitHeal { get; set; } = 1;
+        public static int LimitHeal { get; set; } = 2;
 
-        // ========== 能力虚拟奖励 ==========
-        public static int LimitNeedleThrow { get; set; } = 1;
-        public static int LimitThreadSphere { get; set; } = 1;
-        public static int LimitHarpoonDash { get; set; } = 1;
-        public static int LimitSilkCharge { get; set; } = 1;
-        public static int LimitSilkBomb { get; set; } = 1;
-        public static int LimitSilkBossNeedle { get; set; } = 1;
-        public static int LimitNeedolin { get; set; } = 1;
-        public static int LimitParry { get; set; } = 1;
-        public static int LimitNeedolinMemory { get; set; } = 1;
-        public static int LimitFastTravel { get; set; } = 1;
-        public static int LimitEvaHeal { get; set; } = 1;
-        public static int LimitDash { get; set; } = 1;
-        public static int LimitBrolly { get; set; } = 1;
-        public static int LimitDoubleJump { get; set; } = 1;
-        public static int LimitSuperJump { get; set; } = 1;
-        public static int LimitWallJump { get; set; } = 1;
-        public static int LimitChargeSlash { get; set; } = 1;
+        // ========== 能力虚拟奖励（默认 2 = 双倍发放，映射与动态共用此值） ==========
+        public static int LimitNeedleThrow { get; set; } = 2;
+        public static int LimitThreadSphere { get; set; } = 2;
+        public static int LimitHarpoonDash { get; set; } = 2;
+        public static int LimitSilkCharge { get; set; } = 2;
+        public static int LimitSilkBomb { get; set; } = 2;
+        public static int LimitSilkBossNeedle { get; set; } = 2;
+        public static int LimitNeedolin { get; set; } = 2;
+        public static int LimitParry { get; set; } = 2;
+        public static int LimitNeedolinMemory { get; set; } = 2;
+        public static int LimitFastTravel { get; set; } = 2;
+        public static int LimitEvaHeal { get; set; } = 2;
+        public static int LimitDash { get; set; } = 2;
+        public static int LimitBrolly { get; set; } = 2;
+        public static int LimitDoubleJump { get; set; } = 2;
+        public static int LimitSuperJump { get; set; } = 2;
+        public static int LimitWallJump { get; set; } = 2;
+        public static int LimitChargeSlash { get; set; } = 2;
 
         // ========== 珍贵虚拟奖励 ==========
         public static int LimitHeartPiece { get; set; } = 20;
         public static int LimitSpoolPart { get; set; } = 18;
         public static int LimitMaxSilkRegenUp { get; set; } = 2;
         public static int LimitUnlockCrestSlot { get; set; } = 2;
+        /// <summary>简单钥匙全游戏共 4 把，全部入池</summary>
+        public static int LimitSimpleKey { get; set; } = 4;
+        /// <summary>寒冷抗性（雪绫披风拆分功能）：默认全游戏 1 个</summary>
+        public static int LimitColdResist { get; set; } = 1;
+        /// <summary>游泳权限：默认全游戏 1 个</summary>
+        public static int LimitSwim { get; set; } = 1;
 
         // ========== 无限池奖励开关 ==========
         public static bool EnableInfSilk { get; private set; } = true;
@@ -85,20 +98,21 @@ namespace SilksongItemRandomizer
         // 升级改动这些数字会触发「代码更新标记」，首次同步后即被标记，不再重复覆盖用户实际设置。
         private static readonly (string Section, string Key, int Default)[] CodeDefaultInts =
         {
-            ("Limits", "SkillItem", 2), ("Limits", "Relic", 2), ("Limits", "OtherItem", 2),
-            ("Limits", "UpSlash", 1), ("Limits", "LeftSlash", 1), ("Limits", "RightSlash", 1),
+            ("Limits", "SkillItem", 1), ("Limits", "Relic", 1), ("Limits", "OtherItem", 1),
+            ("Limits", "UpSlash", 2), ("Limits", "LeftSlash", 2), ("Limits", "RightSlash", 2),
             ("Limits", "DashLeft", 1), ("Limits", "DashRight", 1),
             ("Limits", "HarpoonLeft", 1), ("Limits", "HarpoonRight", 1),
             ("Limits", "FloatLeft", 1), ("Limits", "FloatRight", 1),
-            ("Limits", "WallJumpLeft", 1), ("Limits", "WallJumpRight", 1), ("Limits", "Heal", 1),
-            ("Limits", "NeedleThrow", 1), ("Limits", "ThreadSphere", 1), ("Limits", "HarpoonDash", 1),
-            ("Limits", "SilkCharge", 1), ("Limits", "SilkBomb", 1), ("Limits", "SilkBossNeedle", 1),
-            ("Limits", "Needolin", 1), ("Limits", "Parry", 1), ("Limits", "NeedolinMemory", 1),
-            ("Limits", "FastTravel", 1), ("Limits", "EvaHeal", 1), ("Limits", "Dash", 1),
-            ("Limits", "Brolly", 1), ("Limits", "DoubleJump", 1), ("Limits", "SuperJump", 1),
-            ("Limits", "WallJump", 1), ("Limits", "ChargeSlash", 1),
+            ("Limits", "WallJumpLeft", 1), ("Limits", "WallJumpRight", 1), ("Limits", "Heal", 2),
+            ("Limits", "NeedleThrow", 2), ("Limits", "ThreadSphere", 2), ("Limits", "HarpoonDash", 2),
+            ("Limits", "SilkCharge", 2), ("Limits", "SilkBomb", 2), ("Limits", "SilkBossNeedle", 2),
+            ("Limits", "Needolin", 2), ("Limits", "Parry", 2), ("Limits", "NeedolinMemory", 2),
+            ("Limits", "FastTravel", 2), ("Limits", "EvaHeal", 2), ("Limits", "Dash", 2),
+            ("Limits", "Brolly", 2), ("Limits", "DoubleJump", 2), ("Limits", "SuperJump", 2),
+            ("Limits", "WallJump", 2), ("Limits", "ChargeSlash", 2),
             ("Limits", "HeartPiece", 20), ("Limits", "SpoolPart", 18),
             ("Limits", "MaxSilkRegenUp", 2), ("Limits", "UnlockCrestSlot", 2),
+            ("Limits", "SimpleKey", 4),
         };
 
         private static readonly (string Section, string Key, bool Default)[] CodeDefaultBools =
@@ -208,6 +222,7 @@ namespace SilksongItemRandomizer
                     case "SpoolPart": LimitSpoolPart = entry.Value; break;
                     case "MaxSilkRegenUp": LimitMaxSilkRegenUp = entry.Value; break;
                     case "UnlockCrestSlot": LimitUnlockCrestSlot = entry.Value; break;
+                    case "SimpleKey": LimitSimpleKey = entry.Value; break;
                 }
             }
 
@@ -277,6 +292,7 @@ namespace SilksongItemRandomizer
             LimitSpoolPart = settings.SpoolPart;
             LimitMaxSilkRegenUp = settings.MaxSilkRegenUp;
             LimitUnlockCrestSlot = settings.UnlockCrestSlot;
+            LimitSimpleKey = settings.SimpleKey;
         }
 
         /// <summary>
@@ -345,6 +361,7 @@ namespace SilksongItemRandomizer
             SetInt("SpoolPart", LimitSpoolPart);
             SetInt("MaxSilkRegenUp", LimitMaxSilkRegenUp);
             SetInt("UnlockCrestSlot", LimitUnlockCrestSlot);
+            SetInt("SimpleKey", LimitSimpleKey);
 
             // 无限池 / 开关（只读入口，面板不直接改，但一并持久化）：
             SetBool("EnableInfSilk", EnableInfSilk);
@@ -376,7 +393,8 @@ namespace SilksongItemRandomizer
                 LimitNeedolin, LimitParry, LimitNeedolinMemory,
                 LimitFastTravel, LimitEvaHeal, LimitDash, LimitBrolly,
                 LimitDoubleJump, LimitSuperJump, LimitWallJump, LimitChargeSlash,
-                LimitHeartPiece, LimitSpoolPart, LimitMaxSilkRegenUp, LimitUnlockCrestSlot,
+                LimitHeartPiece, LimitSpoolPart, LimitMaxSilkRegenUp, LimitUnlockCrestSlot, LimitSimpleKey,
+                LimitColdResist, LimitSwim,
                 EnableInfSilk, EnableInfBlueHealth,
                 EnableInfGeo300, EnableInfShards300,
                 EnableLoreReward, EnableLoreTrigger, EnableInspectPermit,
@@ -440,6 +458,9 @@ namespace SilksongItemRandomizer
                 "hasSuperJump" => LimitSuperJump,
                 "hasWalljump" => LimitWallJump,
                 "hasChargeSlash" => LimitChargeSlash,
+                "ColdResist" => LimitColdResist,
+                "Swim" => LimitSwim,
+                "SilkHeart" => LimitMaxSilkRegenUp,
                 _ => 1
             };
         }
@@ -479,12 +500,261 @@ namespace SilksongItemRandomizer
         public static int GetItemTypeLimit(SavedItem item)
         {
             if (item == null) return 2;
+            // 简单钥匙：全游戏共 4 把，全部入池（配置化）
+            if (string.Equals(item.name, "Simple Key", System.StringComparison.Ordinal)) return LimitSimpleKey;
             var t = item.GetType();
             if (t == typeof(ToolItemSkill) || t.IsSubclassOf(typeof(ToolItemSkill)) || item is ToolItemSkill)
                 return LimitSkillItem;
             if (typeof(CollectableRelic).IsAssignableFrom(t))
                 return LimitRelic;
             return LimitOtherItem;
+        }
+    }
+}
+
+
+namespace SilksongItemRandomizer
+{
+    /// <summary>
+    /// 负责将所有物品的显示名称注册到游戏的本地化系统中，
+    /// 以便在商店等 UI 中使用 LocalisedString 正确显示中文名称。
+    /// </summary>
+    public static class ItemLocalizationRegistrar
+    {
+        public const string CustomSheetName = "SilksongItemRandomizer";
+
+        private static readonly HashSet<string> _registeredKeys = new HashSet<string>();
+
+        private static Dictionary<string, Dictionary<string, string>> _localizationDict;
+
+        private static bool EnsureLocalizationDict()
+        {
+            if (_localizationDict != null)
+                return true;
+
+            var field = typeof(Language).GetField("_currentEntrySheets", BindingFlags.Static | BindingFlags.NonPublic);
+            if (field == null)
+            {
+                Plugin.Log.LogError("[ItemLocalization] 无法获取 Language._currentEntrySheets 字段");
+                return false;
+            }
+
+            _localizationDict = field.GetValue(null) as Dictionary<string, Dictionary<string, string>>;
+            if (_localizationDict == null)
+            {
+                Plugin.Log.LogError("[ItemLocalization] Language._currentEntrySheets 字段不是预期类型");
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool RegisterItemName(string key, string displayName)
+        {
+            if (!EnsureLocalizationDict())
+                return false;
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(displayName))
+                return false;
+
+            if (_registeredKeys.Contains(key))
+                return true;
+
+            if (!_localizationDict.TryGetValue(CustomSheetName, out var sheet))
+            {
+                sheet = new Dictionary<string, string>();
+                _localizationDict[CustomSheetName] = sheet;
+            }
+
+            sheet[key] = displayName;
+            _registeredKeys.Add(key);
+
+            return true;
+        }
+
+        public static string GetLocalizationKey(string itemInternalName)
+        {
+            return $"item_{itemInternalName}";
+        }
+
+        public static LocalisedString GetLocalisedString(string itemInternalName)
+        {
+            return new LocalisedString(CustomSheetName, GetLocalizationKey(itemInternalName));
+        }
+
+        public static void RegisterAllKnownItems()
+        {
+            if (!EnsureLocalizationDict())
+                return;
+
+            var allSavedItems = Resources.FindObjectsOfTypeAll<SavedItem>();
+            int registeredCount = 0;
+
+            foreach (var item in allSavedItems)
+            {
+                if (item == null) continue;
+
+                string internalName = item.name;
+                string displayName = GetItemDisplayNameSafe(item);
+
+                if (string.IsNullOrEmpty(displayName))
+                    continue;
+
+                string key = GetLocalizationKey(internalName);
+                if (RegisterItemName(key, displayName))
+                    registeredCount++;
+            }
+
+            Plugin.Log.LogInfo($"[ItemLocalization] 已注册 {registeredCount} 个物品的本地化名称");
+        }
+
+        /// <summary>
+        /// 安全获取显示名称，避免调用未实现的 GetPopupName 抛出异常。
+        /// </summary>
+        private static string GetItemDisplayNameSafe(SavedItem item)
+        {
+            // CollectableItemStates 在无状态满足时调用 GetPopupName 会触发游戏本体
+            // "Item state was less than 0" 错误日志；改为直接读取首个状态的显示名
+            if (item is CollectableItemStates statesItem)
+            {
+                try
+                {
+                    var statesField = typeof(CollectableItemStates).GetField("states", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var states = statesField?.GetValue(statesItem) as Array;
+                    if (states != null && states.Length > 0)
+                    {
+                        for (int i = 0; i < states.Length; i++)
+                        {
+                            var state = states.GetValue(i);
+                            if (state == null) continue;
+                            var dnField = state.GetType().GetField("DisplayName",
+                                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                            var dn = dnField?.GetValue(state);
+                            if (dn is LocalisedString ls)
+                            {
+                                string text = ToLocalisedString(ls);
+                                if (!string.IsNullOrEmpty(text))
+                                    return text;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // 反射失败则回退到 item.name
+                }
+                return item.name;
+            }
+
+            // 通过反射检查 GetPopupName 方法是否被重写（即 DeclaringType 不是 SavedItem）
+            var method = typeof(SavedItem).GetMethod("GetPopupName", BindingFlags.Instance | BindingFlags.Public);
+            if (method != null)
+            {
+                // 获取 item 实际类型的方法
+                var actualMethod = item.GetType().GetMethod("GetPopupName", BindingFlags.Instance | BindingFlags.Public);
+                if (actualMethod != null && actualMethod.DeclaringType == typeof(SavedItem))
+                {
+                    // 未重写，直接返回 item.name
+                    return item.name;
+                }
+            }
+
+            // 尝试调用，但捕获所有异常（包括 NotImplementedException 和其他）
+            try
+            {
+                return item.GetPopupName();
+            }
+            catch
+            {
+                return item.name;
+            }
+        }
+
+        // 通过反射调用 LocalisedString 的隐式转换（op_Implicit），避免直接强转
+        private static string ToLocalisedString(LocalisedString ls)
+        {
+            try
+            {
+                var op = typeof(LocalisedString).GetMethod("op_Implicit", new[] { typeof(LocalisedString) });
+                if (op != null && op.IsStatic)
+                    return (string)op.Invoke(null, new object[] { ls });
+                return ls.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static void Reset()
+        {
+            if (!EnsureLocalizationDict())
+                return;
+
+            if (_localizationDict.ContainsKey(CustomSheetName))
+                _localizationDict[CustomSheetName].Clear();
+
+            _registeredKeys.Clear();
+            Plugin.Log.LogInfo("[ItemLocalization] 已清空所有自定义本地化条目");
+        }
+    }
+}
+
+
+namespace SilksongItemRandomizer
+{
+    /// <summary>
+    /// 全局 Sprite 按需缓存：不再启动时全量扫描并强引用数万个 Sprite（阻止图集纹理卸载），
+    /// 只缓存实际被请求过的名字（命中后 O(1)，未命中的名字记入负缓存避免重复扫描）。
+    /// 全量枚举（图标筛选调试窗）改为现场扫描+去重，不在内存中驻留。
+    /// </summary>
+    public static class SpriteCache
+    {
+        private static readonly Dictionary<string, Sprite> _cache = new Dictionary<string, Sprite>();
+        private static readonly HashSet<string> _misses = new HashSet<string>(System.StringComparer.Ordinal);
+
+        /// <summary>兼容旧调用点：按需缓存模式下无需预构建，保留空实现。</summary>
+        public static void EnsureBuilt()
+        {
+        }
+
+        public static Sprite Find(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            if (_cache.TryGetValue(name, out var sprite)) return sprite;
+            if (_misses.Contains(name)) return null;
+            var all = Resources.FindObjectsOfTypeAll<Sprite>();
+            foreach (var s in all)
+            {
+                if (s == null || string.IsNullOrEmpty(s.name)) continue;
+                if (string.Equals(s.name, name, System.StringComparison.Ordinal))
+                {
+                    _cache[name] = s;
+                    return s;
+                }
+            }
+            _misses.Add(name);
+            return null;
+        }
+
+        /// <summary>返回当前已加载的全部 Sprite 名单（同名去重，现场扫描不驻留），供全量图标搜索使用。</summary>
+        public static IEnumerable<Sprite> GetAll()
+        {
+            var all = Resources.FindObjectsOfTypeAll<Sprite>();
+            var seen = new HashSet<string>(System.StringComparer.Ordinal);
+            var result = new List<Sprite>();
+            foreach (var s in all)
+            {
+                if (s == null || string.IsNullOrEmpty(s.name)) continue;
+                if (seen.Add(s.name)) result.Add(s);
+            }
+            return result;
+        }
+
+        public static void Reset()
+        {
+            _cache.Clear();
+            _misses.Clear();
         }
     }
 }

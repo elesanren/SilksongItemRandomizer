@@ -81,9 +81,10 @@ namespace SilksongItemRandomizer
 
                 string originalName = __instance.name;
 
-                // ★ 丝轴/面具碎片类收集物被随机化替换时，标记原生丝轴静默窗口：
-                //   后续被驱动的 Silk Spool UI 动画流程不播动画/不加碎片/不加上限，但正常走完不卡死。
-                if (originalName.IndexOf("Spool", StringComparison.OrdinalIgnoreCase) >= 0)
+                // ★ 丝轴/面具碎片类收集物被随机化替换时，标记原生碎片静默窗口：
+                //   后续被驱动的碎片 UI 动画流程不播动画/不加碎片/不加上限，但正常走完不卡死。
+                if (originalName.IndexOf("Spool", StringComparison.OrdinalIgnoreCase) >= 0
+                    || string.Equals(originalName, "Heart Piece", StringComparison.OrdinalIgnoreCase))
                     SilkSpoolState.MarkNativeIntercept(5f);
 
                 // ★ 预生成映射：拾取点（PickupPatch）已设置 PendingKey，命中则直接按表给予，
@@ -117,6 +118,11 @@ namespace SilksongItemRandomizer
 
                     // 添加到 UI 显示
                     RecentItemsUI.AddItem(reward);
+
+                    // 碎片世界点（丝轴/面具点）随机化后记持久 key，防重进场景复活
+                    if (originalName.IndexOf("Spool", StringComparison.OrdinalIgnoreCase) >= 0
+                        || string.Equals(originalName, "Heart Piece", StringComparison.OrdinalIgnoreCase))
+                        SpoolPartPatch.TryRecordPiecePoint(originalName);
 
                 }
                 catch (Exception ex)

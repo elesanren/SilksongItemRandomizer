@@ -134,6 +134,7 @@ namespace SilksongItemRandomizer
                     SpoolPart = ItemLimitConfig.LimitSpoolPart,
                     MaxSilkRegenUp = ItemLimitConfig.LimitMaxSilkRegenUp,
                     UnlockCrestSlot = ItemLimitConfig.LimitUnlockCrestSlot,
+                    SimpleKey = ItemLimitConfig.LimitSimpleKey,
                 },
                 InfinitePool = new InfinitePoolSettings
                 {
@@ -222,7 +223,6 @@ namespace SilksongItemRandomizer
                 TrapRandomizer.ClearAndRescan();
                 StartCoroutine(SpawnTrapsAfterSceneLoad());
             }
-            CrestRandomizePatch.OnSceneLoaded(scene, mode);
             MapStationUnlockPatch.OnSceneLoaded(scene);
             LoreTriggerPatch.OnSceneLoaded(scene);
             MossberryRandomizer.OnSceneLoaded(scene, mode);
@@ -247,6 +247,35 @@ namespace SilksongItemRandomizer
                 {
                     Destroy(p.gameObject);
                     Log.LogInfo("场景加载时销毁已标记点: " + key);
+                }
+            }
+            // 碎片世界点（丝轴 Silk Spool / 面具 Heart Piece，PrefabCollectable 场景对象，非 CollectableItemPickup）
+            // 无原生持久标记，仅由模组 global data 记录后在此销毁；Repacked 对象延迟实例化，等一小段再扫
+            yield return new WaitForSeconds(0.3f);
+            bool killAllSpools = SaveData.DestroyedPickupKeys.Contains($"spoolscene:{scene.name}");
+            bool killAllHearts = SaveData.DestroyedPickupKeys.Contains($"heartpiecescene:{scene.name}");
+            foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
+            {
+                if (go == null || go.transform == null || go.scene != scene) continue;
+                if (string.Equals(go.name, "Silk Spool", StringComparison.OrdinalIgnoreCase))
+                {
+                    var pos = go.transform.position;
+                    var key = $"spool:{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
+                    if (killAllSpools || SaveData.DestroyedPickupKeys.Contains(key))
+                    {
+                        Destroy(go);
+                        Log.LogInfo("场景加载时销毁已标记丝轴点: " + key);
+                    }
+                }
+                else if (string.Equals(go.name, "Heart Piece", StringComparison.OrdinalIgnoreCase))
+                {
+                    var pos = go.transform.position;
+                    var key = $"heartpiece:{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
+                    if (killAllHearts || SaveData.DestroyedPickupKeys.Contains(key))
+                    {
+                        Destroy(go);
+                        Log.LogInfo("场景加载时销毁已标记面具点: " + key);
+                    }
                 }
             }
         }

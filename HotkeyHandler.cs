@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using SilksongItemRandomizer;
 using StartingAbilityPicker;
+using GlobalSettings;
+using HutongGames.PlayMaker;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -23,6 +25,39 @@ using Plugin = SilksongItemRandomizer.Plugin;   // 别名，解决命名冲突
 /// F8: 显示/隐藏最近获得物品 UI
 /// F9: 转储所有随机映射到控制台
 /// ESC: 刷新 Benchwarp 菜单
+///
+/// F4: 纹章原生获得弹窗测试（临时代码）：轮流显示 ToolItemManager.GetAllCrests() 中每个纹章的
+///     "获得纹章"原生弹窗，用于验证弹窗调用方式。
+///
+/// F4(当前): 依次发放全部能力（调试用）：按列表顺序每次按 F4 发放一个能力，走官方弹窗链路
+///     （6 能力弹窗 PowerUpGetMsg / 7 技能弹窗 SkillGetMsg / 4 官方横幅 CollectableUIMsg），
+///     发放前重置 pd 字段以便重复测试弹窗效果。
+///
+/// == 纹章原生弹窗技术方案（已实测验证通过, 2026-08-16）==
+/// 落地现状: 机制已实现于 CrestPopupHelper.cs（预制体加载+弹窗调用），随机奖励为纹章时
+///   SavedItemReward.Give 自动弹原生纹章弹窗；下方为当时验证的技术要点。
+/// 1) 预制体来源: AssetBundle "c3ef29e95eda5580682bb076589a723c.bundle"（游戏启动即预加载, 位于
+///    StreamingAssets\aa\StandaloneWindows64\ 下）内的
+///    "Assets/Prefabs/UI/Messages/Tool Crest UI Msg.prefab"（另有两个变体:
+///    "Tool Crest UI Msg Architect Variant.prefab" 建筑师版 / "Tool Crest Upgrade UI Msg.prefab" 升级版）。
+///    注意: 不能直接 AssetBundle.LoadFromFile 加载, Unity 会报 "another AssetBundle with the same
+///    files is already loaded" 拒绝; 必须先遍历 AssetBundle.GetAllLoadedAssetBundles() 按
+///    bundle.name == "c3ef29e95eda5580682bb076589a723c.bundle" 匹配, 再 targetBundle.LoadAsset<GameObject>(路径)。
+///    另外: 该 bundle 与技能弹窗 (Silk_Skill_Get_Prompt.prefab) 是同一个 bundle, 加载方式同
+///    SilkSpearPityPatch.GetSkillMsgPrefab。
+/// 2) 调用链: ToolCrestUIMsg.Spawn(ToolCrest crest, GameObject prefab, Action afterMsg = null)
+///    -> UIMsgBase<ToolCrest>.Spawn 内部: Object.Instantiate(prefab) + StartCoroutine(DoMsg):
+///    显示动画(animator) -> 等待玩家按跳过键 -> 隐藏动画 -> afterMsg() 回调 -> SetActive(false)。
+///    弹窗为自实例化自管理, 无需手动挂到 Canvas 或销毁; 播放期间 UIMsgProxy 会接管暂停/震动/输入。
+/// 3) 纹章数据来源: ToolItemManager.GetAllCrests() 返回全部纹章 List<ToolCrest>（管理器组件序列化
+///    的 ToolCrestList ScriptableObject 列表）; ToolCrest 字段均为私有序列化 + 只读属性
+///    (CrestSprite/DisplayName/GetPromptDesc/ItemNamePrefix/EquipText), Setup 用它填充弹窗文本。
+///    注意: Resources.FindObjectsOfTypeAll<ToolCrest> 只能拿到当前场景已加载的纹章实例(通常只有
+///    当前装备的一个, 如 Hunter), 拿不到全部, 必须用 ToolItemManager.GetAllCrests()。
+/// 4) 原生游戏的触发入口: PlayMaker action HutongGames.PlayMaker.Actions.ShowToolCrestUIMsg
+///    (OnEnter 里调 Spawn), 纹章与 prefab 均来自场景 FSM 变量, 游戏代码侧无其他调用点。
+/// 5) 已知纹章名: Hunter, Hunter_v2, Hunter_v3, Reaper, Wanderer, Warrior, Witch, Toolmaster,
+///    Spell, Cursed, Cloakless 等。
 /// </summary>
 public class HotkeyHandler : MonoBehaviour
 {
@@ -62,19 +97,63 @@ public class HotkeyHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F9))
             Plugin.Instance?.DumpAllMappings();
 
-        // F4 交替自发面具/丝轴碎片（调试用：进半满后去碰原生点，验证原生触发点动画是否被静默拦截）
+        // F4 测试：丝轴 prefab 给予（复现拦截误伤问题，调试用）
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            int n = _f4SelfGiveIndex++ % 2;
-            if (n == 0)
-                NativePickupGiver.GiveHeartPiece();
-            else
-                Plugin.Instance?.StartCoroutine(NativePickupGiver.GiveSpoolPart());
+            Plugin.Log.LogInfo("[F4丝轴测试] 触发 GiveSpoolPart");
+            StartCoroutine(NativePickupGiver.GiveSpoolPart());
         }
-
         if (Input.GetKeyDown(KeyCode.Escape))
             Plugin.Instance?.RefreshBenchwarpUI();
     }
+
+
+    private int _f4MsgCycleIndex;
+
+    /// <summary>F4 测试：依次调用 OfficialMsgHelper 三类官方弹窗（额外槽→丝之心→纹章），循环。</summary>
+    //private void TestOfficialMsgCycle()
+    //{
+    //    try
+    //    {
+    //        switch (_f4MsgCycleIndex++ % 3)
+    //        {
+    //            case 0:
+    //            {
+    //                var slot = _f4MsgCycleIndex % 2 == 0 ? ToolItemType.Blue : ToolItemType.Yellow;
+    //                Plugin.Log.LogInfo($"[F4弹窗循环] 额外槽 {slot}");
+    //                StartingAbilityPicker.OfficialMsgHelper.ShowExtraSlot(slot);
+    //                break;
+    //            }
+    //            case 1:
+    //                Plugin.Log.LogInfo("[F4弹窗循环] 丝之心");
+    //                // 走 ShowBannerPopup 已有映射 "HasSeenSilkHearts" => "SilkHeart"
+    //                // → UiMsgBannerHelper.Show 进 Msg Control FSM StringSwitch，
+    //                // 文案由官方语言表自动填入“已汲取，恢复甲壳内灵丝再生的能力”；
+    //                // 图标由 SIR 侧传官方丝之心图标（SAP bundle 扫描拿不到该 sprite）
+    //                StartingAbilityPicker.SkillRandomizer.ShowBannerPopup("HasSeenSilkHearts",
+    //                    SpriteCache.Find("prompt_silkheart"));
+    //                break;
+    //            case 2:
+    //            {
+    //                var all = ToolItemManager.GetAllCrests();
+    //                if (all == null || all.Count == 0)
+    //                {
+    //                    Plugin.Log.LogError("[F4弹窗循环] 无纹章清单");
+    //                    break;
+    //                }
+    //                var crest = all[_crestPopupIndex++ % all.Count];
+    //                Plugin.Log.LogInfo($"[F4弹窗循环] 纹章 {crest.name}");
+    //                StartingAbilityPicker.OfficialMsgHelper.ShowToolCrest(crest,
+    //                    () => Plugin.Log.LogInfo("[F4弹窗循环] 纹章弹窗结束"));
+    //                break;
+    //            }
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Plugin.Log.LogError($"[F4弹窗循环] 异常: {ex}");
+    //    }
+    //}
 
     // private void GiveSelfFragmentsTest()
     // {
@@ -88,6 +167,750 @@ public class HotkeyHandler : MonoBehaviour
     //         Plugin.Instance?.StartCoroutine(NativePickupGiver.GiveSpoolPart());
     //     }
     // }
+
+
+    /// <summary>
+    /// 依次给予 Slab Key A/B/C，每次按 F4 给下一把，循环。
+    /// 同时设置对应的 HasSlabKey 布尔值，并弹出原生 CollectableUIMsg。
+    /// </summary>
+
+    // ==================== F4 测试：依次给予三把 Slab 钥匙 ====================
+    //private static int _slabKeyIndex = 0;
+
+    ///// <summary>
+    ///// 依次给予 Slab Key A/B/C，每次按 F4 给下一把，循环。
+    ///// 同时设置对应的 HasSlabKey 布尔值，并弹出原生 CollectableUIMsg。
+    ///// </summary>
+    //// 缓存（与 RewardCore 共享同一 bundle 引用，但为了独立测试，各自维护）
+    //private static AssetBundle _testBundle = null;
+    //private static bool _testBundleSearched = false;
+
+    //private void TestGiveSlabKeysInOrder()
+    //{
+    //    try
+    //    {
+    //        var keys = new (string name, string boolField)[]
+    //        {
+    //        ("Slab Key A", "HasSlabKeyA"),
+    //        ("Slab Key B", "HasSlabKeyB"),
+    //        ("Slab Key C", "HasSlabKeyC")
+    //        };
+
+    //        var (keyName, boolField) = keys[_slabKeyIndex % keys.Length];
+    //        _slabKeyIndex++;
+
+    //        // 1. 设置布尔值
+    //        var pd = PlayerData.instance;
+    //        if (pd == null)
+    //        {
+    //            Plugin.Log.LogWarning("[F4测试] PlayerData 不可用");
+    //            return;
+    //        }
+    //        pd.SetBool(boolField, true);
+    //        Plugin.Log.LogInfo($"[F4测试] 设置 {boolField} = true");
+
+    //        // 2. 缓存 bundle（只找一次）
+    //        if (!_testBundleSearched)
+    //        {
+    //            var bundles = AssetBundle.GetAllLoadedAssetBundles();
+    //            string testPath = "Assets/Data Assets/Collectables/Fake Collectables/Slab Key A.asset";
+    //            foreach (var bundle in bundles)
+    //            {
+    //                if (bundle == null) continue;
+    //                var testItem = bundle.LoadAsset<SavedItem>(testPath);
+    //                if (testItem != null)
+    //                {
+    //                    _testBundle = bundle;
+    //                    Plugin.Log.LogInfo($"[F4测试] 缓存 bundle: {bundle.name}");
+    //                    break;
+    //                }
+    //            }
+    //            _testBundleSearched = true;
+    //        }
+
+    //        // 3. 用缓存的 bundle 弹窗
+    //        if (_testBundle != null)
+    //        {
+    //            string path = $"Assets/Data Assets/Collectables/Fake Collectables/{keyName}.asset";
+    //            var item = _testBundle.LoadAsset<SavedItem>(path);
+    //            if (item != null)
+    //            {
+    //                item.Get(true);
+    //                Plugin.Log.LogInfo($"[F4测试] 弹窗显示: {keyName}");
+    //            }
+    //            else
+    //            {
+    //                Plugin.Log.LogWarning($"[F4测试] 从缓存 bundle 加载失败: {keyName}");
+    //            }
+    //        }
+    //        else
+    //        {
+    //            Plugin.Log.LogWarning("[F4测试] 未找到 FakeCollectables bundle");
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Plugin.Log.LogError($"[F4测试] 异常: {ex}");
+    //    }
+    //}
+    private static int _crestPopupIndex;
+
+    // F4 教堂关门动画触发测试：当前场景找 chapel_door_control FSM 及其门对象，
+    // 直接发 DO CLOSE 事件跑原生关门演出（激活 Door DoClose 播关门动画 + SetPlayerDataBool 持久化）。
+    // 找不到门对象/FSM 时输出诊断日志，便于确认场景对象名。
+    private void TestTriggerChapelDoorClose()
+    {
+        try
+        {
+            string scene = SceneManager.GetActiveScene().name;
+            Plugin.Log.LogInfo($"[教堂关门测试] 场景: {scene}");
+
+            GameObject doorDoClose = null, doorClosed = null, doorOpen = null, doorArt = null;
+            List<string> allDoorLike = new();
+            PlayMakerFSM doorFsm = null;
+
+            foreach (GameObject root in SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+                {
+                    string n = child.name;
+                    if (n.IndexOf("Door", StringComparison.OrdinalIgnoreCase) >= 0 || n.IndexOf("door", StringComparison.OrdinalIgnoreCase) >= 0)
+                        allDoorLike.Add(n);
+                    if (n == "Door DoClose" && doorDoClose == null) doorDoClose = child.gameObject;
+                    else if (n == "Door Closed" && doorClosed == null) doorClosed = child.gameObject;
+                    else if (n == "Door Art" && doorArt == null) doorArt = child.gameObject;
+                }
+                foreach (var f in root.GetComponentsInChildren<PlayMakerFSM>(true))
+                {
+                    if (doorFsm == null && f.FsmName == "chapel_door_control")
+                        doorFsm = f;
+                }
+            }
+
+            Plugin.Log.LogInfo($"[教堂关门测试] chapel_door_control FSM: {(doorFsm != null ? doorFsm.gameObject.name : "未找到")}");
+            Plugin.Log.LogInfo($"[教堂关门测试] Door DoClose: {(doorDoClose != null ? doorDoClose.name : "未找到")} | Door Closed: {(doorClosed != null ? doorClosed.name : "未找到")} | Door Art: {(doorArt != null ? doorArt.name : "未找到")}");
+            Plugin.Log.LogInfo($"[教堂关门测试] 场景内 door 相关对象: {string.Join(", ", allDoorLike.Distinct(StringComparer.OrdinalIgnoreCase))}");
+
+            if (doorFsm == null)
+            {
+                Plugin.Log.LogWarning("[教堂关门测试] 无 chapel_door_control FSM，退出");
+                return;
+            }
+
+            Plugin.Log.LogInfo($"[教堂关门测试] FSM 当前状态: {doorFsm.Fsm.ActiveStateName}");
+
+            // 诊断：State Check 判定相关变量与 mod 平替标记
+            try
+            {
+                var vars = doorFsm.Fsm.Variables;
+                var crestType = vars.GetFsmEnum("Crest Type");
+                var crestObj = vars.GetFsmObject("Crest Object");
+                var closedPdBool = vars.GetFsmString("Closed PD Bool");
+                Plugin.Log.LogInfo($"[教堂关门测试] Crest Type: {crestType?.Value} | Crest Object: {crestObj?.Value?.name ?? "空"} | Closed PD Bool: {closedPdBool?.Value ?? "空"}");
+                var pd = PlayerData.instance;
+                if (pd != null)
+                    Plugin.Log.LogInfo($"[教堂关门测试] chapelClosed: reaper={pd.chapelClosed_reaper} wanderer={pd.chapelClosed_wanderer} beast={pd.chapelClosed_beast} witch={pd.chapelClosed_witch} toolmaster={pd.chapelClosed_toolmaster} shaman={pd.chapelClosed_shaman}");
+                try { Plugin.Log.LogInfo($"[教堂关门测试] 平替标记: {string.Join(", ", Plugin.SaveData.ChapelRandomizedCrests)}"); } catch { }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[教堂关门测试] 诊断输出异常: {ex.Message}");
+            }
+
+            // 直接跳进 Do Close 状态演关门（Init/Crest Check 已跑过，变量已就绪）：
+            // SendMessage(door1,SetIsInactive,true) + SetPlayerDataBool + FindNamedChild + SetDeathRespawnV2 -> FINISHED -> Activate Door Close(激活 Door DoClose 播关门动画)
+            doorFsm.Fsm.SetState("Do Close");
+            Plugin.Log.LogInfo("[教堂关门测试] 已 SetState(\"Do Close\")，观察关门动画是否播放");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[教堂关门测试] 异常: {ex}");
+        }
+    }
+
+    // F4 测试：随机发放一个纹章（走正式奖励路径 SavedItemReward.Give：
+    // 解锁 + 原生"获得纹章"弹窗 + 弹窗结束后自动装配动画，与神社演出顺序一致）。
+    // 优先选未解锁纹章（贴近真实获得场景），全部解锁后随机任性发。
+    private void TestGiveRandomCrest()
+    {
+        try
+        {
+            var all = ToolItemManager.GetAllCrests();
+            if (all == null || all.Count == 0)
+            {
+                Plugin.Log.LogError("[F4纹章] ToolItemManager 无纹章清单");
+                return;
+            }
+
+            ToolCrest pick = null;
+            foreach (var c in all)
+            {
+                if (c != null && !c.IsUnlocked) { pick = c; break; }
+            }
+            if (pick == null)
+                pick = all[UnityEngine.Random.Range(0, all.Count)];
+            if (pick == null) return;
+
+            Plugin.Log.LogInfo($"[F4纹章] 随机发放纹章: {pick.name}");
+            var reward = new SavedItemReward(pick);
+            reward.Give();
+            SilksongItemRandomizer.ItemRandomizer.AddGivenCount(reward.Id);
+            SilksongItemRandomizer.ItemRandomizer.RecordMapping("test:F4crest", "reward:" + reward.Id);
+            RecentItemsUI.AddItem(reward);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4纹章] 异常: {ex}");
+        }
+    }
+
+    // F4 测试：依次播放全部技能弹窗 + 全部纹章弹窗（官方弹窗链路：6 能力弹窗 PowerUpGetMsg /
+    // 7 技能弹窗 SkillGetMsg / 4 官方 UI Msg 横幅 + 纹章 ToolCrestUIMsg），每按一次播下一个，
+    // 遍历后循环。技能发放前重置对应 pd 字段，保证重复按 F4 每次都能看到弹窗。
+    private static readonly string[] _testSkillFields = {
+        "hasDash", "hasWalljump", "hasHarpoonDash", "hasNeedolin", "hasSuperJump", "HasSeenEvaHeal",
+        "hasNeedleThrow", "hasThreadSphere", "hasSilkCharge", "hasSilkBomb", "hasSilkBossNeedle",
+        "hasParry", "hasBrolly", "hasDoubleJump", "hasChargeSlash",
+        "hasNeedolinMemoryPowerup", "hasFastTravelTeleport"
+    };
+
+    // ==================== F4 测试：额外槽获得（物品给予 + 官方全屏 UI Msg 弹窗） ====================
+    // 全屏演出 = ExtraToolSlotUIMsg（UIMsgBase 家族全屏弹窗：槽位图标/名称/染色 + 入场动画），
+    // prefab 通过 Addressables 加载（解析全部跨 bundle 依赖：字体/动画/粒子/音效）。
+    // 蓝槽/黄槽轮流。
+    private static int _extraSlotTestIndex = 0;
+    private static bool _slotDepsLoaded;
+
+    /// <summary>全量加载 Addressables bundle（aa/StandaloneWindows64 下所有 .bundle）。
+    /// 关键：AssetBundle 的跨 bundle 引用在"依赖 bundle 已加载"时自动解析完整
+    /// （动画 clip/字体材质/贴图/音效全在依赖 bundle 里）。只做一次。</summary>
+    private static void LoadSlotDependencyBundles()
+    {
+        if (_slotDepsLoaded) return;
+        _slotDepsLoaded = true;
+        try
+        {
+            string dir = System.IO.Path.Combine(Application.streamingAssetsPath, "aa", "StandaloneWindows64");
+            if (!System.IO.Directory.Exists(dir))
+            {
+                Plugin.Log.LogWarning("[F4额外槽] Addressables 目录不存在: " + dir);
+                return;
+            }
+            int ok = 0, fail = 0, skippedScene = 0;
+            foreach (var file in System.IO.Directory.GetFiles(dir, "*.bundle"))
+            {
+                try
+                {
+                    var b = AssetBundle.LoadFromFile(file);
+                    if (b == null) { fail++; continue; }
+                    // 跳过场景 bundle（isStreamedSceneAssetBundle），避免污染场景切换
+                    if (b.isStreamedSceneAssetBundle)
+                    {
+                        b.Unload(false);
+                        skippedScene++;
+                        continue;
+                    }
+                    ok++;
+                }
+                catch { fail++; }
+            }
+            Plugin.Log.LogInfo($"[F4额外槽] 依赖 bundle 全量加载: 成功{ok} 场景跳过{skippedScene} 失败{fail}");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4额外槽] 依赖 bundle 加载异常: {ex.Message}");
+        }
+    }
+
+    private void TestGiveExtraSlot()
+    {
+        try
+        {
+            var pd = PlayerData.instance;
+            if (pd == null)
+            {
+                Plugin.Log.LogError("[F4额外槽] PlayerData 不可用");
+                return;
+            }
+
+            int slot = _extraSlotTestIndex % 2;
+            _extraSlotTestIndex++;
+            string field = slot == 0 ? "UnlockedExtraYellowSlot" : "UnlockedExtraBlueSlot";
+            Plugin.Log.LogInfo($"[F4额外槽] 触发: slot#{_extraSlotTestIndex - 1} field={field} scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+
+            // 1. 物品给予：解锁额外槽字段
+            var fi = typeof(PlayerData).GetField(field, BindingFlags.Instance | BindingFlags.Public);
+            if (fi == null || fi.FieldType != typeof(bool))
+            {
+                Plugin.Log.LogError($"[F4额外槽] 字段不存在: {field}");
+                return;
+            }
+            fi.SetValue(pd, true);
+            Plugin.Log.LogInfo($"[F4额外槽] 物品给予: {field} = true");
+
+            // 2. 弹窗：官方全屏演出 ExtraToolSlotUIMsg.Spawn
+            //    prefab 走 Addressables 加载（游戏自用加载系统，解析全部跨 bundle 依赖：
+            //    字体/动画/材质/音频完整）→ UIMsgBase 全自动演出（Setup 槽位图标/名称/染色
+            //    → Animator 播放入场 → 停留 → 淡出 → 回收）
+            var slotType = slot == 0 ? ToolItemType.Yellow : ToolItemType.Blue;
+            StartCoroutine(SpawnFullScreenSlotMsg(slotType));
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4额外槽] 异常: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 全屏弹窗：走游戏原生完整播放流程
+    /// （UI Msg Crest Evolve prefab 的 Msg Control FSM：设置 Item 字符串变量="Socket 0/1"
+    ///  → startState=Init → StringSwitch 发 SOCKET 1/2 → Set Socket 写标题/正文/前缀本地化文字
+    ///  → Audio Player Actor → Icon Evolve 播放动画+粒子+音效+震动）
+    /// </summary>
+    private System.Collections.IEnumerator SpawnFullScreenSlotMsg(ToolItemType slotType)
+    {
+        var evolvePrefab = AssetChainFixer.ChainFixer.LoadPrefabFixed(
+            "prompts_assets_all.bundle",
+            "Assets/Prefabs/UI/Messages/UI Msg Crest Evolve.prefab",
+            "F4额外槽evolve");
+        if (evolvePrefab == null)
+        {
+            string socketName = slotType == ToolItemType.Yellow ? "Socket 0" : "Socket 1";
+            Plugin.ShowNotification($"解锁 {socketName}！", 3f);
+            yield break;
+        }
+
+        var evo = UnityEngine.Object.Instantiate(evolvePrefab);
+        evo.SetActive(false);
+        evo.transform.position = new UnityEngine.Vector3(0f, 0f, 0f);
+
+        var fsmComp = evo.GetComponentsInChildren<PlayMakerFSM>(true)
+            .FirstOrDefault(f => f.FsmName == "Msg Control");
+        if (fsmComp != null)
+        {
+            var itemVar = fsmComp.FsmVariables.GetFsmString("Item");
+            if (itemVar != null)
+            {
+                string branch = slotType == ToolItemType.Yellow ? "Socket 0" : "Socket 1";
+                itemVar.Value = branch;
+                Plugin.Log.LogInfo($"[F4额外槽] FSM '{fsmComp.FsmName}' 设 Item='{branch}'，激活后 Init→StringSwitch→{(slotType == ToolItemType.Yellow ? "SOCKET 1" : "SOCKET 2")} 分支");
+            }
+            else Plugin.Log.LogWarning("[F4额外槽] FSM 无 Item 字符串变量");
+        }
+        else Plugin.Log.LogWarning("[F4额外槽] 未找到 Msg Control FSM");
+
+        Plugin.Log.LogInfo("[F4额外槽] 激活 evolve prefab，Msg Control FSM startState=Init 自动演出");
+        evo.SetActive(true);
+        StartCoroutine(DiagnoseBg(evo));
+        StartCoroutine(HideEvolveVisualLater(evo, fsmComp));
+    }
+
+    private System.Collections.IEnumerator DiagnoseBg(GameObject evo)
+    {
+        yield return new UnityEngine.WaitForSeconds(0.5f);
+        if (evo == null) yield break;
+        var bg = evo.transform.Find("BG");
+        if (bg == null)
+        {
+            Plugin.Log.LogWarning("[F4额外槽] 未找到 BG 子物体");
+            yield break;
+        }
+        var sr = bg.GetComponent<SpriteRenderer>();
+        var anim = bg.GetComponent<Animator>();
+        var fsm = bg.GetComponent<PlayMakerFSM>();
+        Plugin.Log.LogInfo($"[F4额外槽] BG pos={bg.position} active={bg.gameObject.activeSelf} sr={(sr != null ? $"sprite={sr.sprite?.name} enabled={sr.enabled} color={sr.color} sortingL={sr.sortingLayerName} order={sr.sortingOrder}" : "NULL")} anim={(anim != null ? $"ctrl={anim.runtimeAnimatorController?.name} enabled={anim.enabled}" : "NULL")} fsm={(fsm != null ? $"{fsm.FsmName}/{fsm.ActiveStateName}" : "NULL")}");
+        foreach (var c in bg.GetComponents<Component>())
+            Plugin.Log.LogInfo($"[F4额外槽] BG 组件: {c.GetType().Name}");
+    }
+
+    private System.Collections.IEnumerator HideEvolveVisualLater(GameObject evo, PlayMakerFSM controlFsm)
+    {
+        yield return new UnityEngine.WaitForSeconds(7.5f);
+        if (evo == null) yield break;
+
+        Plugin.Log.LogInfo("[F4额外槽] 演出超时，发 PRESS 让 FSM 走完还原流程 (Detect→Down→Done)");
+        if (controlFsm != null)
+        {
+            try
+            {
+                controlFsm.SendEvent("PRESS");
+                Plugin.Log.LogInfo($"[F4额外槽] 已发 PRESS，当前状态: {controlFsm.Fsm.ActiveStateName}");
+            }
+            catch (System.Exception ex) { Plugin.Log.LogWarning($"[F4额外槽] 发 PRESS 异常: {ex.Message}"); }
+        }
+
+        float t = 0f;
+        while (t < 3f && evo != null)
+        {
+            t += Time.deltaTime;
+            if (controlFsm != null && controlFsm.Fsm.ActiveStateName == "Done")
+            {
+                Plugin.Log.LogInfo("[F4额外槽] FSM 已到 Done（还原完成）");
+                break;
+            }
+            yield return null;
+        }
+
+        RestoreMsgInputState();
+
+        if (evo != null)
+        {
+            evo.SetActive(false);
+            UnityEngine.Object.Destroy(evo);
+            Plugin.Log.LogInfo("[F4额外槽] evolve 视觉已回收");
+        }
+    }
+
+    /// <summary>兜底还原弹窗造成的输入/暂停阻塞（原生 Done 状态走 UIMsgProxy.SetIsInMsg(false)）。</summary>
+    private static void RestoreMsgInputState()
+    {
+        try
+        {
+            var proxies = UnityEngine.Object.FindObjectsOfType<UIMsgProxy>(true);
+            foreach (var p in proxies)
+            {
+                p.SetIsInMsg(false);
+                Plugin.Log.LogInfo($"[F4额外槽] 兜底还原 UIMsgProxy '{p.name}' SetIsInMsg(false)");
+            }
+            if (proxies.Length == 0)
+                Plugin.Log.LogInfo("[F4额外槽] 未找到 UIMsgProxy，跳过兜底还原");
+
+            try
+            {
+                var pd = PlayerData.instance;
+                var inp = InventoryPaneInput.IsInputBlocked;
+                var pickup = CollectableItemPickup.IsPickupPaused;
+                Plugin.Log.LogInfo($"[F4额外槽] 还原后状态: disablePause={pd.disablePause} IsInputBlocked={inp} IsPickupPaused={pickup}");
+            }
+            catch (System.Exception ex2) { Plugin.Log.LogWarning($"[F4额外槽] 还原后状态读取异常: {ex2.Message}"); }
+
+            try
+            {
+                if (PlayerData.instance != null && PlayerData.instance.disablePause)
+                {
+                    PlayerData.instance.disablePause = false;
+                    Plugin.Log.LogInfo("[F4额外槽] 强制还原 disablePause=false（FSM 未走完 SetIsInMsg 还原链）");
+                }
+            }
+            catch (System.Exception ex3) { Plugin.Log.LogWarning($"[F4额外槽] 强制还原 disablePause 异常: {ex3.Message}"); }
+        }
+        catch (System.Exception ex) { Plugin.Log.LogWarning($"[F4额外槽] 兜底还原异常: {ex.Message}"); }
+    }
+
+    /// <summary>逐帧转储 FSM 状态（仅打印变化）与 Icon 爆炸对象激活状态，定位演出卡点（调试用）。</summary>
+    private System.Collections.IEnumerator TraceSlotFsm(GameObject go, PlayMakerFSM controlFsm)
+    {
+        if (go == null) yield break;
+        string outPath = Path.Combine(BepInEx.Paths.PluginPath, $"crest_evolve_trace_{DateTime.Now:HHmmssfff}.txt");
+        DumpGameObjectStructure(go, outPath);
+        var icon = go.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
+        var targetAnim = go.transform.Find("Tool_Socket_Evolve_lvl1")?.GetComponent<Animator>();
+        string lastState = null;
+        for (int frame = 1; frame <= 90; frame++)
+        {
+            yield return null;
+            if (go == null) { Plugin.Log.LogInfo("[F4额外槽] 弹窗已销毁"); yield break; }
+            string state = controlFsm != null ? (controlFsm.Fsm.ActiveStateName ?? "none") : "noCtrl";
+            string iconActive = icon != null ? icon.gameObject.activeInHierarchy.ToString() : "noIcon";
+            string animInfo = "noLvl1Anim";
+            if (targetAnim != null)
+            {
+                var st = targetAnim.GetCurrentAnimatorStateInfo(0);
+                string iconSprite = "noIcon";
+                if (icon != null)
+                {
+                    var sr = icon.GetComponent<SpriteRenderer>();
+                    iconSprite = sr == null ? "noSR" : (sr.sprite != null ? sr.sprite.name : "nullSprite");
+                }
+                animInfo = $"animOn={targetAnim.isActiveAndEnabled} normTime={st.normalizedTime:F2} stateHash={st.fullPathHash} clip={targetAnim.GetCurrentAnimatorClipInfo(0).Length} icon={iconSprite}";
+            }
+            string line = $"state={state} icon={iconActive} | {animInfo}";
+            if (state != lastState || frame <= 3 || frame % 10 == 0)
+            {
+                Plugin.Log.LogInfo($"[F4额外槽] 帧{frame}: {line}");
+                lastState = state;
+            }
+            if (state == "Done" || state == "Finished" || state == "Stop") break;
+        }
+    }
+
+    /// <summary>导出 GameObject 完整结构（树、组件、FSM 变量、Animator、Sprite 等）到文本文件。</summary>
+    private void DumpGameObjectStructure(GameObject root, string outputPath)
+    {
+        if (root == null) return;
+        try
+        {
+            using (var writer = new StreamWriter(outputPath, false, Encoding.UTF8))
+            {
+                writer.WriteLine($"=== GameObject 结构导出: {root.name} ===");
+                writer.WriteLine($"时间: {DateTime.Now:HH:mm:ss.fff}");
+                writer.WriteLine($"Active Self: {root.activeSelf}  Active In Hierarchy: {root.activeInHierarchy}");
+                writer.WriteLine($"场景: {root.scene.name}");
+                writer.WriteLine($"层: {LayerMask.LayerToName(root.layer)}");
+                writer.WriteLine();
+                DumpTransformRecursive(root.transform, writer, 0);
+            }
+            Plugin.Log.LogInfo($"[结构导出] 已保存到: {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[结构导出] 失败: {ex}");
+        }
+    }
+
+    private void DumpTransformRecursive(Transform t, StreamWriter writer, int depth)
+    {
+        string indent = new string(' ', depth * 2);
+        writer.WriteLine($"{indent}[{depth}] ─ {t.name}");
+        writer.WriteLine($"{indent}   Position: {t.localPosition}  Rotation: {t.localEulerAngles}  Scale: {t.localScale}");
+        writer.WriteLine($"{indent}   Active Self: {t.gameObject.activeSelf}  Active In Hierarchy: {t.gameObject.activeInHierarchy}");
+        writer.WriteLine($"{indent}   Tag: {t.tag}  Layer: {LayerMask.LayerToName(t.gameObject.layer)}");
+
+        var components = t.GetComponents<Component>();
+        writer.WriteLine($"{indent}   Components ({components.Length}):");
+        foreach (var comp in components)
+        {
+            if (comp == null)
+            {
+                writer.WriteLine($"{indent}     - (missing)");
+                continue;
+            }
+            string compType = comp.GetType().FullName;
+            writer.WriteLine($"{indent}     - {compType}");
+            DumpComponentDetail(comp, writer, indent + "       ");
+        }
+
+        foreach (Transform child in t)
+        {
+            DumpTransformRecursive(child, writer, depth + 1);
+        }
+    }
+
+    private void DumpComponentDetail(Component comp, StreamWriter writer, string indent)
+    {
+        try
+        {
+            if (comp is Animator anim)
+            {
+                writer.WriteLine($"{indent}Animator:");
+                writer.WriteLine($"{indent}  Controller: {(anim.runtimeAnimatorController != null ? anim.runtimeAnimatorController.name : "NULL")}");
+                writer.WriteLine($"{indent}  Avatar: {(anim.avatar != null ? anim.avatar.name : "NULL")}");
+                writer.WriteLine($"{indent}  Root Motion: {anim.applyRootMotion}");
+                writer.WriteLine($"{indent}  Update Mode: {anim.updateMode}");
+                writer.WriteLine($"{indent}  Enabled: {anim.enabled}");
+                if (anim.runtimeAnimatorController != null)
+                {
+                    var layers = anim.layerCount;
+                    writer.WriteLine($"{indent}  Layers: {layers}");
+                    for (int i = 0; i < layers; i++)
+                    {
+                        writer.WriteLine($"{indent}    Layer[{i}]: {anim.GetLayerName(i)}  weight={anim.GetLayerWeight(i)}");
+                    }
+                    var parameters = anim.parameters;
+                    writer.WriteLine($"{indent}  Parameters: {parameters.Length}");
+                    foreach (var p in parameters)
+                    {
+                        writer.WriteLine($"{indent}    {p.name} ({p.type}) = {GetAnimatorParamValue(anim, p)}");
+                    }
+                }
+                return;
+            }
+
+            if (comp is SpriteRenderer sr)
+            {
+                writer.WriteLine($"{indent}SpriteRenderer:");
+                writer.WriteLine($"{indent}  Sprite: {(sr.sprite != null ? sr.sprite.name : "NULL")}");
+                writer.WriteLine($"{indent}  Color: {sr.color}");
+                writer.WriteLine($"{indent}  Material: {(sr.sharedMaterial != null ? sr.sharedMaterial.name : "NULL")}");
+                writer.WriteLine($"{indent}  Sorting Layer: {sr.sortingLayerName}  Order: {sr.sortingOrder}");
+                writer.WriteLine($"{indent}  Flip X: {sr.flipX}  Flip Y: {sr.flipY}");
+                return;
+            }
+
+            if (comp is PlayMakerFSM fsm)
+            {
+                writer.WriteLine($"{indent}PlayMakerFSM:");
+                writer.WriteLine($"{indent}  FSM Name: {fsm.FsmName}");
+                writer.WriteLine($"{indent}  Active State: {fsm.ActiveStateName}");
+                writer.WriteLine($"{indent}  Start State: {(fsm.Fsm != null ? fsm.Fsm.StartState : "NULL")}");
+                writer.WriteLine($"{indent}  Enabled: {fsm.enabled}");
+                writer.WriteLine($"{indent}  Variables:");
+                if (fsm.Fsm != null && fsm.Fsm.Variables != null)
+                {
+                    var vars = fsm.Fsm.Variables;
+                    foreach (var f in vars.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (!f.FieldType.Name.StartsWith("Fsm")) continue;
+                        var v = f.GetValue(vars);
+                        if (v == null) continue;
+                        string val = GetFsmVariableValue(v);
+                        writer.WriteLine($"{indent}    {f.Name} ({f.FieldType.Name}) = {val}");
+                    }
+                }
+                return;
+            }
+
+            if (comp is Canvas canvas)
+            {
+                writer.WriteLine($"{indent}Canvas:");
+                writer.WriteLine($"{indent}  Render Mode: {canvas.renderMode}");
+                writer.WriteLine($"{indent}  World Camera: {(canvas.worldCamera != null ? canvas.worldCamera.name : "NULL")}");
+                writer.WriteLine($"{indent}  Pixel Perfect: {canvas.pixelPerfect}");
+                writer.WriteLine($"{indent}  Sort Order: {canvas.sortingOrder}");
+                writer.WriteLine($"{indent}  Scale Factor: {canvas.scaleFactor}");
+                return;
+            }
+
+            if (comp is AudioSource au)
+            {
+                writer.WriteLine($"{indent}AudioSource:");
+                writer.WriteLine($"{indent}  Clip: {(au.clip != null ? au.clip.name : "NULL")}");
+                writer.WriteLine($"{indent}  Loop: {au.loop}  Mute: {au.mute}");
+                writer.WriteLine($"{indent}  Volume: {au.volume}  Pitch: {au.pitch}");
+                return;
+            }
+
+            if (comp is ParticleSystem ps)
+            {
+                writer.WriteLine($"{indent}ParticleSystem:");
+                writer.WriteLine($"{indent}  Enabled: {ps.isPlaying}");
+                writer.WriteLine($"{indent}  Main: startLifetime={ps.main.startLifetime.constant}  startSpeed={ps.main.startSpeed.constant}");
+                writer.WriteLine($"{indent}  Emission: rate={ps.emission.rateOverTime.constant}  enabled={ps.emission.enabled}");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            writer.WriteLine($"{indent}  [组件详情输出异常: {ex.Message}]");
+        }
+    }
+
+    private string GetAnimatorParamValue(Animator anim, AnimatorControllerParameter p)
+    {
+        try
+        {
+            switch (p.type)
+            {
+                case AnimatorControllerParameterType.Float: return anim.GetFloat(p.nameHash).ToString("F3");
+                case AnimatorControllerParameterType.Int: return anim.GetInteger(p.nameHash).ToString();
+                case AnimatorControllerParameterType.Bool: return anim.GetBool(p.nameHash).ToString();
+                case AnimatorControllerParameterType.Trigger: return "Trigger";
+                default: return "?";
+            }
+        }
+        catch { return "获取失败"; }
+    }
+
+    private string GetFsmVariableValue(object v)
+    {
+        if (v == null) return "null";
+        try
+        {
+            var prop = v.GetType().GetProperty("Value");
+            if (prop != null)
+            {
+                var val = prop.GetValue(v);
+                return val != null ? val.ToString() : "null";
+            }
+            var field = v.GetType().GetField("Value");
+            if (field != null)
+            {
+                var val = field.GetValue(v);
+                return val != null ? val.ToString() : "null";
+            }
+            return v.ToString();
+        }
+        catch { return "??"; }
+    }
+
+    private void TestGiveSkillsInOrder()
+    {
+        try
+        {
+            var pd = PlayerData.instance;
+            if (pd == null)
+            {
+                Plugin.Log.LogError("[F4弹窗测试] PlayerData 为空");
+                return;
+            }
+
+            // 测试序列：全部技能字段 + 全部纹章名，依次播放
+            var crestNames = new List<string>();
+            try
+            {
+                var all = ToolItemManager.GetAllCrests();
+                if (all != null)
+                    foreach (var c in all)
+                        if (c != null && !string.IsNullOrEmpty(c.name))
+                            crestNames.Add(c.name);
+            }
+            catch { }
+
+            int total = _testSkillFields.Length + crestNames.Count;
+            if (total == 0)
+            {
+                Plugin.Log.LogError("[F4弹窗测试] 测试序列为空");
+                return;
+            }
+            int idx = _f4SelfGiveIndex % total;
+            _f4SelfGiveIndex++;
+
+            if (idx < _testSkillFields.Length)
+            {
+                string field = _testSkillFields[idx];
+                // 重置 pd 字段（含关联字段），保证每次都能看到弹窗
+                ResetPdBoolForTest(pd, field);
+                if (field == "HasSeenEvaHeal")
+                    ResetPdBoolForTest(pd, "HasBoundCrestUpgrader");
+                Plugin.Log.LogInfo($"[F4弹窗测试] 技能 #{_f4SelfGiveIndex}/{total}: {field}");
+                StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill(field);
+            }
+            else
+            {
+                string crestName = crestNames[idx - _testSkillFields.Length];
+                Plugin.Log.LogInfo($"[F4弹窗测试] 纹章 #{_f4SelfGiveIndex}/{total}: {crestName}");
+                StartingAbilityPicker.OfficialMsgHelper.ShowToolCrestByName(crestName);
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4弹窗测试] 异常: {ex}");
+        }
+    }
+
+    private static void ResetPdBoolForTest(PlayerData pd, string field)
+    {
+        try
+        {
+            var fi = typeof(PlayerData).GetField(field, BindingFlags.Instance | BindingFlags.Public);
+            if (fi != null && fi.FieldType == typeof(bool))
+                fi.SetValue(pd, false);
+        }
+        catch { }
+    }
+
+    // F4 测试：轮流显示全部纹章的原生获得弹窗（复用正式机制的 CrestPopupHelper）
+    private void TestShowCrestPopup()
+    {
+        try
+        {
+            var all = ToolItemManager.GetAllCrests();
+            if (all == null || all.Count == 0)
+            {
+                Plugin.Log.LogError("[纹章弹窗] ToolItemManager 无纹章清单");
+                return;
+            }
+
+            var crest = all[_crestPopupIndex % all.Count];
+            _crestPopupIndex++;
+
+            StartingAbilityPicker.OfficialMsgHelper.ShowToolCrest(crest, () => Plugin.Log.LogInfo("[纹章弹窗] 弹窗结束"));
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[纹章弹窗] 异常: {ex}");
+        }
+    }
 
     private void TestUnlockEvaHeal()
     {
@@ -1240,19 +2063,19 @@ public class HotkeyHandler : MonoBehaviour
                                 int foundHere = 0;   // 本场景新增写入的连接对数
                                 int totalHere = 0;   // 本场景实际扫到的门总数（含反向已记录的）
                                 foreach (GameObject root in scene.GetRootGameObjects())
-                                foreach (TransitionPoint tp in root.GetComponentsInChildren<TransitionPoint>(true))
-                                {
-                                    if (tp == null || string.IsNullOrEmpty(tp.targetScene)) continue;
-                                    totalHere++;
-                                    string keyA = e.name + "|" + tp.gameObject.name;
-                                    string keyB = tp.targetScene + "|" + (tp.entryPoint ?? "");
-                                    // 无方向键去重：同一对连接只输出一次
-                                    string pairKey = string.CompareOrdinal(keyA, keyB) <= 0 ? keyA + "<->" + keyB : keyB + "<->" + keyA;
-                                    if (!seenPairs.Add(pairKey)) continue;
-                                    writer.WriteLine($"{keyA}|{tp.targetScene}|{tp.entryPoint}");
-                                    pairCount++;
-                                    foundHere++;
-                                }
+                                    foreach (TransitionPoint tp in root.GetComponentsInChildren<TransitionPoint>(true))
+                                    {
+                                        if (tp == null || string.IsNullOrEmpty(tp.targetScene)) continue;
+                                        totalHere++;
+                                        string keyA = e.name + "|" + tp.gameObject.name;
+                                        string keyB = tp.targetScene + "|" + (tp.entryPoint ?? "");
+                                        // 无方向键去重：同一对连接只输出一次
+                                        string pairKey = string.CompareOrdinal(keyA, keyB) <= 0 ? keyA + "<->" + keyB : keyB + "<->" + keyA;
+                                        if (!seenPairs.Add(pairKey)) continue;
+                                        writer.WriteLine($"{keyA}|{tp.targetScene}|{tp.entryPoint}");
+                                        pairCount++;
+                                        foundHere++;
+                                    }
                                 sceneCount++;
                             }
                             else

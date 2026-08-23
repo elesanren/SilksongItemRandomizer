@@ -1,0 +1,14 @@
+{
+ "catalog_bin": "D:\\Steam\\steamapps\\common\\Hollow Knight Silksong\\Hollow Knight Silksong_Data\\StreamingAssets\\aa\\catalog.bin",
+ "catalog_string_count": 13068,
+ "sprite_count": 20520,
+ "cab_count": 521,
+ "generated_unix": 1787116911,
+ "files": {
+  "catalog_full.json": "catalog.bin 全量可读字符串（含类型分类）",
+  "catalog_strings.json": "catalog.bin 纯字符串列表",
+  "all_atlas_sprites.json": "全部 spriteatlas bundle 的 sprite 全表（bundle/atlas/texture/pathID/name）",
+  "cab_map.json": "CAB 哈希 → bundle 文件映射（用于解析 clip 的 fileID 跨文件引用）",
+  "prompts_clip_refs.json": "prompts_assets_all 各 clip 的 pptr 曲线引用（sprite 引用目标）"
+ }
+}

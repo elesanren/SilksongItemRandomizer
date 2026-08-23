@@ -1,10 +1,12 @@
-// CrestRandomizer.cs - 修复后的完整版本
-using System;
+﻿using Random = System.Random;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System;
 using UnityEngine;
-using Random = System.Random;
+
+// CrestRandomizer.cs - 修复后的完整版本
 
 namespace SilksongItemRandomizer
 {
@@ -264,3 +266,4 @@ namespace SilksongItemRandomizer
         }
     }
 }
+
