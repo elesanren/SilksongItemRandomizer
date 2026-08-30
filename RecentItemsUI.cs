@@ -1,251 +1,335 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using GlobalEnums;
 using StartingAbilityPicker;
+using TeamCherry.Localization;
+using TMProOld;
 using UnityEngine;
 
 namespace SilksongItemRandomizer
 {
     /// <summary>
-    /// 最近获得物品 UI 显示
-    /// 改造后：不再依赖 Plugin 的静态字段，仅依赖 ItemRandomizer 和本地化
-    /// 保留所有原有功能：最多显示5个最近获得的物品，自动隐藏，可手动开关
+    /// 最近获得物品 UI——像素级仿一代 RecentItemsDisplay mod 的 UI 风格：
+    ///   - 右上角常驻堆叠列表：标题 "Recent Items"，每条 = 图标(50x50) + 两行文字(名字 / from 区域)
+    ///   - 条目 200x50、图标锚 (-0.1,0.5)、文字 400x100 字号24 锚 (1.1,0.5)、行距 0.06（比例锚点，随分辨率缩放）
+    ///   - 新条目在顶部，旧条目依次下移；队列容量 10（超出销毁最旧），同屏最多显示 5 条（超出隐藏不销毁）
+    ///   - 纯静态布局：仅 AddItem 时重排一次；CanvasGroup 不拦截输入，组件 raycastTarget 全关
+    ///   - 持久化最近 10 条 {图标名, 文本} 到 GlobalSaveData，进游戏后重放
     /// </summary>
     public static class RecentItemsUI
     {
-        private static readonly Queue<IRandomReward> RecentRewards = new();
-        private const int MaxItems = 5;
-        private static bool _showWindow;
-        private static float _hideTime;
+        private const int MaxStored = 10;   // 队列容量/持久化条数（超出移除最旧）
+        private const int MaxVisible = 5;   // 同屏最多显示条数（与原 mod 默认 MaxItems 一致）
 
-        private static readonly Dictionary<string, Sprite> _iconCache = new();
-        private static Sprite _defaultFallbackIcon;
+        // 原 mod GlobalSettings.DefaultAnchor = (0.9, 0.9)
+        private static readonly Vector2 AnchorPoint = new(0.9f, 0.9f);
 
-        public static bool IsVisible => _showWindow;
+        private static GameObject _canvas;
+        private static readonly Queue<GameObject> _items = new();
+        private static bool _restorePending = true;
+        private static bool _visible = true;
+        private static TMP_FontAsset _font;       // 条目正文：当前语言 body 字体
+        private static TMP_FontAsset _titleFont;  // 标题：Trajan（官方弹窗标题同款，仅大写字形）
+        // 存档历史条目暂存区：与旧版时机一致——进游戏不显示，
+        // 首次真实获得物品时才连历史一起铺开
+        private static readonly List<KeyValuePair<string, string>> _pendingRestore = new();
 
-        public static void AddItem(SavedItem item) => AddItem(new SavedItemReward(item));
+        public static bool IsVisible => _visible && _canvas != null && _canvas.activeSelf;
+
+        /// <summary>记录一条奖励（兼容原签名：全部 8 个调用点传 IRandomReward）。
+        /// 文本格式仿原 mod DEFAULT_MESSAGE_FORMAT "{0}&lt;br&gt;from {1}"：
+        /// 名字取 DisplayName，来源取当前地图区域官方译名（GameMap 同款取法）。</summary>
         public static void AddItem(IRandomReward reward)
         {
             if (reward == null) return;
-            RecentRewards.Enqueue(reward);
-            while (RecentRewards.Count > MaxItems) RecentRewards.Dequeue();
-            _showWindow = true;
-            _hideTime = float.MaxValue;
+            string name;
+            try { name = reward.DisplayName ?? reward.Id; }
+            catch { name = reward.Id; }
+            Sprite icon = null;
+            try { icon = reward.Icon; }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 取图标失败: {reward.Id} - {ex.Message}"); }
+            AddEntry(icon != null ? icon.name : "", name, GetCurrentAreaName());
+        }
+
+        /// <summary>进游戏后把存档历史条目暂存（由 Plugin 在随机器就绪后调用一次）。
+        /// 不建 UI 不显示；首次 AddItem 时才连同历史一起铺开，时机与旧版一致。</summary>
+        public static void RestoreFromSave()
+        {
+            if (!_restorePending) return;
+            _restorePending = false;
+            try
+            {
+                foreach (var e in Plugin.SaveData.RecentItemList)
+                    _pendingRestore.Add(new KeyValuePair<string, string>(e?.IconName, e?.Text ?? ""));
+            }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 重放暂存失败: {ex.Message}"); }
         }
 
         public static void Toggle()
         {
-            _showWindow = !_showWindow;
-            if (_showWindow) _hideTime = float.MaxValue;
+            _visible = !_visible;
+            ApplyVisibility();
         }
 
-        public static void Draw()
+        // ========== 内部 ==========
+
+        private static void AddEntry(string iconName, string displayName, string source)
         {
-            if (!_showWindow) return;
-            // 固定吸附右上角；背景透明，高度由内容自适应
-            const float w = 500f;
-            GUILayout.BeginArea(new Rect(Screen.width - w - 6f, 6f, w, Mathf.Max(Screen.height - 12f, 80f)));
+            // 原 mod GetMessage(): "{名字}<br>from {来源}"，无来源时只显示名字
+            string text = string.IsNullOrEmpty(source) ? displayName : $"{displayName}\nfrom {source}";
+
             try
             {
-                GUILayout.BeginVertical();
-                GUILayout.Label("Recent Item", GetTitleStyle());
-                GUILayout.Space(4f);
-                foreach (var reward in RecentRewards)
+                var list = Plugin.SaveData.RecentItemList;
+                list.Add(new RecentItemsEntry { IconName = iconName ?? "", Text = text ?? "" });
+                while (list.Count > MaxStored) list.RemoveAt(0);
+                Plugin.SaveGlobalData();
+            }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 落盘失败: {ex.Message}"); }
+
+            // 首次真实获得物品：先把存档历史条目补建出来（隐藏在队列尾部，超出可见数的自然不显示）
+            if (_pendingRestore.Count > 0)
+            {
+                foreach (var p in _pendingRestore)
                 {
-                    try
-                    {
-                        DrawRewardItem(reward);
-                    }
-                    catch (Exception ex)
-                    {
-                        Plugin.Log.LogError($"绘制奖励失败: {reward?.Id} - {ex.Message}");
-                        GUILayout.Label("❌ 显示错误");
-                    }
+                    EnsureCanvas();
+                    if (_canvas == null) return;
+                    BuildEntry(FindSprite(p.Key), p.Value);
                 }
-                GUILayout.EndVertical();
+                _pendingRestore.Clear();
             }
-            finally
+
+            EnsureCanvas();
+            if (_canvas == null) return;
+
+            BuildEntry(FindSprite(iconName), text);
+            if (_items.Count > MaxStored)
             {
-                GUILayout.EndArea();
+                UnityEngine.Object.Destroy(_items.Dequeue());
             }
+            UpdatePositions();
         }
 
-        private static GUIStyle _bodyLabelStyle;
-        private static GUIStyle GetBodyLabelStyle()
-        {
-            if (_bodyLabelStyle == null)
-            {
-                _bodyLabelStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 22,
-                    alignment = TextAnchor.MiddleLeft,
-                };
-            }
-            return _bodyLabelStyle;
-        }
-
-        private static GUIStyle _titleStyle;
-        private static GUIStyle GetTitleStyle()
-        {
-            if (_titleStyle == null)
-            {
-                _titleStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 26,
-                    fontStyle = FontStyle.Bold,
-                    alignment = TextAnchor.MiddleCenter,
-                };
-            }
-            return _titleStyle;
-        }
-
-        private static GUIStyle _fallbackQuestionStyle;
-        private static GUIStyle GetFallbackQuestionStyle()
-        {
-            if (_fallbackQuestionStyle == null)
-            {
-                _fallbackQuestionStyle = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 28,
-                };
-            }
-            return _fallbackQuestionStyle;
-        }
-
-        private static void DrawRewardItem(IRandomReward reward)
-        {
-            GUILayout.BeginHorizontal();
-
-            Sprite icon = GetIconForReward(reward);
-            if (icon == null) icon = GetDefaultFallbackIcon();
-
-            const float iconWidth = 96f;
-            const float iconHeight = 96f;
-            Rect texCoords = new Rect(0, 0, 1, 1);
-            Rect texRect;
-            if (icon != null && icon.texture != null)
-            {
-                texRect = icon.textureRect;
-                float texW = icon.texture.width;
-                float texH = icon.texture.height;
-                texCoords = new Rect(texRect.x / texW, texRect.y / texH, texRect.width / texW, texRect.height / texH);
-            }
-
-            Rect iconRect = GUILayoutUtility.GetRect(iconWidth, iconHeight, GUILayout.Width(iconWidth), GUILayout.Height(iconHeight));
-            if (icon != null && icon.texture != null)
-            {
-                if (icon.name == "bellbench_toll_machine")
-                    texCoords = new Rect(texCoords.x + texCoords.width, texCoords.y + texCoords.height, -texCoords.width, -texCoords.height);
-                GUI.DrawTextureWithTexCoords(iconRect, icon.texture, texCoords);
-            }
-            else
-            {
-                GUI.Box(iconRect, "");
-                GUI.Label(iconRect, "?", GetFallbackQuestionStyle());
-            }
-
-            string displayName;
-            try { displayName = reward.DisplayName; }
-            catch { displayName = reward.Id; }
-            GUILayout.Space(12f);
-            GUILayout.Label(displayName, GetBodyLabelStyle(), GUILayout.Height(iconHeight));
-            GUILayout.EndHorizontal();
-        }
-
-        private static Sprite GetIconForReward(IRandomReward reward)
+        /// <summary>当前地图区域的官方译名（GameMap.cs:624 同款取法），失败回退空串。</summary>
+        private static string GetCurrentAreaName()
         {
             try
             {
-                // 类型图标覆盖（lore 触发按对象分类的图标）优先，且不参与按 Id 的缓存
-                if (reward is IconOverrideReward overrideReward)
-                    return overrideReward.Icon;
+                var gm = GameManager.instance;
+                if (gm == null) return "";
+                MapZone zone = gm.GetCurrentMapZoneEnum();
+                return Language.Get(zone.ToString(), "Map Zones").Replace("<br>", "");
+            }
+            catch { return ""; }
+        }
 
-                if (reward is SavedItemReward saved)
-                {
-                    try { return saved.Icon; }
-                    catch { return null; }
-                }
+        private static void EnsureCanvas()
+        {
+            if (_canvas != null) return;
+            try
+            {
+                _canvas = new GameObject("RecentItemsCanvas");
+                UnityEngine.Object.DontDestroyOnLoad(_canvas);
 
-                // 奖励自带图标优先（虚拟奖励/权限奖励配置的图标），仅在为空时回退到 displayName 关键字匹配
-                try
-                {
-                    Sprite own = reward.Icon;
-                    if (own != null) return own;
-                }
-                catch (Exception) { }
+                var canvas = _canvas.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 1000;
+                // Silksong 的 uGUI 为 package 版：CanvasScaler 在 UnityEngine.UI 命名空间
+                var scaler = _canvas.AddComponent<UnityEngine.UI.CanvasScaler>();
+                scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 1f;
+                var group = _canvas.AddComponent<CanvasGroup>();
+                group.interactable = false;
+                group.blocksRaycasts = false;
 
-                if (_iconCache.TryGetValue(reward.Id, out var cached))
-                    return cached;
+                if (_font == null) ResolveFont();
 
-                Sprite found = null;
-                string displayName = reward.DisplayName;
-
-                if (displayName.Contains(Locale.Get("灵丝")))
-                    found = FindSprite("silk_heart_inv_icon");
-                else if (displayName.Contains(Locale.Get("生命")))
-                    found = FindSprite("Inv_health_backboard_SS");
-                else if (displayName.Contains(Locale.Get("念珠")))
-                    found = FindSprite("coinget_01");
-                else if (displayName.Contains(Locale.Get("甲壳")))
-                    found = FindSprite("Shell_shard_icon");
-                else if (displayName.Contains(Locale.Get("蓝血")))
-                    found = FindSprite("Icon_Inv_Blue_Health_Blood");
-                else if (displayName.Contains(Locale.Get("灵丝碎片")))
-                    found = FindSprite("silk_heart_inv_icon_empty");
-                else if (displayName.Contains(Locale.Get("丝轴碎片")))
-                    found = FindSprite("spool_upgrade_pickup");
-                else if (displayName.Contains(Locale.Get("面具碎片")))
-                    found = FindSprite("mask_first");
-                else if (displayName.Contains(Locale.Get("丝线恢复上限")))
-                    found = FindSprite("prompt_silkheart");
-                else if (displayName.Contains(Locale.Get("完全恢复")))
-                    found = FindSprite("Inv_health_backboard_SS");
-                else if (reward.Id == "virt:UnlockCrestSlot")
-                {
-                    var slotType = ItemRandomizer.LastUnlockedSlotType;
-                    if (slotType.HasValue)
-                    {
-                        string typeName = slotType.Value.ToString().ToLower();
-                        if (typeName.Contains("attack"))
-                            found = FindSprite("UI_tool_slot_attack0000");
-                        else if (typeName.Contains("defend"))
-                            found = FindSprite("UI_tool_slot_defend0000");
-                        else if (typeName.Contains("socket") || typeName.Contains("tool") || typeName.Contains("item"))
-                            found = FindSprite("UI_tool_slot_socket0000");
-                    }
-                    if (found == null)
-                    {
-                        string[] options = { "UI_tool_slot_attack0000", "UI_tool_slot_defend0000", "UI_tool_slot_socket0000" };
-                        string randomName = options[UnityEngine.Random.Range(0, options.Length)];
-                        found = FindSprite(randomName);
-                    }
-                    if (found == null)
-                        found = FindSprite("spool_upgrade_pickup") ?? FindSprite("simple_key_icon") ?? FindSprite("mask_first");
-                }
-
-                _iconCache[reward.Id] = found;
-                return found;
+                // 标题：原 mod CreateTextPanel("Recent Items", 24, MiddleCenter, (200,100),
+                //          anchor = AnchorPoint + (-0.025, +0.05))；
+                //          恒全大写英文 + Trajan（官方弹窗标题同款），缺字形问题不复存在
+                CreateLabel("RECENT ITEMS", 24f,
+                    AnchorPoint + new Vector2(-0.025f, 0.05f), new Vector2(200f, 100f),
+                    TextAnchor.MiddleCenter, title: true);
             }
             catch (Exception ex)
             {
-                // 记录异常但不崩溃，返回默认图标
-                Plugin.Log.LogWarning($"GetIconForReward 异常: {ex.Message} for reward {reward?.Id}");
-                return GetDefaultFallbackIcon();
+                Plugin.Log.LogError($"[RecentItems] Canvas 创建失败: {ex}");
+                _canvas = null;
             }
         }
 
-        private static Sprite FindSprite(string name) => SpriteCache.Find(name);
-
-        private static Sprite GetDefaultFallbackIcon()
+        /// <summary>单条目：原 mod CreateBasePanel((200,50)) + 图标 ImagePanel((50,50), 锚(-0.1,0.5))
+        /// + 文字面板((400,100), 字号24, MiddleLeft, 锚(1.1,0.5))。</summary>
+        private static void BuildEntry(Sprite sprite, string text)
         {
-            if (_defaultFallbackIcon == null)
+            var panel = new GameObject("RecentItem");
+            panel.transform.SetParent(_canvas.transform, false);
+
+            var rt = panel.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = AnchorPoint;
+            rt.sizeDelta = new Vector2(200f, 50f);
+            _items.Enqueue(panel);
+
+            if (sprite != null)
             {
-                var tex = new Texture2D(1, 1);
-                tex.SetPixel(0, 0, Color.white);
-                tex.Apply();
-                _defaultFallbackIcon = Sprite.Create(tex, new Rect(0, 0, 1, 1), Vector2.zero);
+                var iconGo = new GameObject("Icon");
+                iconGo.transform.SetParent(panel.transform, false);
+                var iconRt = iconGo.AddComponent<RectTransform>();
+                iconRt.anchorMin = iconRt.anchorMax = new Vector2(-0.1f, 0.5f);
+                iconRt.sizeDelta = new Vector2(50f, 50f);
+                var image = iconGo.AddComponent<UnityEngine.UI.Image>();
+                image.sprite = sprite;
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                if (sprite.name == "bellbench_toll_machine")
+                    iconRt.localRotation = Quaternion.Euler(0f, 0f, 180f);
             }
-            return _defaultFallbackIcon;
+
+            var labelGo = new GameObject("Text");
+            labelGo.transform.SetParent(panel.transform, false);
+            var labelRt = labelGo.AddComponent<RectTransform>();
+            labelRt.anchorMin = labelRt.anchorMax = new Vector2(1.1f, 0.5f);
+            labelRt.sizeDelta = new Vector2(400f, 100f);
+            BuildLabel(labelGo, text, 24, TextAnchor.MiddleLeft);
+            // 以文字实际渲染高度收紧矩形：MiddleLeft 下矩形中心=文字视觉中心=图标中心，
+            // 消除中文字体行高差导致的上下错位
+            try
+            {
+                var tmp = labelGo.GetComponent<TMP_Text>();
+                if (tmp != null)
+                    labelRt.sizeDelta = new Vector2(400f, Mathf.Max(50f, tmp.preferredHeight));
+            }
+            catch { }
+        }
+
+        /// <summary>画布直属文字（标题）：锚点比例定位，原 mod CreateTextPanel 同构。</summary>
+        private static void CreateLabel(string text, float fontSize, Vector2 anchorPos,
+            Vector2 size, TextAnchor alignment, bool title = false)
+        {
+            var go = new GameObject("Title");
+            go.transform.SetParent(_canvas.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = anchorPos;
+            rt.sizeDelta = size;
+            BuildLabel(go, text, Mathf.RoundToInt(fontSize), alignment, title);
+        }
+
+        /// <summary>
+        /// 从游戏已加载资源中抠当前语言的官方正文字体。
+        /// 机制（从 fsm_full fonts_assets_* bundle 确认）：游戏按语言分包加载字体
+        /// （中文=chinese_body/NotoSerifCJKsc，英文=Amor Serif Text Pro SDF，俄文=russian_body…），
+        /// 运行时枚举内存中的 TMP_FontAsset 天然就是当前语言的字体，自动跟随游戏语言。
+        /// 注意避开 Trajan（官方弹窗标题装饰字体，静态图集缺 n 等字形）与 ARIAL SDF（无中文）。
+        /// </summary>
+        private static void ResolveFont()
+        {
+            try
+            {
+                var all = Resources.FindObjectsOfTypeAll<TMP_FontAsset>()
+                    .Where(f => f != null && !string.IsNullOrEmpty(f.name)).Distinct().ToList();
+                if (all.Count == 0)
+                {
+                    Plugin.Log.LogWarning("[RecentItems] 内存中无 TMP 字体资产");
+                    return;
+                }
+                Plugin.Log.LogInfo($"[RecentItems] 可用 TMP 字体: {string.Join(", ", all.Select(f => f.name))}");
+
+                string Pick(Func<string, bool> pred) =>
+                    all.FirstOrDefault(f => pred(f.name.ToUpperInvariant()))?.name;
+
+                // 按当前游戏语言挑对应语言的 body 正文字体（各语言图集只含本语种字形，
+                // 挑错语言会出现方框；名单顺序不定，不能 FirstOrDefault 了事）
+                string want;
+                try
+                {
+                    want = Language.CurrentLanguage().ToString().ToUpperInvariant() switch
+                    {
+                        "ZH" => "CHINESE_BODY",
+                        "ZH_TW" => "CHINESE_TRAD_BODY",
+                        "JA" => "JAPANESE_BODY",
+                        "KO" => "KOREAN_BODY",
+                        "RU" => "RUSSIAN_BODY",
+                        _ => "AMOR SERIF TEXT PRO REGULAR SDF"
+                    };
+                }
+                catch { want = null; }
+
+                var picked = (want != null ? Pick(n => n == want) : null)
+                    ?? Pick(n => n.Contains("BODY") && !n.Contains("DO_NOT_USE"))
+                    ?? Pick(n => !n.Contains("TRAJAN") && !n.Contains("ARIAL")
+                                && !n.Contains("DO_NOT_USE") && !n.Contains("TITLE"));
+                _font = all.First(f => f.name == picked);
+                Plugin.Log.LogInfo($"[RecentItems] 使用字体: {_font.name}");
+
+                // 标题用 Trajan（官方弹窗标题同款），文本恒全大写以避开其缺小写字形的图集
+                _titleFont = all.FirstOrDefault(f => f.name.ToUpperInvariant().Contains("TRAJAN"));
+                if (_titleFont != null)
+                    Plugin.Log.LogInfo($"[RecentItems] 标题字体: {_titleFont.name}");
+            }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 字体解析失败: {ex.Message}"); }
+        }
+
+        /// <summary>
+        /// 文字标签。title=true 时用 Trajan（官方弹窗标题字体，仅大写字形，配合全大写标题文本），
+        /// 否则用当前语言正文字体。防御式创建：禁用状态下 AddComponent 不触发 Awake，
+        /// 先显式设好字体再激活，保证运行期不会走到 TMP_Settings.defaultFontAsset
+        /// （该 getter 在本游戏中因 Settings 资产未加载而必然 NRE）。
+        /// </summary>
+        private static void BuildLabel(GameObject go, string text, float fontSize, TextAnchor alignment,
+            bool title = false)
+        {
+            // 防御式创建：禁用状态下 AddComponent 不触发 Awake，先显式设好字体再激活，
+            // 保证运行期不会走到 TMP_Settings.defaultFontAsset（该路径在本游戏中必然 NRE）
+            bool wasActive = go.activeSelf;
+            if (wasActive) go.SetActive(false);
+            try
+            {
+                var tmp = go.GetComponent<TextMeshProUGUI>() ?? go.AddComponent<TextMeshProUGUI>();
+                var font = title && _titleFont != null ? _titleFont : _font;
+                if (font != null) tmp.font = font;
+                tmp.text = text;
+                tmp.fontSize = fontSize;
+                tmp.alignment = alignment == TextAnchor.MiddleCenter
+                    ? TextAlignmentOptions.Center
+                    : TextAlignmentOptions.Left;
+                tmp.color = Color.white;
+                tmp.raycastTarget = false;
+                tmp.enableWordWrapping = false;
+                tmp.OverflowMode = TextOverflowModes.Overflow;
+            }
+            finally
+            {
+                if (wasActive) go.SetActive(true);
+            }
+        }
+
+        /// <summary>一次性重排（原 mod UpdatePositions 原样移植）：最新条目在锚点处，
+        /// 向下按 0.06 间距排开；i 自减后判断 SetActive(i &lt; MaxItems - 1)，即最多可见 MaxVisible 条。</summary>
+        private static void UpdatePositions()
+        {
+            int i = _items.Count - 1;
+            foreach (var item in _items)
+            {
+                if (item == null) continue;
+                Vector2 newPos = AnchorPoint + new Vector2(0f, -0.06f * i--);
+                var rt = item.GetComponent<RectTransform>();
+                rt.anchorMin = newPos;
+                rt.anchorMax = newPos;
+                item.SetActive(i < MaxVisible - 1);
+            }
+        }
+
+        private static void ApplyVisibility()
+        {
+            if (_canvas != null) _canvas.SetActive(_visible);
+        }
+
+        private static Sprite FindSprite(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            return SpriteCache.Find(name);
         }
     }
 }

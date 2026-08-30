@@ -1,4 +1,4 @@
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,23 +19,23 @@ namespace SilksongItemRandomizer
         private static BepInEx.Configuration.ConfigFile _configFile;
 
         // ========== 普通物品（映射模式每物品恰好 1 次全覆盖，此处为动态兜底上限） ==========
-        public static int LimitSkillItem { get; set; } = 1;
+        public static int LimitSkillItem { get; set; } = 2;
         public static int LimitRelic { get; set; } = 1;
         public static int LimitOtherItem { get; set; } = 1;
 
         // ========== 方向权限 ==========
-        // 攻击/回血权限与能力一致按"双倍"处理（默认 2 份），移动方向权限默认 1 份
+        // 攻击/回血权限与能力一致按"双倍"处理；方向权限同样统一 2 份（2026-08-24 调整）
         public static int LimitUpSlash { get; set; } = 2;
         public static int LimitLeftSlash { get; set; } = 2;
         public static int LimitRightSlash { get; set; } = 2;
-        public static int LimitDashLeft { get; set; } = 1;
-        public static int LimitDashRight { get; set; } = 1;
-        public static int LimitHarpoonLeft { get; set; } = 1;
-        public static int LimitHarpoonRight { get; set; } = 1;
-        public static int LimitFloatLeft { get; set; } = 1;
-        public static int LimitFloatRight { get; set; } = 1;
-        public static int LimitWallJumpLeft { get; set; } = 1;
-        public static int LimitWallJumpRight { get; set; } = 1;
+        public static int LimitDashLeft { get; set; } = 2;
+        public static int LimitDashRight { get; set; } = 2;
+        public static int LimitHarpoonLeft { get; set; } = 2;
+        public static int LimitHarpoonRight { get; set; } = 2;
+        public static int LimitFloatLeft { get; set; } = 2;
+        public static int LimitFloatRight { get; set; } = 2;
+        public static int LimitWallJumpLeft { get; set; } = 2;
+        public static int LimitWallJumpRight { get; set; } = 2;
         public static int LimitHeal { get; set; } = 2;
 
         // ========== 能力虚拟奖励（默认 2 = 双倍发放，映射与动态共用此值） ==========
@@ -64,10 +64,21 @@ namespace SilksongItemRandomizer
         public static int LimitUnlockCrestSlot { get; set; } = 2;
         /// <summary>简单钥匙全游戏共 4 把，全部入池</summary>
         public static int LimitSimpleKey { get; set; } = 4;
+        /// <summary>跳蚤救援可获取次数（对应 flea:01~27 共 27 次）</summary>
+        public static int LimitFleaRescue { get; set; } = 27;
         /// <summary>寒冷抗性（雪绫披风拆分功能）：默认全游戏 1 个</summary>
-        public static int LimitColdResist { get; set; } = 1;
+        public static int LimitColdResist { get; set; } = 2;
         /// <summary>游泳权限：默认全游戏 1 个</summary>
-        public static int LimitSwim { get; set; } = 1;
+        public static int LimitSwim { get; set; } = 2;
+
+        // ========== 收集类顺序键总数（2026-08-29 全量归纳；精确份数 = 物理存在总数，
+        // 各分支必须全部齐全，默认值不可低于原生总数，降低会让对应分支缺档） ==========
+        /// <summary>苔莓 moss:01~06 全游戏共 6 个</summary>
+        public static int LimitMoss { get; set; } = 6;
+        /// <summary>花芯 flower:01~06 全游戏共 6 个</summary>
+        public static int LimitFlower { get; set; } = 6;
+        /// <summary>无限池随机货币（virt:RandomCoin）加权重复份数（权重）</summary>
+        public static int RandomCoinWeight { get; set; } = 6;
 
         // ========== 无限池奖励开关 ==========
         public static bool EnableInfSilk { get; private set; } = true;
@@ -81,9 +92,6 @@ namespace SilksongItemRandomizer
         // ========== 世界石碑阅读触发随机奖励开关 ==========
         public static bool EnableLoreTrigger { get; private set; } = true;
 
-        // ========== 权限类 inspect 地点权限物开关（进随机池） ==========
-        public static bool EnableInspectPermit { get; private set; } = true;
-
         // ========== 地图/车站随机开关 ==========
         /// <summary>28 张地图加入随机奖励池</summary>
         public static bool EnableMapRewards { get; set; } = true;
@@ -93,39 +101,109 @@ namespace SilksongItemRandomizer
         public static bool EnableMapCheckIntercept { get; set; } = true;
         /// <summary>拦截原版车站开通（收费机）转为随机奖励</summary>
         public static bool EnableStationCheckIntercept { get; set; } = true;
+        /// <summary>6 个管道站加入随机奖励池</summary>
+        public static bool EnableTubeRewards { get; set; } = true;
+        /// <summary>拦截原版管道开通（管道收费机）转为随机奖励</summary>
+        public static bool EnableTubeCheckIntercept { get; set; } = true;
 
-        // ========== 代码默认值（单一事实来源） ==========
-        // 升级改动这些数字会触发「代码更新标记」，首次同步后即被标记，不再重复覆盖用户实际设置。
-        private static readonly (string Section, string Key, int Default)[] CodeDefaultInts =
+        // ========== 单一事实来源：全部 limit 归纳在此表 ==========
+        // 每个 limit 一条记录，同时驱动：cfg 默认值（SyncCodeDefaultsToConfig）、Init 绑定、
+        // Apply 快照反写、SaveToConfigFile 持久化、BuildLimitsStamp 指纹、ItemLimitSettings 捕获。
+        // 新增 limit 只需：声明静态属性 + 在 AllLimitInts/AllLimitBools 加一行。菜单/DLL 形态不必再动。
+        private sealed class LimitDef
         {
-            ("Limits", "SkillItem", 1), ("Limits", "Relic", 1), ("Limits", "OtherItem", 1),
-            ("Limits", "UpSlash", 2), ("Limits", "LeftSlash", 2), ("Limits", "RightSlash", 2),
-            ("Limits", "DashLeft", 1), ("Limits", "DashRight", 1),
-            ("Limits", "HarpoonLeft", 1), ("Limits", "HarpoonRight", 1),
-            ("Limits", "FloatLeft", 1), ("Limits", "FloatRight", 1),
-            ("Limits", "WallJumpLeft", 1), ("Limits", "WallJumpRight", 1), ("Limits", "Heal", 2),
-            ("Limits", "NeedleThrow", 2), ("Limits", "ThreadSphere", 2), ("Limits", "HarpoonDash", 2),
-            ("Limits", "SilkCharge", 2), ("Limits", "SilkBomb", 2), ("Limits", "SilkBossNeedle", 2),
-            ("Limits", "Needolin", 2), ("Limits", "Parry", 2), ("Limits", "NeedolinMemory", 2),
-            ("Limits", "FastTravel", 2), ("Limits", "EvaHeal", 2), ("Limits", "Dash", 2),
-            ("Limits", "Brolly", 2), ("Limits", "DoubleJump", 2), ("Limits", "SuperJump", 2),
-            ("Limits", "WallJump", 2), ("Limits", "ChargeSlash", 2),
-            ("Limits", "HeartPiece", 20), ("Limits", "SpoolPart", 18),
-            ("Limits", "MaxSilkRegenUp", 2), ("Limits", "UnlockCrestSlot", 2),
-            ("Limits", "SimpleKey", 4),
+            public string Key;            // cfg 文件里的 key（"SkillItem"）
+            public int Default;           // 代码默认值（= 属性声明默认，2026-08-24 方向权限统一 2）
+            public Func<int> Get;         // 读静态属性
+            public Action<int> Set;       // 写静态属性
+            public string DtoField;       // ItemLimitSettings 同名字段（反射快照用）
+        }
+
+        private sealed class BoolDef
+        {
+            public string Section;        // cfg 分区
+            public string Key;
+            public bool Default;
+            public Func<bool> Get;
+            public Action<bool> Set;
+        }
+
+        private static readonly LimitDef[] AllLimitInts =
+        {
+            // 普通物品
+            new LimitDef { Key = "SkillItem", Default = 2, Get = () => LimitSkillItem, Set = v => LimitSkillItem = v, DtoField = "SkillItem" },
+            new LimitDef { Key = "Relic", Default = 1, Get = () => LimitRelic, Set = v => LimitRelic = v, DtoField = "Relic" },
+            new LimitDef { Key = "OtherItem", Default = 1, Get = () => LimitOtherItem, Set = v => LimitOtherItem = v, DtoField = "OtherItem" },
+            // 方向权限（统一 2 份，2026-08-24 调整）
+            new LimitDef { Key = "UpSlash", Default = 2, Get = () => LimitUpSlash, Set = v => LimitUpSlash = v, DtoField = "UpSlash" },
+            new LimitDef { Key = "LeftSlash", Default = 2, Get = () => LimitLeftSlash, Set = v => LimitLeftSlash = v, DtoField = "LeftSlash" },
+            new LimitDef { Key = "RightSlash", Default = 2, Get = () => LimitRightSlash, Set = v => LimitRightSlash = v, DtoField = "RightSlash" },
+            new LimitDef { Key = "DashLeft", Default = 2, Get = () => LimitDashLeft, Set = v => LimitDashLeft = v, DtoField = "DashLeft" },
+            new LimitDef { Key = "DashRight", Default = 2, Get = () => LimitDashRight, Set = v => LimitDashRight = v, DtoField = "DashRight" },
+            new LimitDef { Key = "HarpoonLeft", Default = 2, Get = () => LimitHarpoonLeft, Set = v => LimitHarpoonLeft = v, DtoField = "HarpoonLeft" },
+            new LimitDef { Key = "HarpoonRight", Default = 2, Get = () => LimitHarpoonRight, Set = v => LimitHarpoonRight = v, DtoField = "HarpoonRight" },
+            new LimitDef { Key = "FloatLeft", Default = 2, Get = () => LimitFloatLeft, Set = v => LimitFloatLeft = v, DtoField = "FloatLeft" },
+            new LimitDef { Key = "FloatRight", Default = 2, Get = () => LimitFloatRight, Set = v => LimitFloatRight = v, DtoField = "FloatRight" },
+            new LimitDef { Key = "WallJumpLeft", Default = 2, Get = () => LimitWallJumpLeft, Set = v => LimitWallJumpLeft = v, DtoField = "WallJumpLeft" },
+            new LimitDef { Key = "WallJumpRight", Default = 2, Get = () => LimitWallJumpRight, Set = v => LimitWallJumpRight = v, DtoField = "WallJumpRight" },
+            new LimitDef { Key = "Heal", Default = 2, Get = () => LimitHeal, Set = v => LimitHeal = v, DtoField = "Heal" },
+            // 能力虚拟奖励（默认 2 = 双倍发放，映射与动态共用此值）
+            new LimitDef { Key = "NeedleThrow", Default = 2, Get = () => LimitNeedleThrow, Set = v => LimitNeedleThrow = v, DtoField = "NeedleThrow" },
+            new LimitDef { Key = "ThreadSphere", Default = 2, Get = () => LimitThreadSphere, Set = v => LimitThreadSphere = v, DtoField = "ThreadSphere" },
+            new LimitDef { Key = "HarpoonDash", Default = 2, Get = () => LimitHarpoonDash, Set = v => LimitHarpoonDash = v, DtoField = "HarpoonDash" },
+            new LimitDef { Key = "SilkCharge", Default = 2, Get = () => LimitSilkCharge, Set = v => LimitSilkCharge = v, DtoField = "SilkCharge" },
+            new LimitDef { Key = "SilkBomb", Default = 2, Get = () => LimitSilkBomb, Set = v => LimitSilkBomb = v, DtoField = "SilkBomb" },
+            new LimitDef { Key = "SilkBossNeedle", Default = 2, Get = () => LimitSilkBossNeedle, Set = v => LimitSilkBossNeedle = v, DtoField = "SilkBossNeedle" },
+            new LimitDef { Key = "Needolin", Default = 2, Get = () => LimitNeedolin, Set = v => LimitNeedolin = v, DtoField = "Needolin" },
+            new LimitDef { Key = "Parry", Default = 2, Get = () => LimitParry, Set = v => LimitParry = v, DtoField = "Parry" },
+            new LimitDef { Key = "NeedolinMemory", Default = 2, Get = () => LimitNeedolinMemory, Set = v => LimitNeedolinMemory = v, DtoField = "NeedolinMemory" },
+            new LimitDef { Key = "FastTravel", Default = 2, Get = () => LimitFastTravel, Set = v => LimitFastTravel = v, DtoField = "FastTravel" },
+            new LimitDef { Key = "EvaHeal", Default = 2, Get = () => LimitEvaHeal, Set = v => LimitEvaHeal = v, DtoField = "EvaHeal" },
+            new LimitDef { Key = "Dash", Default = 2, Get = () => LimitDash, Set = v => LimitDash = v, DtoField = "Dash" },
+            new LimitDef { Key = "Brolly", Default = 2, Get = () => LimitBrolly, Set = v => LimitBrolly = v, DtoField = "Brolly" },
+            new LimitDef { Key = "DoubleJump", Default = 2, Get = () => LimitDoubleJump, Set = v => LimitDoubleJump = v, DtoField = "DoubleJump" },
+            new LimitDef { Key = "SuperJump", Default = 2, Get = () => LimitSuperJump, Set = v => LimitSuperJump = v, DtoField = "SuperJump" },
+            new LimitDef { Key = "WallJump", Default = 2, Get = () => LimitWallJump, Set = v => LimitWallJump = v, DtoField = "WallJump" },
+            new LimitDef { Key = "ChargeSlash", Default = 2, Get = () => LimitChargeSlash, Set = v => LimitChargeSlash = v, DtoField = "ChargeSlash" },
+            // 珍贵虚拟奖励
+            new LimitDef { Key = "HeartPiece", Default = 20, Get = () => LimitHeartPiece, Set = v => LimitHeartPiece = v, DtoField = "HeartPiece" },
+            new LimitDef { Key = "SpoolPart", Default = 18, Get = () => LimitSpoolPart, Set = v => LimitSpoolPart = v, DtoField = "SpoolPart" },
+            new LimitDef { Key = "MaxSilkRegenUp", Default = 2, Get = () => LimitMaxSilkRegenUp, Set = v => LimitMaxSilkRegenUp = v, DtoField = "MaxSilkRegenUp" },
+            new LimitDef { Key = "UnlockCrestSlot", Default = 2, Get = () => LimitUnlockCrestSlot, Set = v => LimitUnlockCrestSlot = v, DtoField = "UnlockCrestSlot" },
+            // 计数类（此前全部缺席于 cfg 绑定——flea 无 case / coldresist.swim 无条目，本次全量归纳）
+            new LimitDef { Key = "SimpleKey", Default = 4, Get = () => LimitSimpleKey, Set = v => LimitSimpleKey = v, DtoField = "SimpleKey" },
+            new LimitDef { Key = "FleaRescue", Default = 27, Get = () => LimitFleaRescue, Set = v => LimitFleaRescue = v, DtoField = "FleaRescue" },
+            new LimitDef { Key = "ColdResist", Default = 2, Get = () => LimitColdResist, Set = v => LimitColdResist = v, DtoField = "ColdResist" },
+            new LimitDef { Key = "Swim", Default = 2, Get = () => LimitSwim, Set = v => LimitSwim = v, DtoField = "Swim" },
+            // 收集类顺序键总数：精确份数（默认 = 物理存在总数，各分支必须齐全，勿降太低）
+            new LimitDef { Key = "Moss", Default = 6, Get = () => LimitMoss, Set = v => LimitMoss = v, DtoField = "Moss" },
+            new LimitDef { Key = "Flower", Default = 6, Get = () => LimitFlower, Set = v => LimitFlower = v, DtoField = "Flower" },
+            // 无限池随机货币加权权重
+            new LimitDef { Key = "RandomCoinWeight", Default = 6, Get = () => RandomCoinWeight, Set = v => RandomCoinWeight = v, DtoField = "RandomCoinWeight" },
         };
 
-        private static readonly (string Section, string Key, bool Default)[] CodeDefaultBools =
+        private static readonly BoolDef[] AllLimitBools =
         {
-            ("Limits", "EnableInfSilk", true), ("Limits", "EnableInfBlueHealth", true),
-            ("Limits", "EnableInfGeo300", true), ("Limits", "EnableInfShards300", true),
-            ("Limits", "EnableLoreReward", true), ("Limits", "EnableLoreTrigger", true),
-            ("Limits", "EnableInspectPermit", true),
-            ("MapStation", "EnableMapRewards", true), ("MapStation", "EnableStationRewards", true),
-            ("MapStation", "EnableMapCheckIntercept", true), ("MapStation", "EnableStationCheckIntercept", true),
+            new BoolDef { Section = "Limits", Key = "EnableInfSilk", Default = true, Get = () => EnableInfSilk, Set = v => EnableInfSilk = v },
+            new BoolDef { Section = "Limits", Key = "EnableInfBlueHealth", Default = true, Get = () => EnableInfBlueHealth, Set = v => EnableInfBlueHealth = v },
+            new BoolDef { Section = "Limits", Key = "EnableInfGeo300", Default = true, Get = () => EnableInfGeo300, Set = v => EnableInfGeo300 = v },
+            new BoolDef { Section = "Limits", Key = "EnableInfShards300", Default = true, Get = () => EnableInfShards300, Set = v => EnableInfShards300 = v },
+            new BoolDef { Section = "Limits", Key = "EnableLoreReward", Default = true, Get = () => EnableLoreReward, Set = v => EnableLoreReward = v },
+            new BoolDef { Section = "Limits", Key = "EnableLoreTrigger", Default = true, Get = () => EnableLoreTrigger, Set = v => EnableLoreTrigger = v },
+            new BoolDef { Section = "MapStation", Key = "EnableMapRewards", Default = true, Get = () => EnableMapRewards, Set = v => EnableMapRewards = v },
+            new BoolDef { Section = "MapStation", Key = "EnableStationRewards", Default = true, Get = () => EnableStationRewards, Set = v => EnableStationRewards = v },
+            new BoolDef { Section = "MapStation", Key = "EnableMapCheckIntercept", Default = true, Get = () => EnableMapCheckIntercept, Set = v => EnableMapCheckIntercept = v },
+            new BoolDef { Section = "MapStation", Key = "EnableStationCheckIntercept", Default = true, Get = () => EnableStationCheckIntercept, Set = v => EnableStationCheckIntercept = v },
+            new BoolDef { Section = "MapStation", Key = "EnableTubeRewards", Default = true, Get = () => EnableTubeRewards, Set = v => EnableTubeRewards = v },
+            new BoolDef { Section = "MapStation", Key = "EnableTubeCheckIntercept", Default = true, Get = () => EnableTubeCheckIntercept, Set = v => EnableTubeCheckIntercept = v },
         };
 
         private static string _codeDefaultsStampCache;
+
+        // 反射缓存：ItemLimitSettings 字段名 → FieldInfo（Apply/快照用，低频反射可接受）
+        private static readonly Dictionary<string, FieldInfo> ItemLimitSettingsFields =
+            typeof(ItemLimitSettings).GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .ToDictionary(f => f.Name, f => f);
 
         private static string BuildCodeDefaultsStamp()
         {
@@ -135,13 +213,13 @@ namespace SilksongItemRandomizer
         private static string BuildCodeDefaultsStampInner()
         {
             var sb = new System.Text.StringBuilder("v1:");
-            foreach (var d in CodeDefaultInts)
+            foreach (var d in AllLimitInts)
             {
                 sb.Append(d.Key).Append('=').Append(d.Default).Append(',');
             }
-            foreach (var d in CodeDefaultBools)
+            foreach (var d in AllLimitBools)
             {
-                sb.Append(d.Key).Append('=').Append(d.Default ? 1 : 0).Append(',');
+                sb.Append(d.Section).Append('.').Append(d.Key).Append('=').Append(d.Default ? 1 : 0).Append(',');
             }
             return sb.ToString();
         }
@@ -160,9 +238,9 @@ namespace SilksongItemRandomizer
                 return; // 已经同步过本次代码的默认值，绝不覆盖用户已改的本地值
 
             Plugin.Log?.LogInfo($"[ItemLimitConfig] 检测到代码默认值更新，同步新默认值到配置（旧标记: {stampEntry.Value ?? "(空)"}）");
-            foreach (var d in CodeDefaultInts)
-                config.Bind<int>(d.Section, d.Key, d.Default).Value = d.Default;
-            foreach (var d in CodeDefaultBools)
+            foreach (var d in AllLimitInts)
+                config.Bind<int>("Limits", d.Key, d.Default).Value = d.Default;
+            foreach (var d in AllLimitBools)
                 config.Bind<bool>(d.Section, d.Key, d.Default).Value = d.Default;
 
             stampEntry.Value = codeStamp;
@@ -180,70 +258,13 @@ namespace SilksongItemRandomizer
             // 代码更新标记：仅在检测到代码默认值变化时同步一次并固化标记，之后不再覆盖本地设置
             SyncCodeDefaultsToConfig(config);
 
-            // 由代码默认值数组驱动绑定与读取，单一事实来源（CodeDefaultInts/Bools），避免与上文重复维护
-            foreach (var d in CodeDefaultInts)
-            {
-                var entry = config.Bind<int>(d.Section, d.Key, d.Default);
-                switch (d.Key)
-                {
-                    case "SkillItem": LimitSkillItem = entry.Value; break;
-                    case "Relic": LimitRelic = entry.Value; break;
-                    case "OtherItem": LimitOtherItem = entry.Value; break;
-                    case "UpSlash": LimitUpSlash = entry.Value; break;
-                    case "LeftSlash": LimitLeftSlash = entry.Value; break;
-                    case "RightSlash": LimitRightSlash = entry.Value; break;
-                    case "DashLeft": LimitDashLeft = entry.Value; break;
-                    case "DashRight": LimitDashRight = entry.Value; break;
-                    case "HarpoonLeft": LimitHarpoonLeft = entry.Value; break;
-                    case "HarpoonRight": LimitHarpoonRight = entry.Value; break;
-                    case "FloatLeft": LimitFloatLeft = entry.Value; break;
-                    case "FloatRight": LimitFloatRight = entry.Value; break;
-                    case "WallJumpLeft": LimitWallJumpLeft = entry.Value; break;
-                    case "WallJumpRight": LimitWallJumpRight = entry.Value; break;
-                    case "Heal": LimitHeal = entry.Value; break;
-                    case "NeedleThrow": LimitNeedleThrow = entry.Value; break;
-                    case "ThreadSphere": LimitThreadSphere = entry.Value; break;
-                    case "HarpoonDash": LimitHarpoonDash = entry.Value; break;
-                    case "SilkCharge": LimitSilkCharge = entry.Value; break;
-                    case "SilkBomb": LimitSilkBomb = entry.Value; break;
-                    case "SilkBossNeedle": LimitSilkBossNeedle = entry.Value; break;
-                    case "Needolin": LimitNeedolin = entry.Value; break;
-                    case "Parry": LimitParry = entry.Value; break;
-                    case "NeedolinMemory": LimitNeedolinMemory = entry.Value; break;
-                    case "FastTravel": LimitFastTravel = entry.Value; break;
-                    case "EvaHeal": LimitEvaHeal = entry.Value; break;
-                    case "Dash": LimitDash = entry.Value; break;
-                    case "Brolly": LimitBrolly = entry.Value; break;
-                    case "DoubleJump": LimitDoubleJump = entry.Value; break;
-                    case "SuperJump": LimitSuperJump = entry.Value; break;
-                    case "WallJump": LimitWallJump = entry.Value; break;
-                    case "ChargeSlash": LimitChargeSlash = entry.Value; break;
-                    case "HeartPiece": LimitHeartPiece = entry.Value; break;
-                    case "SpoolPart": LimitSpoolPart = entry.Value; break;
-                    case "MaxSilkRegenUp": LimitMaxSilkRegenUp = entry.Value; break;
-                    case "UnlockCrestSlot": LimitUnlockCrestSlot = entry.Value; break;
-                    case "SimpleKey": LimitSimpleKey = entry.Value; break;
-                }
-            }
+            // 全部 limit / 开关由单一事实表驱动绑定，表里每一项自动覆盖（含 FleaRescue/ColdResist/Swim，
+            // 此前缺口现在全量归纳，cfg 改动必然生效）
+            foreach (var d in AllLimitInts)
+                d.Set(config.Bind<int>("Limits", d.Key, d.Default).Value);
 
-            foreach (var d in CodeDefaultBools)
-            {
-                var entry = config.Bind<bool>(d.Section, d.Key, d.Default);
-                switch (d.Key)
-                {
-                    case "EnableInfSilk": EnableInfSilk = entry.Value; break;
-                    case "EnableInfBlueHealth": EnableInfBlueHealth = entry.Value; break;
-                    case "EnableInfGeo300": EnableInfGeo300 = entry.Value; break;
-                    case "EnableInfShards300": EnableInfShards300 = entry.Value; break;
-                    case "EnableLoreReward": EnableLoreReward = entry.Value; break;
-                    case "EnableLoreTrigger": EnableLoreTrigger = entry.Value; break;
-                    case "EnableInspectPermit": EnableInspectPermit = entry.Value; break;
-                    case "EnableMapRewards": EnableMapRewards = entry.Value; break;
-                    case "EnableStationRewards": EnableStationRewards = entry.Value; break;
-                    case "EnableMapCheckIntercept": EnableMapCheckIntercept = entry.Value; break;
-                    case "EnableStationCheckIntercept": EnableStationCheckIntercept = entry.Value; break;
-                }
-            }
+            foreach (var d in AllLimitBools)
+                d.Set(config.Bind<bool>(d.Section, d.Key, d.Default).Value);
         }
 
         /// <summary>
@@ -253,46 +274,28 @@ namespace SilksongItemRandomizer
         {
             if (settings == null) return;
 
-            LimitSkillItem = settings.SkillItem;
-            LimitRelic = settings.Relic;
-            LimitOtherItem = settings.OtherItem;
+            // 表驱动：与 AllLimitInts 中 DtoField 同名的最新字段存在则写入
+            //（反射仅在配置应用时低频调用；保持静态属性名不变以兼容 MenuChanger）
+            foreach (var d in AllLimitInts)
+            {
+                if (ItemLimitSettingsFields.TryGetValue(d.DtoField, out var field))
+                    d.Set((int)field.GetValue(settings));
+            }
+        }
 
-            LimitUpSlash = settings.UpSlash;
-            LimitLeftSlash = settings.LeftSlash;
-            LimitRightSlash = settings.RightSlash;
-            LimitDashLeft = settings.DashLeft;
-            LimitDashRight = settings.DashRight;
-            LimitHarpoonLeft = settings.HarpoonLeft;
-            LimitHarpoonRight = settings.HarpoonRight;
-            LimitFloatLeft = settings.FloatLeft;
-            LimitFloatRight = settings.FloatRight;
-            LimitWallJumpLeft = settings.WallJumpLeft;
-            LimitWallJumpRight = settings.WallJumpRight;
-            LimitHeal = settings.Heal;
-
-            LimitNeedleThrow = settings.NeedleThrow;
-            LimitThreadSphere = settings.ThreadSphere;
-            LimitHarpoonDash = settings.HarpoonDash;
-            LimitSilkCharge = settings.SilkCharge;
-            LimitSilkBomb = settings.SilkBomb;
-            LimitSilkBossNeedle = settings.SilkBossNeedle;
-            LimitNeedolin = settings.Needolin;
-            LimitParry = settings.Parry;
-            LimitNeedolinMemory = settings.NeedolinMemory;
-            LimitFastTravel = settings.FastTravel;
-            LimitEvaHeal = settings.EvaHeal;
-            LimitDash = settings.Dash;
-            LimitBrolly = settings.Brolly;
-            LimitDoubleJump = settings.DoubleJump;
-            LimitSuperJump = settings.SuperJump;
-            LimitWallJump = settings.WallJump;
-            LimitChargeSlash = settings.ChargeSlash;
-
-            LimitHeartPiece = settings.HeartPiece;
-            LimitSpoolPart = settings.SpoolPart;
-            LimitMaxSilkRegenUp = settings.MaxSilkRegenUp;
-            LimitUnlockCrestSlot = settings.UnlockCrestSlot;
-            LimitSimpleKey = settings.SimpleKey;
+        /// <summary>
+        /// 由当前 ItemLimitConfig 静态属性捕获一份 ItemLimitSettings 快照。
+        /// 取代 Plugin.cs / API 中逐字段手写映射（新增 limit 后此处自动覆盖）。
+        /// </summary>
+        public static ItemLimitSettings CaptureSettings()
+        {
+            var settings = new ItemLimitSettings();
+            foreach (var d in AllLimitInts)
+            {
+                if (ItemLimitSettingsFields.TryGetValue(d.DtoField, out var field))
+                    field.SetValue(settings, d.Get());
+            }
+            return settings;
         }
 
         /// <summary>
@@ -315,62 +318,11 @@ namespace SilksongItemRandomizer
         {
             if (_configFile == null) return;
 
-            void SetInt(string key, int value) => _configFile.Bind<int>("Limits", key, value).Value = value;
-            void SetBool(string key, bool value) => _configFile.Bind<bool>("Limits", key, value).Value = value;
-
-            // 普通物品
-            SetInt("SkillItem", LimitSkillItem);
-            SetInt("Relic", LimitRelic);
-            SetInt("OtherItem", LimitOtherItem);
-
-            // 方向权限
-            SetInt("UpSlash", LimitUpSlash);
-            SetInt("LeftSlash", LimitLeftSlash);
-            SetInt("RightSlash", LimitRightSlash);
-            SetInt("DashLeft", LimitDashLeft);
-            SetInt("DashRight", LimitDashRight);
-            SetInt("HarpoonLeft", LimitHarpoonLeft);
-            SetInt("HarpoonRight", LimitHarpoonRight);
-            SetInt("FloatLeft", LimitFloatLeft);
-            SetInt("FloatRight", LimitFloatRight);
-            SetInt("WallJumpLeft", LimitWallJumpLeft);
-            SetInt("WallJumpRight", LimitWallJumpRight);
-            SetInt("Heal", LimitHeal);
-
-            // 能力虚拟奖励
-            SetInt("NeedleThrow", LimitNeedleThrow);
-            SetInt("ThreadSphere", LimitThreadSphere);
-            SetInt("HarpoonDash", LimitHarpoonDash);
-            SetInt("SilkCharge", LimitSilkCharge);
-            SetInt("SilkBomb", LimitSilkBomb);
-            SetInt("SilkBossNeedle", LimitSilkBossNeedle);
-            SetInt("Needolin", LimitNeedolin);
-            SetInt("Parry", LimitParry);
-            SetInt("NeedolinMemory", LimitNeedolinMemory);
-            SetInt("FastTravel", LimitFastTravel);
-            SetInt("EvaHeal", LimitEvaHeal);
-            SetInt("Dash", LimitDash);
-            SetInt("Brolly", LimitBrolly);
-            SetInt("DoubleJump", LimitDoubleJump);
-            SetInt("SuperJump", LimitSuperJump);
-            SetInt("WallJump", LimitWallJump);
-            SetInt("ChargeSlash", LimitChargeSlash);
-
-            // 珍贵虚拟奖励
-            SetInt("HeartPiece", LimitHeartPiece);
-            SetInt("SpoolPart", LimitSpoolPart);
-            SetInt("MaxSilkRegenUp", LimitMaxSilkRegenUp);
-            SetInt("UnlockCrestSlot", LimitUnlockCrestSlot);
-            SetInt("SimpleKey", LimitSimpleKey);
-
-            // 无限池 / 开关（只读入口，面板不直接改，但一并持久化）：
-            SetBool("EnableInfSilk", EnableInfSilk);
-            SetBool("EnableInfBlueHealth", EnableInfBlueHealth);
-            SetBool("EnableInfGeo300", EnableInfGeo300);
-            SetBool("EnableInfShards300", EnableInfShards300);
-            SetBool("EnableLoreReward", EnableLoreReward);
-            SetBool("EnableLoreTrigger", EnableLoreTrigger);
-            SetBool("EnableInspectPermit", EnableInspectPermit);
+            // 表驱动：所有 limit/开关由单一事实表统一持久化
+            foreach (var d in AllLimitInts)
+                _configFile.Bind<int>("Limits", d.Key, d.Default).Value = d.Get();
+            foreach (var d in AllLimitBools)
+                _configFile.Bind<bool>(d.Section, d.Key, d.Default).Value = d.Get();
 
             _configFile.Save();
             Plugin.Log?.LogInfo("[ItemLimitConfig] limit 配置已写回配置文件");
@@ -381,25 +333,13 @@ namespace SilksongItemRandomizer
         /// </summary>
         public static string BuildLimitsStamp()
         {
-            return string.Join("|",
-                LimitSkillItem, LimitRelic, LimitOtherItem,
-                LimitUpSlash, LimitLeftSlash, LimitRightSlash,
-                LimitDashLeft, LimitDashRight,
-                LimitHarpoonLeft, LimitHarpoonRight,
-                LimitFloatLeft, LimitFloatRight,
-                LimitWallJumpLeft, LimitWallJumpRight, LimitHeal,
-                LimitNeedleThrow, LimitThreadSphere, LimitHarpoonDash,
-                LimitSilkCharge, LimitSilkBomb, LimitSilkBossNeedle,
-                LimitNeedolin, LimitParry, LimitNeedolinMemory,
-                LimitFastTravel, LimitEvaHeal, LimitDash, LimitBrolly,
-                LimitDoubleJump, LimitSuperJump, LimitWallJump, LimitChargeSlash,
-                LimitHeartPiece, LimitSpoolPart, LimitMaxSilkRegenUp, LimitUnlockCrestSlot, LimitSimpleKey,
-                LimitColdResist, LimitSwim,
-                EnableInfSilk, EnableInfBlueHealth,
-                EnableInfGeo300, EnableInfShards300,
-                EnableLoreReward, EnableLoreTrigger, EnableInspectPermit,
-                EnableMapRewards, EnableStationRewards,
-                EnableMapCheckIntercept, EnableStationCheckIntercept);
+            // 表驱动：所有 limit/开关按固定表顺序拼接（顺序稳定 = 指纹稳定）
+            var parts = new List<string>(AllLimitInts.Length + AllLimitBools.Length);
+            foreach (var d in AllLimitInts)
+                parts.Add(d.Get().ToString());
+            foreach (var d in AllLimitBools)
+                parts.Add(d.Get() ? "1" : "0");
+            return string.Join("|", parts);
         }
 
         // ========== 更新标记 / 防抖 ==========

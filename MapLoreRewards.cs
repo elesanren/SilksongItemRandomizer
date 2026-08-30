@@ -110,6 +110,52 @@ namespace SilksongItemRandomizer
         private static readonly HashSet<string> _mapBools = BuildSet(Maps);
         private static readonly HashSet<string> _stationBools = BuildSet(Stations);
 
+        /// <summary>地图 DisplayName → 图标 sprite 名（F4 筛选器勾选结果，Shop_map_icon 系列按区域后缀对应）</summary>
+        private static readonly Dictionary<string, string> MapIconNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Moss Grotto Map", "Shop_map_icon__0003_moss" },
+            { "Docks Map", "Shop_map_icon__0006_docks" },
+            { "Greymoor Map", "Shop_map_icon__0001_greymoor" },
+            { "Bellhart Map", "Shop_map_icon__0007_bellhart" },
+            { "Shellwood Map", "Shop_map_icon__0002_shellwood" },
+            { "Crawl Map", "Shop_map_icon__0008_crawl" },
+            { "Judge Steps Map", "Shop_map_icon__0005_steps" },
+            { "Slab Map", "Shop_map_icon__0008_slab" },
+            { "Peak Map", "Shop_map_icon__0008_generic_peak" },
+            { "Citadel Understore Map", "Shop_map_icon_understore" },
+            { "Coral Map", "Shop_map_icon__0008_coral_cave" },
+            { "Clover Map", "Shop_map_icon__0003_clover" },
+            { "Halls Map", "Shop_map_icon__0012_halls_new" },
+            { "Ward Map", "Shop_map_icon__0010_ward" },
+            { "Cog Map", "Shop_map_icon__0012_cog" },
+            { "Library Map", "Shop_map_icon__0009_library" },
+            { "Cradle Map", "Shop_map_icon__0012_cradle" },
+            { "Arborium Map", "Shop_map_icon__0012_arborium" },
+            { "Aqueduct Map", "dock_b__0049_table_wide_aqueduct_map" },
+            { "Weavehome Map", "Shop_map_icon__weavehome" },
+            { "Hang Map", "Shop_map_icon__0011_conductor" },
+            { "Dustpens Map", "Shop_map_icon__0008_sinners" },
+            { "Hunters Nest Map", "Shop_map_icon__0000_hunters_march" },
+            { "Wilds Map", "Shop_map_icon__0004_fields" },
+            { "Swamp Map", "Shop_map_icon__0004_bilewater" },
+            { "Boneforest Map", "I_map" },
+            { "Song Gate Map", "I_map_type_02" },
+            { "Abyss Map", "abyss_lore_stone_glow" },
+        };
+
+        /// <summary>6 个管道（Tube）解锁 bool（PlayerData.cs:1418-1423，UnlockedXTube）</summary>
+        public static readonly (string BoolName, string DisplayName)[] Tubes =
+        {
+            ("UnlockedSongTube", "Song Tube"),
+            ("UnlockedUnderTube", "Under Tube"),
+            ("UnlockedCityBellwayTube", "City Bellway Tube"),
+            ("UnlockedHangTube", "Hang Tube"),
+            ("UnlockedEnclaveTube", "Enclave Tube"),
+            ("UnlockedArboriumTube", "Arborium Tube"),
+        };
+
+        private static readonly HashSet<string> _tubeBools = BuildSet(Tubes);
+
         private static HashSet<string> BuildSet((string BoolName, string DisplayName)[] table)
         {
             var set = new HashSet<string>();
@@ -119,6 +165,7 @@ namespace SilksongItemRandomizer
 
         public static bool IsMapBool(string boolName) => boolName != null && _mapBools.Contains(boolName);
         public static bool IsStationBool(string boolName) => boolName != null && _stationBools.Contains(boolName);
+        public static bool IsTubeBool(string boolName) => boolName != null && _tubeBools.Contains(boolName);
 
         // ========== 奖励构建（由 ItemRandomizer.BuildRewardPools 调用） ==========
 
@@ -136,11 +183,35 @@ namespace SilksongItemRandomizer
                 yield return new VirtualReward(
                     "virt:Station_" + capturedBool,
                     Locale.Get(displayName),
-                    SpriteCache.Find("pin_tube_station_shop_icon"),
+                    SpriteCache.Find("pin_stag_station"),
                     () =>
                     {
                         GiveBoolInternal(capturedBool);
                         // 附带解锁铃兽总开关，避免"车站解锁了但没铃兽用不了"
+                        GiveBoolInternal(FastTravelMasterBool);
+                    },
+                    () =>
+                    {
+                        var pd = PlayerData.instance;
+                        return pd != null && pd.GetBool(capturedBool);
+                    }
+                );
+            }
+        }
+
+        /// <summary>6 个管道（Tube）奖励：Give = 置位对应 PlayerData bool + 附带铃兽总开关（与车站一致）</summary>
+        public static IEnumerable<IRandomReward> BuildTubeRewards()
+        {
+            foreach (var (boolName, displayName) in Tubes)
+            {
+                string capturedBool = boolName;
+                yield return new VirtualReward(
+                    "virt:Tube_" + capturedBool,
+                    Locale.Get(displayName),
+                    SpriteCache.Find("pin_tube_station"),
+                    () =>
+                    {
+                        GiveBoolInternal(capturedBool);
                         GiveBoolInternal(FastTravelMasterBool);
                     },
                     () =>
@@ -157,10 +228,11 @@ namespace SilksongItemRandomizer
         /// </summary>
         private static IRandomReward CreateBoolReward(string id, string boolName, string displayName)
         {
+            string iconName = MapIconNames.TryGetValue(displayName, out var n) ? n : "I_map";
             return new VirtualReward(
                 id,
                 Locale.Get(displayName),
-                SpriteCache.Find("I_map"),
+                SpriteCache.Find(iconName),
                 () => GiveBoolInternal(boolName),
                 () =>
                 {
@@ -212,25 +284,36 @@ namespace SilksongItemRandomizer
 
                 bool isStation = MapStationRewards.IsStationBool(boolName);
                 bool isMap = !isStation && MapStationRewards.IsMapBool(boolName);
-                if (!isStation && !isMap) return true;
+                bool isTube = !isStation && !isMap && MapStationRewards.IsTubeBool(boolName);
+                if (!isStation && !isMap && !isTube) return true;
 
                 if (isStation && !ItemLimitConfig.EnableStationCheckIntercept) return true;
                 if (isMap && !ItemLimitConfig.EnableMapCheckIntercept) return true;
+                if (isTube && !ItemLimitConfig.EnableTubeCheckIntercept) return true;
 
-                // 已领取过的检查点：吞掉原版置位，不发奖励（双保险；正常已被禁交互不会走到）
                 string checkKey = "check:" + boolName;
-                if (ItemRandomizer.GetMapping(checkKey) != null)
+
+                // ★ 车站/tube：购买成功给一次随机奖励，放行正常解锁（bool 照常写入）
+                if (isStation || isTube)
                 {
-                    return false;
+                    if (ItemRandomizer.GetMapping(checkKey) == null)
+                    {
+                        var reward = PreGeneratedMap.ResolveReward(checkKey) ?? ItemRandomizer.GetRandomReward();
+                        ItemRandomizer.RecordMapping(checkKey, reward?.Id ?? "none");
+                        if (Plugin.Instance != null)
+                            Plugin.Instance.StartCoroutine(GiveRewardAndDisableTollMachine(reward, isStation));
+                    }
+                    return true;
                 }
 
-                // ★ 预生成映射优先：进入场景时已从随机池摸好结果，直接按表给予；
-                // 再延迟一帧发放，避免打断收费机/商店 FSM
-                var reward = PreGeneratedMap.ResolveReward(checkKey) ?? ItemRandomizer.GetRandomReward();
-                ItemRandomizer.RecordMapping(checkKey, reward?.Id ?? "none");
+                // ★ 地图：保留拦截（吞掉 HasXMap 写入，防止地图本体 + 随机奖励双重获得）
+                if (ItemRandomizer.GetMapping(checkKey) != null)
+                    return false;
 
+                var mapReward = PreGeneratedMap.ResolveReward(checkKey) ?? ItemRandomizer.GetRandomReward();
+                ItemRandomizer.RecordMapping(checkKey, mapReward?.Id ?? "none");
                 if (Plugin.Instance != null)
-                    Plugin.Instance.StartCoroutine(GiveRewardAndDisableTollMachine(reward, isStation));
+                    Plugin.Instance.StartCoroutine(GiveRewardAndDisableTollMachine(mapReward, isStation));
 
                 return false;
             }
@@ -589,15 +672,13 @@ namespace SilksongItemRandomizer
     /// 检测游戏内「检查」交互（石碑等）触发一次性随机奖励。
     /// 挂钩 NPCControlBase.StartDialogue —— 所有交互类型共用的 funnel。
     /// 判定完全基于「交互键类型」：InteractLabel == PromptLabels.Inspect，不检测内容。
-    /// 所有 inspect 交互物按两个本地存储记录分支处理：
+    /// 所有 inspect 交互物按本地存储记录分支处理：
     /// - 记录一（loretrig:scene:name）：该地点是否已触发过随机——每地只触发一次，种子重置才清。
-    /// - 记录二（virt:Permit:scene:name）：权限物（进随机池）是否已获得。
     /// 分支：
     /// - lore 白名单（LoreRandomizer.LoreObjectKeys）：发放随机奖励，跳过原内容并原地禁用
     ///   （lore 内容已入随机池，原地后续不需要恢复）。
-    /// - 车站收费机（InspectPermitRewards.Permits 登记的地点）：无权限物时——首次交互发放随机奖励（记录一），随后拦截；
-    ///   获得权限物（记录二）后放行原地原生流程（把存储的不允许变成允许，不看具体种类）。
-    /// - 其余权限类地点（白名单外且未登记）：一律放行原生流程，不触发随机、不拦截（已移除随机化，避免卡剧情）。
+    /// - 非 lore 白名单对象（收费机等）：一律放行原生流程，不触发随机、不拦截
+    ///   （收费机奖励已改由车站/管道/地图购买走 check 键发放，权限逻辑已废弃）。
     /// 受「物品随机总开关」SilksongItemRandomizerAPI.IsEnabled() 控制。
     /// 我们自己的 LoreRandomizer.ShowLoreDialogue 走 DialogueBox 字符串重载，不经过 StartDialogue，不会自触发。
     /// </summary>
@@ -660,19 +741,9 @@ namespace SilksongItemRandomizer
                 }
                 else
                 {
-                    // ★ 权限类：仅保留车站收费机（InspectPermitRewards 中登记的地点）走权限逻辑；
-                    // 其余权限类地点已移除随机化，直接放行原生流程（不触发随机、不拦截，避免卡剧情）。
-                    if (!InspectPermitRewards.IsPermitObject(__instance.gameObject.scene.name, __instance.gameObject.name))
-                        return true;
-
-                    // ★ 权限类：记录二 = 权限物（virt:Permit:locationId）是否已获得
-                    string permitId = "virt:Permit:" + locationId;
-                    if (ItemRandomizer.GetGivenCount(permitId) > 0)
-                        return true; // 已获得权限：放行原生流程（原地后续照常）
-
-                    // 无权限物：已触发过随机则拦截（等待从随机池获得权限物才能使用）
-                    if (ItemRandomizer.GetGivenCount(triggerId) > 0)
-                        return false;
+                    // 非 lore 白名单对象（收费机等）：放行原生流程，不触发随机（收费机奖励已改由
+                    // 车站/管道/地图购买走 check 键发放，权限逻辑已废弃）。
+                    return true;
                 }
 
                 // ★ 预生成映射优先：进入场景时已从随机池摸好结果，直接按表给予；
@@ -769,6 +840,112 @@ namespace SilksongItemRandomizer
             {
                 Plugin.Log.LogError($"[LoreTriggerPatch] 场景重扫异常: {ex}");
             }
+        }
+    }
+}
+
+namespace SilksongItemRandomizer
+{
+    /// <summary>
+    /// 地图收费机（Map Machine）拦截：玩家在收费机购买地图时，吞掉原生 SavedItem.Get（不获得地图），
+    /// 改为给一次随机奖励，并用本地化映射记录"已拿过"；场景加载时按记录隐藏收费机。
+    /// 只拦地图收费机路径（SavedItem.Get 且当前场景存在 active 的 "Map Machine"），
+    /// 不影响 mod 自己发放地图奖励（走 PlayerData.SetBool / SavedItem.TryGet 通道）。
+    /// </summary>
+    [HarmonyPatch(typeof(SavedItem), "Get", new[] { typeof(int), typeof(bool) })]
+    public static class MapMachineGetPatch
+    {
+        private const string MapMachineName = "Map Machine";
+
+        [HarmonyPrefix]
+        private static bool Prefix()
+        {
+            try
+            {
+                if (!SilksongItemRandomizerAPI.IsEnabled()) return true;
+                if (!ItemRandomizer.IsInitialized) return true;
+
+                var scene = SceneManager.GetActiveScene();
+                if (!scene.IsValid()) return true;
+
+                // 只拦存在地图收费机的场景（地图收费机购买路径）
+                bool hasMapMachine = false;
+                foreach (var root in scene.GetRootGameObjects())
+                    if (ContainsMapMachine(root.transform, ref hasMapMachine) || hasMapMachine) break;
+                if (!hasMapMachine) return true;
+
+                if (Plugin.SaveData != null && Plugin.SaveData.MapMachineClaimedScenes.Contains(scene.name))
+                    return true; // 已拿过：放行（正常不会走到，收费机已隐藏）
+
+                // 给一次随机奖励
+                var reward = ItemRandomizer.GetRandomReward();
+                if (reward != null)
+                {
+                    reward.Give();
+                    ItemRandomizer.AddGivenCount(reward.Id);
+                }
+
+                // 本地化记录已拿过
+                if (Plugin.SaveData != null)
+                {
+                    Plugin.SaveData.MapMachineClaimedScenes.Add(scene.name);
+                    Plugin.SaveGlobalData();
+                }
+
+                if (Plugin.Instance != null)
+                    Plugin.Instance.StartCoroutine(HideMapMachinesDelayed(scene));
+
+                return false; // 吞掉原生 Get，不获得地图
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[地图收费机] 拦截异常（放行原版）: {ex}");
+                return true;
+            }
+        }
+
+        private static bool ContainsMapMachine(Transform t, ref bool found)
+        {
+            if (found) return true;
+            if (string.Equals(t.gameObject.name, MapMachineName, StringComparison.OrdinalIgnoreCase)
+                && t.gameObject.activeSelf)
+            {
+                found = true;
+                return true;
+            }
+            foreach (Transform child in t)
+                if (ContainsMapMachine(child, ref found)) return true;
+            return false;
+        }
+
+        private static IEnumerator HideMapMachinesDelayed(Scene scene)
+        {
+            yield return null;
+            foreach (var root in scene.GetRootGameObjects())
+                HideMapMachinesRecursive(root.transform);
+        }
+
+        private static void HideMapMachinesRecursive(Transform t)
+        {
+            if (string.Equals(t.gameObject.name, MapMachineName, StringComparison.OrdinalIgnoreCase))
+            {
+                var interactable = t.GetComponent<InteractableBase>();
+                if (interactable != null) interactable.Deactivate(false);
+                if (t.gameObject.activeSelf) t.gameObject.SetActive(false);
+            }
+            foreach (Transform child in t)
+                HideMapMachinesRecursive(child);
+        }
+
+        /// <summary>场景加载：已拿过的地图收费机重新隐藏</summary>
+        public static void OnSceneLoaded(Scene scene)
+        {
+            if (!SilksongItemRandomizerAPI.IsEnabled()) return;
+            if (!ItemRandomizer.IsInitialized) return;
+            if (Plugin.SaveData == null) return;
+            if (!Plugin.SaveData.MapMachineClaimedScenes.Contains(scene.name)) return;
+            if (Plugin.Instance != null)
+                Plugin.Instance.StartCoroutine(HideMapMachinesDelayed(scene));
         }
     }
 }

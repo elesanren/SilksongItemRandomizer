@@ -1,8 +1,12 @@
 using HarmonyLib;
 using HutongGames.PlayMaker.Actions;
 using System.Collections;
+using System.Collections.Generic;
 using System;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using GlobalEnums;
 
 // SilkSpoolPartsPatch.cs - 丝轴/面具碎片获得拦截（全链路 C# 底层拦截，单文件）
 //
@@ -18,124 +22,152 @@ using UnityEngine;
 
 namespace SilksongItemRandomizer
 {
-    /// <summary>丝轴/面具碎片拦截共享状态。</summary>
     public static class SilkSpoolState
     {
-        /// <summary>旁路：virt:SpoolPart/virt:HeartPiece 发放时放行原生碎片计数写入。</summary>
         public static bool Bypass = false;
-
-        /// <summary>自发发放的放行窗口（覆盖异步流程，防 Get 后延迟回调被拦）。</summary>
         public static float SelfGiveUntil = -1f;
-
-        public static bool IsSelfGiving => UnityEngine.Time.realtimeSinceStartup < SelfGiveUntil;
-
-        public static void MarkSelfGiving(float seconds = 30f) => SelfGiveUntil = UnityEngine.Time.realtimeSinceStartup + seconds;
-
-        /// <summary>原生碎片获得被拦截的静默窗口：此窗口内 UI 动画/写入/上限全部静默跳过，但 FSM 正常走完不卡死。</summary>
-        /// <remarks>8 秒足以覆盖面具 UI 全流程（Darken→Fleur→Get N→Piece Fade→Check Max→Fuse→Max Up→Fade，动画被静默后仅剩 Wait 计时）。
-        /// 自发发放（F4/随机奖励）有 30 秒 SelfGive 窗口 + Bypass 双重保护，不受此窗口影响。</remarks>
         public static float NativeInterceptUntil = -1f;
+        private static bool _delayedScheduled = false;
+        public static readonly string[] PieceUiFsmNames = new string[]
+        {
+            "Silk Spool UI", "Heart Container UI",
+            "Heart Container Control", "Clear Spool", "Max Spool", "Silk Spool Instant"
+        };
+        private static float _lastUiGiveTime = -1f;
+        private static bool _isGiving = false;
+        private static string _lastGiveField = null;
+        private static float _lastGiveTime = -1f;
 
-        public static bool IsNativeIntercept => UnityEngine.Time.realtimeSinceStartup < NativeInterceptUntil;
+        public static bool IsSelfGiving => Time.realtimeSinceStartup < SelfGiveUntil;
+
+        public static void MarkSelfGiving(float seconds = 30f)
+        {
+            SelfGiveUntil = Time.realtimeSinceStartup + seconds;
+        }
+
+        public static bool IsNativeIntercept => Time.realtimeSinceStartup < NativeInterceptUntil;
 
         public static void MarkNativeIntercept(float seconds = 8f)
         {
-            NativeInterceptUntil = UnityEngine.Time.realtimeSinceStartup + seconds;
+            NativeInterceptUntil = Time.realtimeSinceStartup + seconds;
         }
 
-        /// <summary>是否为「原生碎片获得被拦截」的静默窗口（且非自发）——此时碎片 UI 动画/写入/上限全部静默跳过。</summary>
         public static bool IsNativeInterceptActive => IsNativeIntercept && !IsSelfGiving && !Bypass;
 
-        /// <summary>
-        /// 最小必要恢复：仅解除导致"不能动/上升下落缓慢"的三项，不做暴力物理重置。
-        /// 诊断确认：收集点对象（Heart Piece/Silk Spool）挂在 inputBlockers 上导致 inputBlocked=True，
-        /// 面具 controlReqlinquished=True + gravityScale=0 未恢复。用公开 API 逐一解除。
-        /// </summary>
         public static void MinimalRestore(string tag)
         {
             try
             {
                 MinimalRestoreCore(tag);
-                // 延迟 1.5s 二次兜底：场景收尾可能覆盖本次恢复，到时再补一次
                 ScheduleDelayedRestore(tag);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Restore] MinimalRestore 异常: " + e); } catch { } }
+            catch (Exception ex)
+            {
+            }
         }
 
         private static void MinimalRestoreCore(string tag)
         {
-                var hero = HeroController.instance;
-                if (hero == null) return;
-                // 1. 归还控制权（面具）
-                if (hero.controlReqlinquished)
+            HeroController hero = HeroController.instance;
+            if (hero == null) return;
+
+            if (hero.controlReqlinquished)
+            {
+                hero.RegainControl();
+            }
+
+            try
+            {
+                var field = typeof(HeroController).GetField("inputBlockers", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (field?.GetValue(hero) is HashSet<object> blockers && blockers.Count > 0)
                 {
-                    hero.RegainControl();
-                    Plugin.Log.LogInfo($"[Restore] {tag}: RegainControl");
+                    var list = new List<object>(blockers);
+                    foreach (var obj in list)
+                        hero.RemoveInputBlocker(obj);
                 }
-                // 2. 移除输入锁（面具/丝轴共用，blocker=收集点对象）
-                try
+            }
+            catch (Exception ex)
+            {
+            }
+
+            Rigidbody2D body = hero.Body;
+            if (body != null && !Mathf.Approximately(body.gravityScale, hero.DEFAULT_GRAVITY))
+            {
+                try { hero.ResetGravity(); }
+                catch { body.gravityScale = hero.DEFAULT_GRAVITY; }
+            }
+
+            try
+            {
+                var pgField = typeof(HeroController).GetField("prevGravityScale", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (pgField != null && pgField.GetValue(hero) is float prev && !Mathf.Approximately(prev, hero.DEFAULT_GRAVITY))
                 {
-                    var field = typeof(HeroController).GetField("inputBlockers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (field?.GetValue(hero) is System.Collections.Generic.HashSet<object> set && set.Count > 0)
-                    {
-                        var items = new System.Collections.Generic.List<object>(set);
-                        foreach (var item in items)
-                        {
-                            hero.RemoveInputBlocker(item);
-                        }
-                        Plugin.Log.LogInfo($"[Restore] {tag}: 移除 {items.Count} 个输入锁");
-                    }
+                    pgField.SetValue(hero, hero.DEFAULT_GRAVITY);
                 }
-                catch (Exception e) { Plugin.Log.LogWarning($"[Restore] {tag}: 移除输入锁异常: " + e); }
-                // 3. 恢复重力（面具）+ 同步 prevGravityScale（否则后续 AffectedByGravity(true) 会用 0 覆盖 → 下落缓慢）
-                var rb = hero.Body;
-                if (rb != null && rb.gravityScale != hero.DEFAULT_GRAVITY)
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                if (hero.cState != null && hero.cState.invulnerable)
+                    hero.cState.invulnerable = false;
+                PlayerData pd = PlayerData.instance;
+                if (pd != null && pd.isInvincible)
+                    pd.isInvincible = false;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                if (hero.damageMode != null)
                 {
-                    try { hero.ResetGravity(); } catch { rb.gravityScale = hero.DEFAULT_GRAVITY; }
-                    Plugin.Log.LogInfo($"[Restore] {tag}: 重置重力");
+                    hero.SetDamageMode(DamageMode.FULL_DAMAGE);
                 }
-                try
+            }
+            catch (Exception ex)
+            {
+            }
+
+            try
+            {
+                if (!hero.HasAnimationControl)
                 {
-                    var pf = typeof(HeroController).GetField("prevGravityScale", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (pf != null)
-                    {
-                        var pv = pf.GetValue(hero);
-                        if (pv is float f && f != hero.DEFAULT_GRAVITY)
-                        {
-                            pf.SetValue(hero, hero.DEFAULT_GRAVITY);
-                            Plugin.Log.LogInfo($"[Restore] {tag}: 修正 prevGravityScale {f} -> {hero.DEFAULT_GRAVITY}");
-                        }
-                    }
+                    hero.StartAnimationControl();
                 }
-                catch (Exception e) { Plugin.Log.LogWarning($"[Restore] {tag}: 修正 prevGravityScale 异常: " + e); }
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
-        /// <summary>
-        /// 终止卡死在 "UI" 态的残留 Heart Container Control FSM（收集点场景侧演出对象）。
-        /// 病理：静默流程跳过了 UI→场景侧的推进事件，该 FSM 永远停在 "UI" 态逐帧执行
-        /// SetVelocity2d(0,-1.2)/SetGravity2dScale → 英雄悬浮、无惯性、下落极慢，切场景才恢复。
-        /// 只终止 Active 且 ActiveStateName=="UI" 的，不碰正常流程。
-        /// </summary>
         public static void StopLingeringPieceFsms(string tag)
         {
             try
             {
-                var fsms = UnityEngine.Object.FindObjectsOfType<PlayMakerFSM>();
-                foreach (var f in fsms)
+                foreach (var fsm in UnityEngine.Object.FindObjectsOfType<PlayMakerFSM>())
                 {
-                    if (f == null || f.Fsm == null || !f.Fsm.Active) continue;
-                    if (!string.Equals(f.FsmName, "Heart Container Control", StringComparison.OrdinalIgnoreCase)) continue;
-                    if (!string.Equals(f.ActiveStateName, "UI", StringComparison.OrdinalIgnoreCase)) continue;
-                    Plugin.Log.LogWarning($"[Silent] {tag}: 终止残留演出FSM {f.gameObject.name}/{f.FsmName}@{f.ActiveStateName}");
-                    try { f.Fsm.Stop(); } catch (Exception e) { Plugin.Log.LogWarning($"[Silent] Fsm.Stop 异常: {e.Message}"); }
-                    try { f.enabled = false; } catch { }
+                    if (fsm == null || fsm.Fsm == null || !fsm.Fsm.Active) continue;
+                    if (!string.Equals(fsm.FsmName, "Heart Container Control", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!string.Equals(fsm.ActiveStateName, "UI", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    try { fsm.Fsm.Stop(); } catch { }
+                    try { fsm.enabled = false; } catch { }
+                    try
+                    {
+                        if (fsm.gameObject != null && fsm.gameObject.activeInHierarchy)
+                        {
+                            UnityEngine.Object.Destroy(fsm.gameObject);
+                        }
+                    }
+                    catch { }
                 }
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning($"[Silent] {tag}: StopLingeringPieceFsms 异常: " + e); } catch { }
-            }
+            catch { }
         }
-
-        private static bool _delayedScheduled = false;
 
         private static void ScheduleDelayedRestore(string tag)
         {
@@ -143,83 +175,91 @@ namespace SilksongItemRandomizer
             _delayedScheduled = true;
             try
             {
-                var plugin = Plugin.Instance;
-                if (plugin != null)
-                    plugin.StartCoroutine(DelayedRestoreRoutine(tag));
+                Plugin instance = Plugin.Instance;
+                if (instance != null)
+                    instance.StartCoroutine(DelayedRestoreRoutine(tag));
             }
             catch { _delayedScheduled = false; }
         }
 
-        private static System.Collections.IEnumerator DelayedRestoreRoutine(string tag)        {
-            yield return new UnityEngine.WaitForSeconds(1.5f);
+        private static IEnumerator DelayedRestoreRoutine(string tag)
+        {
+            yield return new WaitForSeconds(0.5f);
             _delayedScheduled = false;
             try { StopLingeringPieceFsms(tag + "延迟"); MinimalRestoreCore(tag + "延迟"); }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Restore] 延迟恢复异常: " + e); } catch { } }
-            // 兜底：再等 3s 终止可能迟到的残留演出 FSM
-            yield return new UnityEngine.WaitForSeconds(3f);
+            catch { }
+            yield return new WaitForSeconds(3f);
             try { StopLingeringPieceFsms(tag + "核查"); }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Restore] 残留FSM核查异常: " + e); } catch { } }
+            catch { }
         }
 
-        /// <summary>碎片获得共用 UI 的 FSM 名（丝轴/面具共用同一套 UI 流程，动画需一并静默）。
-        /// 含满管演出对象（Silk Spool Instant / Heart Container Control / Clear Spool / Max Spool Event）：
-        /// 满管演出与碎片 UI 同窗口启动，动作不静默则会播放动画 + 卡流程。</summary>
-        public static readonly string[] PieceUiFsmNames = {
-            "Silk Spool UI", "Heart Container UI",
-            "Heart Container Control", "Clear Spool", "Max Spool", "Silk Spool Instant"
-        };
-
-        /// <summary>判断某个 PlayMakerFSM 名是否属于碎片获得 UI。</summary>
         public static bool IsPieceUiFsm(string fsmName)
         {
             if (string.IsNullOrEmpty(fsmName)) return false;
-            foreach (var n in PieceUiFsmNames)
-                if (string.Equals(fsmName, n, StringComparison.OrdinalIgnoreCase))
-                    return true;
+            foreach (string n in PieceUiFsmNames)
+                if (string.Equals(fsmName, n, StringComparison.OrdinalIgnoreCase)) return true;
             return false;
         }
 
-        /// <summary>碎片演出对象名表（创建时即拦，不让动画入场）。满格（丝轴）/满管（面具）共用。</summary>
-        public static readonly string[] PieceShowObjectNames = {
-            "Silk Spool UI", "Heart Container UI",
-            "Silk Spool Instant", "Heart Container Control",
-            "Max Spool Event", "Clear Spool"
-        };
+        public static bool JustGaveViaUi => Time.realtimeSinceStartup - _lastUiGiveTime < 3f;
 
-        /// <summary>
-        /// 碎片获得演出对象创建时开窗（仅标记窗口，不阻止创建）。
-        /// 与半格原型一致：动画对象正常创建入场，窗口内动作被静默跳过 → 内容被跳、
-        /// 流程正常走到结束（不会卡死，随机奖励照发）。满格共用同一逻辑。
-        /// 自发（SelfGiving/Bypass）不开窗，原生动画正常播放。
-        /// </summary>
-        public static void MarkWindowOnShowCreate(UnityEngine.GameObject prefab, string via)
+        public static void MarkWindowOnShowCreate(GameObject prefab, string via)
         {
             try
             {
                 if (prefab == null) return;
-                var name = prefab.name;
+                string name = prefab.name;
                 bool hit = false;
                 if (name.IndexOf("Silk Spool", StringComparison.OrdinalIgnoreCase) >= 0) hit = true;
                 else if (name.IndexOf("Heart Container", StringComparison.OrdinalIgnoreCase) >= 0) hit = true;
-                if (!hit) return;
-                if (Bypass || IsSelfGiving) return; // 自发不开窗，原生动画正常播
+                if (!hit || Bypass || IsSelfGiving || (IsNativeIntercept && !JustGaveViaUi)) return;
+
                 MarkNativeIntercept();
-                try { Plugin.Log.LogWarning($"[Silent] 碎片演出入场(仅开窗不拦创建): {name} @ {via} → 窗口内动作静默跳过，流程正常走完"); } catch { }
+                if (JustGaveViaUi) return;
+
+                _lastUiGiveTime = Time.realtimeSinceStartup;
+                var reward = ItemRandomizer.GetRandomReward();
+                if (reward == null) return;
+
+                bool isHeart = name.IndexOf("Heart Container", StringComparison.OrdinalIgnoreCase) >= 0;
+                Bypass = true;
+                try
+                {
+                    reward.Give();
+                }
+                finally
+                {
+                    Bypass = false;
+                }
+                ItemRandomizer.AddGivenCount(reward.Id);
+                ItemRandomizer.RecordMapping(isHeart ? "item:Heart Piece" : "item:Silk Spool", "reward:" + reward.Id);
+                RecentItemsUI.AddItem(reward);
+
+                if (isHeart)
+                {
+                    try
+                    {
+                        foreach (var f in UnityEngine.Object.FindObjectsOfType<PlayMakerFSM>())
+                        {
+                            if (f != null && f.Fsm != null && string.Equals(f.FsmName, "Heart Container Control", StringComparison.OrdinalIgnoreCase))
+                            {
+                                f.Fsm.Event("HEART PIECE COLLECTED");
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                MinimalRestore("UI入口给奖后");
+                ScheduleDelayedRestore("UI入口");
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] MarkWindowOnShowCreate 异常: " + e); } catch { } }
-            _ = via;
+            catch { }
         }
 
         /// <summary>窗口内静默跳过动作：显式 Finish（被跳过 OnEnter 的动作不 Finish 会让 PlayMaker 认为动作仍在运行 → 状态不转换 → 卡死）+ 跳过原方法。</summary>
         public static bool SilentSkip(HutongGames.PlayMaker.FsmStateAction action, ref bool __runOriginal)
         {
-            try
-            {
-                if (action?.Fsm?.ActiveStateName != null)
-                    Plugin.Log.LogWarning($"[Silent] 跳过: FSM={action.Fsm.Name} 状态={action.Fsm.ActiveStateName} 动作={action.GetType().Name}");
-            }
-            catch { }
-            action.Finish();
+            try { action.Finish(); } catch { }
             __runOriginal = false;
             return false;
         }
@@ -233,11 +273,9 @@ namespace SilksongItemRandomizer
                 if (action?.Fsm == null || !IsPieceUiFsm(action.Fsm.Name)) return true;
                 return SilentSkip(action, ref __runOriginal);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] 动作异常: " + e); } catch { } }
+            catch { }
             return true;
         }
-
-        private static bool _isGiving = false;
 
         /// <summary>命中拦截字段则返回规范名，否则返回 null（放行）。</summary>
         public static string GetInterceptedField(string fieldName)
@@ -260,10 +298,6 @@ namespace SilksongItemRandomizer
                 GetInterceptedField(fieldName) != null;
         }
 
-        // 同字段双写去重（Increment/Set 双路径会先后写同一字段，只发一次奖励）
-        private static string _lastGiveField = null;
-        private static float _lastGiveTime = -1f;
-
         public static bool IsDeduped(string fieldName)
         {
             string canonical = GetInterceptedField(fieldName) ?? fieldName;
@@ -281,7 +315,6 @@ namespace SilksongItemRandomizer
             string itemField = string.Equals(canonical, "heartPieces", StringComparison.OrdinalIgnoreCase)
                 ? "item:Heart Piece"
                 : "item:Silk Spool";
-            Plugin.Log.LogInfo($"[SpoolPart] 检测到世界碎片写入（{canonical}@{via}），拦截并改为随机奖励");
 
             var reward = ResolveSequential(canonical);
             if (reward == null)
@@ -289,17 +322,18 @@ namespace SilksongItemRandomizer
             if (reward == null) return false;
 
             _isGiving = true;
+            Bypass = true;
             try
             {
                 reward.Give();
                 ItemRandomizer.AddGivenCount(reward.Id);
                 ItemRandomizer.RecordMapping(itemField, "reward:" + reward.Id);
                 RecentItemsUI.AddItem(reward);
-                Plugin.Log.LogInfo($"[SpoolPart] {canonical}@{via} 触发点给予: {reward.DisplayName}");
                 MinimalRestore("给奖后");
             }
             finally
             {
+                Bypass = false;
                 _isGiving = false;
             }
             // ★ 销毁记录兜底：本路径（写字段拦截）未经过 PrefabCollectable.Get/TryGet 入口，
@@ -314,10 +348,9 @@ namespace SilksongItemRandomizer
                         ? $"heartpiecescene:{activeScene.name}"
                         : $"spoolscene:{activeScene.name}";
                     Plugin.AddDestroyedPickupKey(sceneKey);
-                    Plugin.Log.LogInfo($"[SpoolPart] {canonical}@{via} 场景级销毁标记已写入: {sceneKey}");
                 }
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[SpoolPart] 场景级销毁标记异常: " + e); } catch { } }
+            catch { }
             return true;
         }
 
@@ -349,11 +382,12 @@ namespace SilksongItemRandomizer
             if (!IsNativeInterceptActive)
                 MarkNativeIntercept();
             if (!ShouldIntercept(name)) return true;
-            if (IsDeduped(name))
+            if (IsDeduped(name) || JustGaveViaUi)
             {
                 // 3 秒内同字段二次命中 = UI 内部补写/清零（风险例：Heart Container UI Check Max 会 IncrementPlayerDataInt 补写 heartPieces，
                 // 不拦则碎片进度被 UI 虚增到 4/4 却无合成，与丝轴上"半满+上限虚增"同源）。
                 // 静默拦下（不写数据、不再发奖励），UI 流程本身正常走完不卡。
+                // JustGaveViaUi：UI 创建入口已发随机（此类碎片点不经过 Get），写字段时不再发。
                 __runOriginal = false;
                 return false;
             }
@@ -395,7 +429,7 @@ namespace SilksongItemRandomizer
                     }
                 }
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Intercept] SetPlayerDataVariable.OnEnter 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -409,7 +443,7 @@ namespace SilksongItemRandomizer
         private static bool Prefix(PlayerData __instance, string intName, ref bool __runOriginal)
         {
             try { if (__instance == PlayerData.instance) { return SilkSpoolState.TryIntercept("[IncrementInt]", intName, ref __runOriginal); } }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Intercept] IncrementInt prefix 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -455,7 +489,7 @@ namespace SilksongItemRandomizer
                 if (__instance?.storeResult == null || !string.Equals(__instance.storeResult.Name, "Spool Parts", StringComparison.OrdinalIgnoreCase)) return true;
                 return SilkSpoolState.SilentSkip(__instance, ref __runOriginal);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] IntOperator 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -472,7 +506,7 @@ namespace SilksongItemRandomizer
                 if (__instance?.Fsm == null || !SilkSpoolState.IsPieceUiFsm(__instance.Fsm.Name)) return true;
                 return SilkSpoolState.SilentSkip(__instance, ref __runOriginal);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] SetAnimator 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -492,7 +526,7 @@ namespace SilksongItemRandomizer
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] AnimatorPlayStateWait 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -514,7 +548,7 @@ namespace SilksongItemRandomizer
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] ListenForAnimationEvent 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -544,7 +578,7 @@ namespace SilksongItemRandomizer
                     __instance.Fsm.Event(__instance.animationCompleteEvent);
                 return SilkSpoolState.SilentSkip(__instance, ref __runOriginal);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] Tk2dPlayAnimationWithEvents 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -565,7 +599,7 @@ namespace SilksongItemRandomizer
                     && __instance.finishEvent != null)
                     __instance.Fsm.Event(__instance.finishEvent);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] Wait 补发事件异常: " + e); } catch { } }
+            catch { }
             return SilkSpoolState.TrySilentSkip(__instance, ref __runOriginal);
         }
     }
@@ -583,7 +617,7 @@ namespace SilksongItemRandomizer
                     && __instance.finishEvent != null)
                     __instance.Fsm.Event(__instance.finishEvent);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] EaseColor 补发事件异常: " + e); } catch { } }
+            catch { }
             return SilkSpoolState.TrySilentSkip(__instance, ref __runOriginal);
         }
     }
@@ -684,13 +718,12 @@ namespace SilksongItemRandomizer
                 if (__instance?.Fsm == null || !SilkSpoolState.IsPieceUiFsm(__instance.Fsm.Name)) return true;
                 if (!string.Equals(__instance.Fsm.ActiveStateName, "Wait", StringComparison.OrdinalIgnoreCase)) return true;
                 // Wait 态：跳过 IsAnyCursed 判定，直接发满管结束事件推进
-                Plugin.Log.LogWarning($"[Silent] Silk Spool UI Wait 态：补发 SPOOL MAX UP ENDED 推进（满管演出已拦）");
                 __instance.Fsm.Event("SPOOL MAX UP ENDED");
                 __instance.Finish();
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] PlayerDataVariableTest 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -733,7 +766,7 @@ namespace SilksongItemRandomizer
                 }
                 return SilkSpoolState.TrySilentSkip(__instance, ref __runOriginal);
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] SendEventToRegister 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -774,7 +807,7 @@ namespace SilksongItemRandomizer
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] Tk2dPlayAnimation 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -795,7 +828,7 @@ namespace SilksongItemRandomizer
                 }
                 return true;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] AddToMaxSilk 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -816,7 +849,7 @@ namespace SilksongItemRandomizer
                 }
                 return true;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] AddToMaxHealth 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -839,12 +872,11 @@ namespace SilksongItemRandomizer
                 if (!SilkSpoolState.IsNativeInterceptActive) return true;
                 if (__instance?.Fsm == null || !SilkSpoolState.IsPieceUiFsm(__instance.Fsm.Name)) return true;
                 // 内容被跳过，无需锁输入（源头解决锁死/移动缓慢）
-                Plugin.Log.LogWarning($"[Silent] 跳过 AddHeroInputBlocker: FSM={__instance.Fsm.Name}");
                 __instance.Finish();
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] AddHeroInputBlocker 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -868,7 +900,7 @@ namespace SilksongItemRandomizer
                 __runOriginal = false;
                 return false;
             }
-            catch (Exception e) { try { Plugin.Log.LogWarning("[Silent] CheckIsCharacterGrounded 异常: " + e); } catch { } }
+            catch { }
             return true;
         }
     }
@@ -973,7 +1005,6 @@ namespace SilksongItemRandomizer
             _saveData = saveDataAccessor;
             if (_saveData != null)
             {
-                Plugin.Log.LogInfo($"[丝矛保底] 加载状态: 已给予={_saveData.GetSilkSpearGiven()}, 当前计数={_saveData.GetTryGetCount()}");
             }
         }
 
@@ -983,7 +1014,6 @@ namespace SilksongItemRandomizer
             {
                 _saveData.SetTryGetCount(0);
                 _saveData.SetSilkSpearGiven(false);
-                Plugin.Log.LogInfo("[丝矛保底] 保底状态已重置");
             }
         }
 
@@ -1004,7 +1034,6 @@ namespace SilksongItemRandomizer
 
             if (newCount < requiredCount) return;
 
-            Plugin.Log.LogInfo($"[丝矛保底] 保底触发（第{newCount}次物品获得）");
 
             GiveSilkSpearWithNativePopup();
 
@@ -1019,11 +1048,9 @@ namespace SilksongItemRandomizer
                 // 不再做任何槽位解锁初始化（EnsureCrestSlots 曾把全部槽位解锁，属过度处理已移除）
                 StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill("hasNeedleThrow");
                 Plugin.Instance.StartCoroutine(DelayedHealAndSilk());
-                Plugin.Log.LogInfo("[丝矛保底] 已通过 SkillRandomizer 给予丝矛（官方弹窗），5秒后回满血丝");
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogError($"[丝矛保底] 给予丝矛失败: {ex}");
             }
         }
 
@@ -1041,7 +1068,6 @@ namespace SilksongItemRandomizer
                 var pd = PlayerData.instance;
                 if (hero == null || pd == null)
                 {
-                    Plugin.Log.LogWarning("[丝矛保底] HeroController 或 PlayerData 为空，无法回满");
                     return;
                 }
 
@@ -1050,7 +1076,6 @@ namespace SilksongItemRandomizer
                 {
                     for (int i = 0; i < healthNeeded; i++)
                         hero.AddHealth(1);
-                    Plugin.Log.LogInfo($"[丝矛保底] 已回满血量 (+{healthNeeded})");
                 }
 
                 int silkNeeded = pd.CurrentSilkMax - pd.silk;
@@ -1058,19 +1083,16 @@ namespace SilksongItemRandomizer
                 {
                     for (int i = 0; i < silkNeeded; i++)
                         hero.AddSilk(1, false);
-                    Plugin.Log.LogInfo($"[丝矛保底] 已回满丝线 (+{silkNeeded})");
                 }
 
                 if (healthNeeded <= 0 && silkNeeded <= 0)
                 {
                     EventRegister.SendEvent(EventRegisterEvents.HealthUpdate, null);
                     GameCameras.instance?.silkSpool?.RefreshSilk();
-                    Plugin.Log.LogInfo("[丝矛保底] 血量/丝线已满，仅刷新UI");
                 }
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogError($"[丝矛保底] ForceFullHealAndSilk 异常: {ex}");
             }
         }
     }

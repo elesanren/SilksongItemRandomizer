@@ -127,13 +127,13 @@ namespace SilksongItemRandomizer
             //   丝线恢复上限同理不放——由随机池 SilkHeart（完整给予含官方弹窗）承担，
             //   曾有的简易版 virt:MaxSilkRegenUp 已删除，避免与丝之心重复发放）
 
-            // 纹章槽位解锁器（商店版，最多购买 20 次）
+            // 纹章槽位解锁器（商店版；购买/池内发放共用同一 limit，表驱动）
             list.Add(new LimitedVirtualReward(
                 "virt:UnlockCrestSlot",
                 Locale.Get("纹章槽位解锁器"),
                 FindSprite("spool_upgrade_pickup"),
                 () => ItemRandomizer.TryUnlockCrestSlot(),
-                20
+                ItemLimitConfig.LimitUnlockCrestSlot
             ));
 
             return list;
@@ -201,6 +201,28 @@ namespace SilksongItemRandomizer
                 {
                     var rng = new Random(Plugin.RandomSeed.Value ^ permanentId.GetHashCode());
                     price = GenerateRandomPrice(rng);
+                }
+
+                // ★ 商店购买的随机吉欧/跳蚤：直接给予，而非在玩家位置生成堆/跳蚤
+                if (preReward.Id == "virt:RandomCoin" || preReward.Id == "virt:FallbackCoin")
+                {
+                    int amount = ItemRandomizer.Rng.Next(0, 91);
+                    var coinReward = new VirtualReward(
+                        $"virt:RandomCoin_{amount}",
+                        string.Format(Locale.Get("随机念珠"), amount),
+                        FindSprite("I_rosary_icon_clean"),
+                        () => HeroController.instance?.AddGeo(amount),
+                        () => false);
+                    preReward = coinReward;
+                }
+                else if (preReward.Id == "virt:RandomFlea" || preReward.Id == "virt:FallbackFlea")
+                {
+                    preReward = new VirtualReward(
+                        "virt:RandomFlea",
+                        Locale.Get("跳蚤救援"),
+                        null,
+                        () => FleaRescueBuilder.SpawnAtHero(),
+                        () => false);
                 }
 
                 var proxy = ScriptableObject.CreateInstance<ProxySavedItem>();
@@ -475,8 +497,8 @@ namespace SilksongItemRandomizer
             {
                 float scale = 1f;
                 string name = savedItem.name;
-                // 地点权限 / 方向权限图标（Map_prompt、技能图标）原图很大，缩小防止遮挡视野
-                if (name.StartsWith("virt:Permit:") || name.StartsWith("perm:"))
+                // 方向权限图标（技能图标）原图很大，缩小防止遮挡视野
+                if (name.StartsWith("perm:"))
                     scale = 0.35f;
                 itemSpriteScaleField.SetValue(temp, scale);
             }
@@ -962,6 +984,10 @@ namespace SilksongItemRandomizer
             foreach (var s in SkillRegionRandomizePatch.UIMsgScenes) yield return "event:" + s;
             foreach (var s in SkillRegionRandomizePatch.MemoryNoPopupScenes) yield return "event:" + s;
             foreach (var s in ChurchRandomizePatch.ChapelShrineScenes) yield return "event:" + s;
+            // weave_10 织女五个独立随机点位（两纹章升级/两额外槽/风铃谣）：预注册保证同种子结果
+            // 确定。场景键 event:weave_10 因 SkillScenes 仍会预分配但永不 Resolve（无害预留）。
+            foreach (var s in new[] { "weave_10:CrestUpg1", "weave_10:CrestUpg2", "weave_10:Slot1", "weave_10:Slot2", "weave_10:EvaHeal" })
+                yield return "event:" + s;
         }
 
         /// <summary>触发侧查询：按当前拦截点场景取预生成奖励；未命中返回 null 由调用方回落现抽。</summary>
@@ -1043,14 +1069,16 @@ namespace SilksongItemRandomizer
         }
 
         /// <summary>生成当前配置指纹：全部 limit 额度 + 随机种子 + 映射数据版本（凡会影响映射分配的内容）
-        /// 数据版本随 check_points.txt / InspectPermitRewards 等映射数据变更时手动 +1，强制旧存档重建映射。</summary>
+        /// 数据版本随 check_points.txt 等映射数据变更时手动 +1，强制旧存档重建映射。</summary>
         private static string BuildConfigStamp()
         {
             // data3：方向权限 Id 规则变更（攻击/回血去掉方向后缀），旧映射表残留的
             // reward:perm:upward_R 等旧键在新 Id 下找不到，需强制重建一次
             // data4：剧情演出拦截点纳入预分配（event:场景 键入池），旧映射无这些键，强制重建
             // data5：删除简易版 virt:MaxSilkRegenUp（与丝之心重复），旧映射残留该奖励键，强制重建
-            return $"L{ItemLimitConfig.BuildLimitsStamp()}|seed{Plugin.RandomSeed?.Value ?? 0}|data5";
+            // data6：跳蚤救援 flea:01~27 顺序键纳入预分配，旧映射无这些键，强制重建
+            // data7：删除收费机权限物（virt:Permit:*）与收费机 lore 键，收费机奖励改走 check 键，旧映射残留，强制重建
+            return $"L{ItemLimitConfig.BuildLimitsStamp()}|seed{Plugin.RandomSeed?.Value ?? 0}|data7";
         }
 
         /// <summary>
@@ -1093,8 +1121,11 @@ namespace SilksongItemRandomizer
                 }
                 else if (type == "Lore")
                 {
-                    // ★ 前缀统一为 lore:
-                    key = $"lore:{scene}:{name}";
+                    // ★ 仅生成 LoreTable 白名单内的 lore 键（石碑/铭文日志）；
+                    // 收费机（Bellway Toll Machine / tube_toll_machine 等）不在白名单，
+                    // 其奖励已改由车站/管道/地图购买走 check 键发放，不再生成 lore 键。
+                    if (LoreRandomizer.IsLoreObject(scene, name))
+                        key = $"lore:{scene}:{name}";
                 }
                 // 忽略 Toll 和 BellBench（它们由 check 键处理）
                 if (!string.IsNullOrEmpty(key))
@@ -1106,16 +1137,21 @@ namespace SilksongItemRandomizer
                 allKeys.Add("check:" + boolName);
             foreach (var (boolName, _) in MapStationRewards.Stations)
                 allKeys.Add("check:" + boolName);
+            foreach (var (boolName, _) in MapStationRewards.Tubes)
+                allKeys.Add("check:" + boolName);
 
             // 2.3 商店槽位键（已含 "shop:" 前缀）
             foreach (var key in ShopSlotKeys)
                 allKeys.Add(key);
 
             // 2.4 原生碎片/苔莓顺序发放键（按获取顺序依次给；地点未知，先预编号）
-            //     面具碎片 heart:01~20、丝轴碎片 spool:01~18、苔莓 moss:01~06
-            for (int i = 1; i <= 20; i++) allKeys.Add($"heart:{i:D2}");
-            for (int i = 1; i <= 18; i++) allKeys.Add($"spool:{i:D2}");
-            for (int i = 1; i <= 6; i++) allKeys.Add($"moss:{i:D2}");
+            //     袋面碎片 heart、丝轴 spool、苔莓 moss、花芯 flower、跳蚤救援 flea
+            //     份数统一由 ItemLimitConfig 表驱动（精确份数 = 收集类物理总数，各分支必须齐全）
+            for (int i = 1; i <= ItemLimitConfig.LimitHeartPiece; i++) allKeys.Add($"heart:{i:D2}");
+            for (int i = 1; i <= ItemLimitConfig.LimitSpoolPart; i++) allKeys.Add($"spool:{i:D2}");
+            for (int i = 1; i <= ItemLimitConfig.LimitMoss; i++) allKeys.Add($"moss:{i:D2}");
+            for (int i = 1; i <= ItemLimitConfig.LimitFlower; i++) allKeys.Add($"flower:{i:D2}");
+            for (int i = 1; i <= FleaSceneMap.Count; i++) allKeys.Add($"flea:{i:D2}");
 
             // 2.5 剧情演出拦截点键（技能/丝之心/猎人日志/教堂神社；一场景至多一点，HashSet 去重重叠场景）
             foreach (var key in EventKeys())
@@ -1162,7 +1198,10 @@ namespace SilksongItemRandomizer
                 {
                     count = ItemLimitConfig.GetDirectionLimit(id);
                 }
-
+                else if (id == "flea:Rescue")
+                {
+                    count = ItemLimitConfig.LimitFleaRescue; // 这个值应为 27
+                }
                 for (int i = 0; i < count; i++)
                     pool.Add(reward);
             }
@@ -1180,8 +1219,8 @@ namespace SilksongItemRandomizer
             {
                 foreach (var reward in unlimitedSource)
                 {
-                    // 随机货币（virt:RandomCoin）添加 6 次，其余各 1 次，确保货币占大头
-                    int repeat = reward.Id == "virt:RandomCoin" ? 6 : 1;
+                    // 随机货币（virt:RandomCoin）按表权重重复（默认 6），确保货币占大头
+                    int repeat = reward.Id == "virt:RandomCoin" ? ItemLimitConfig.RandomCoinWeight : 1;
                     for (int i = 0; i < repeat; i++)
                         weightedUnlimited.Add(reward);
                 }
@@ -1323,14 +1362,25 @@ namespace SilksongItemRandomizer
                         ? stored.Substring("reward:".Length)
                         : stored;
 
-                    // 虚拟货币奖励
+                    // 虚拟货币奖励（地图点：生成钱堆）
                     if (id == "virt:FallbackCoin")
                     {
                         return new VirtualReward(
                             "virt:FallbackCoin",
                             Locale.Get("随机货币"),
                             SpriteCache.Find("coinget_01"),
-                            () => HeroController.instance?.AddGeo(ItemRandomizer.Rng.Next(1, 6)),
+                            () => GeoRockBuilder.SpawnAtHero(),
+                            () => false
+                        );
+                    }
+                    // 虚拟跳蚤奖励（地图点：生成跳蚤救援）
+                    if (id == "virt:FallbackFlea")
+                    {
+                        return new VirtualReward(
+                            "virt:FallbackFlea",
+                            Locale.Get("跳蚤救援"),
+                            null,
+                            () => FleaRescueBuilder.SpawnAtHero(),
                             () => false
                         );
                     }
@@ -1452,6 +1502,16 @@ namespace SilksongItemRandomizer
                     ? stored.Substring("reward:".Length)
                     : stored;
                 if (id == "virt:FallbackCoin") return null;
+                // 跳蚤顺序键：映射为跳蚤奖励时直接给跳蚤（生成救援跳蚤）
+                if (prefix == "flea" && (id == "virt:FallbackFlea" || id == "virt:RandomFlea"))
+                {
+                    return new VirtualReward(
+                        id,
+                        Locale.Get("跳蚤救援"),
+                        null,
+                        () => FleaRescueBuilder.SpawnAtHero(),
+                        () => false);
+                }
                 return ItemRandomizer.FindRewardById(id);
             }
             catch { return null; }

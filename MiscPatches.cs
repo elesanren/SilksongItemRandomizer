@@ -145,10 +145,14 @@ namespace SilksongItemRandomizer
             __instance.damageMode = 0;
             __instance.AffectedByGravity(true);
 
-            // 无敌保护
-            _protectionEndTime = Time.time + ProtectionDuration;
-            __instance.cState.invulnerable = true;
-            __instance.StartCoroutine(ClearInvincibleAfterDelay(__instance, ProtectionDuration));
+            // 无敌保护：仅陷阱随机开启时生效（对抗出生点踩陷阱即死），
+            // 陷阱随机关闭时保持原生行为（重生无额外无敌）
+            if (TrapRandomizer.Enabled)
+            {
+                _protectionEndTime = Time.time + ProtectionDuration;
+                __instance.cState.invulnerable = true;
+                __instance.StartCoroutine(ClearInvincibleAfterDelay(__instance, ProtectionDuration));
+            }
         }
 
         private static void ClearInputState(HeroController hero)

@@ -60,6 +60,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="TeamCherry.TK2D">
+      <HintPath>..\..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\TeamCherry.TK2D.dll</HintPath>
+    </Reference>
     <Reference Include="PlayMaker">
       <HintPath>..\..\..\steam\steamapps\common\Hollow Knight Silksong\Hollow Knight Silksong_Data\Managed\PlayMaker.dll</HintPath>
     </Reference>
@@ -134,6 +137,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CrestSystem.cs" />
     <Compile Include="EnemyRandoAdjuster.cs" />
+    <Compile Include="GeoFleaSystem.cs" />
     <Compile Include="GlobalSaveData.cs" />
     <Compile Include="HotkeyHandler.cs" />
     <Compile Include="ItemConfig.cs" />

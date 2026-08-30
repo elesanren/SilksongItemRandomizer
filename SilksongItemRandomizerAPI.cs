@@ -161,52 +161,26 @@ namespace SilksongItemRandomizer
         private static void SyncLimitsBackToCachedConfig()
         {
             if (_cachedConfig == null) return;
-            _cachedConfig.Limits = new ItemLimitSettings
-            {
-                SkillItem = ItemLimitConfig.LimitSkillItem,
-                Relic = ItemLimitConfig.LimitRelic,
-                OtherItem = ItemLimitConfig.LimitOtherItem,
-                UpSlash = ItemLimitConfig.LimitUpSlash,
-                LeftSlash = ItemLimitConfig.LimitLeftSlash,
-                RightSlash = ItemLimitConfig.LimitRightSlash,
-                DashLeft = ItemLimitConfig.LimitDashLeft,
-                DashRight = ItemLimitConfig.LimitDashRight,
-                HarpoonLeft = ItemLimitConfig.LimitHarpoonLeft,
-                HarpoonRight = ItemLimitConfig.LimitHarpoonRight,
-                FloatLeft = ItemLimitConfig.LimitFloatLeft,
-                FloatRight = ItemLimitConfig.LimitFloatRight,
-                WallJumpLeft = ItemLimitConfig.LimitWallJumpLeft,
-                WallJumpRight = ItemLimitConfig.LimitWallJumpRight,
-                Heal = ItemLimitConfig.LimitHeal,
-                NeedleThrow = ItemLimitConfig.LimitNeedleThrow,
-                ThreadSphere = ItemLimitConfig.LimitThreadSphere,
-                HarpoonDash = ItemLimitConfig.LimitHarpoonDash,
-                SilkCharge = ItemLimitConfig.LimitSilkCharge,
-                SilkBomb = ItemLimitConfig.LimitSilkBomb,
-                SilkBossNeedle = ItemLimitConfig.LimitSilkBossNeedle,
-                Needolin = ItemLimitConfig.LimitNeedolin,
-                Parry = ItemLimitConfig.LimitParry,
-                NeedolinMemory = ItemLimitConfig.LimitNeedolinMemory,
-                FastTravel = ItemLimitConfig.LimitFastTravel,
-                EvaHeal = ItemLimitConfig.LimitEvaHeal,
-                Dash = ItemLimitConfig.LimitDash,
-                Brolly = ItemLimitConfig.LimitBrolly,
-                DoubleJump = ItemLimitConfig.LimitDoubleJump,
-                SuperJump = ItemLimitConfig.LimitSuperJump,
-                WallJump = ItemLimitConfig.LimitWallJump,
-                ChargeSlash = ItemLimitConfig.LimitChargeSlash,
-                HeartPiece = ItemLimitConfig.LimitHeartPiece,
-                SpoolPart = ItemLimitConfig.LimitSpoolPart,
-                MaxSilkRegenUp = ItemLimitConfig.LimitMaxSilkRegenUp,
-                UnlockCrestSlot = ItemLimitConfig.LimitUnlockCrestSlot,
-                SimpleKey = ItemLimitConfig.LimitSimpleKey,
-            };
+            _cachedConfig.Limits = ItemLimitConfig.CaptureSettings();
         }
 
         public static void ResetAllData()
         {
             // 使用公开方法重置存档，而不是直接赋值
             Plugin.ResetSaveData();
+
+            // ★ 新开随机档：攻击方向权限重置为全未获得，并标记方向系统已启用，
+            //   否则 GlobalSaveData 默认 Ability* = true + AttackDirectionsSet=false
+            //   会让重进存档时所有分裂权限全部解锁。
+            var saveData = Plugin.SaveData;
+            if (saveData != null)
+            {
+                saveData.AbilityUpward = false;
+                saveData.AbilityLeft = false;
+                saveData.AbilityRight = false;
+                saveData.AttackDirectionsSet = true;
+                Plugin.SaveGlobalData();
+            }
 
             // 重建缓存
             SpriteCache.Reset();
@@ -300,9 +274,11 @@ namespace SilksongItemRandomizer
             ToolEffectRandomizer.SetEnabled(_cachedConfig.CrestEnabled);
             ShopRandomizer.ResetCache();
 
-            // 能力门控随物品随机化总开关启停（回血/二段跳/抗寒/游泳；与 SAP 全随机模式解耦）
+            // 能力门控（回血/二段跳/抗寒/游泳）：仅在「全随机模式」下启用。
+            // 这些分裂型权限是稀缺能力，随机池在非全随机模式不含它们，若门控开启会造成无法获得的死局
+            //（如未持游泳权限时水一直有伤害）。非全随机模式一律关闭门控，保持原生行为。
             StartingAbilityPicker.StartingAbilityPickerAPI.SetAbilityGates(
-                _cachedConfig.Enabled, _cachedConfig.Enabled, _cachedConfig.Enabled, _cachedConfig.Enabled);
+                fullRandom, fullRandom, fullRandom, fullRandom);
 
             if (_cachedConfig.Enabled && !_harmonyPatched)
             {
@@ -415,6 +391,7 @@ namespace SilksongItemRandomizer
             typeof(MapperPermanentPatch.MapperLeaveAllPatch),
             typeof(MapperPermanentPatch.ResetOnEnterPatch),
             typeof(DeactivateIfPlayerdataTruePatch),
+            typeof(SkillRegionRandomizePatch.GiveSilkHeartAllowPatch),
         };
 
         /// <summary>常驻补丁是否已注册（避免重复 PatchAll）</summary>

@@ -97,18 +97,193 @@ public class HotkeyHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F9))
             Plugin.Instance?.DumpAllMappings();
 
-        // F4 测试：丝轴 prefab 给予（复现拦截误伤问题，调试用）
+        if (Input.GetKeyDown(KeyCode.F10))
+            TestNextDirectionPermission();
+
         if (Input.GetKeyDown(KeyCode.F4))
         {
-            Plugin.Log.LogInfo("[F4丝轴测试] 触发 GiveSpoolPart");
-            StartCoroutine(NativePickupGiver.GiveSpoolPart());
+            StartMapSpritePicker();
         }
         if (Input.GetKeyDown(KeyCode.Escape))
             Plugin.Instance?.RefreshBenchwarpUI();
     }
+    /// <summary>
+    /// 启动跳蚤图标筛选器：搜索所有名称含 "flea" 的 Sprite，弹出预览窗口让用户浏览。
+    /// </summary>
+    private List<(string cat, string name)> _currentCandidates = new List<(string cat, string name)>();
+    private void StartFleaPicker()
+    {
+        if (_isDumpingSprites) return; // 防止重复调用
+        StartCoroutine(LoadAtlasesThenStartFleaPicker());
+    }
 
+    /// <summary>
+    /// F4 地图图标筛选器：加载图集后搜索名称含剩余地图名（Boneforest / Abyss / Song Gate）的
+    /// sprite，逐张预览勾选，勾选名单写入 sprite_picked.txt。
+    /// </summary>
+    private void StartMapSpritePicker()
+    {
+        if (_isDumpingSprites) return;
+        StartCoroutine(LoadAtlasesThenStartMapPicker());
+    }
+
+    private IEnumerator LoadAtlasesThenStartMapPicker()
+    {
+        if (_isDumpingSprites) yield break;
+        _isDumpingSprites = true;
+
+        // 剩余待配图地图的关键词
+        var pendingKeys = new[] { "boneforest", "abyss", "songgate", "song_gate", "song-gate" };
+
+        // 1. 枚举 Addressables 全部 key
+        var addrKeys = new List<string>();
+        try
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+                foreach (object key in locator.Keys)
+                    if (key is string sk && !string.IsNullOrEmpty(sk))
+                        addrKeys.Add(sk);
+        }
+        catch { }
+
+        // 2. 筛选图集类 key（含剩余地图关键词）
+        var atlasKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var k in addrKeys)
+        {
+            if (!IsLikelyAtlasKey(k)) continue;
+            foreach (var kw in pendingKeys)
+                if (k.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0) { atlasKeys.Add(k); break; }
+        }
+
+        // 3. 加载图集资源
+        int loadedOk = 0, loadedFail = 0;
+        foreach (var k in atlasKeys)
+        {
+            AsyncOperationHandle<UnityEngine.Object> handle = default;
+            try { handle = Addressables.LoadAssetAsync<UnityEngine.Object>(k); }
+            catch { loadedFail++; continue; }
+
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (!handle.IsDone && Time.realtimeSinceStartup <= deadline)
+                yield return null;
+            if (handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded)
+                loadedOk++;
+            else
+            {
+                loadedFail++;
+                try { if (handle.IsValid()) Addressables.Release(handle); } catch { }
+            }
+        }
+
+        // 4. 重置缓存并重建 Sprite 缓存
+        SpriteCache.Reset();
+        SpriteCache.EnsureBuilt();
+
+        // 5. 构建候选：所有名称含剩余地图关键词的 sprite
+        _currentCandidates.Clear();
+        var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+        foreach (var sp in allSprites)
+        {
+            if (sp == null || string.IsNullOrEmpty(sp.name)) continue;
+            foreach (var kw in pendingKeys)
+            {
+                if (sp.name.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _currentCandidates.Add(("map", sp.name));
+                    break;
+                }
+            }
+        }
+
+        if (_currentCandidates.Count == 0)
+        {
+            Plugin.Log.LogInfo("[F4] 未找到剩余地图名的贴图。");
+            _isDumpingSprites = false;
+            yield break;
+        }
+
+        _pickerActive = true;
+        _pickerIndex = 0;
+        _pickedNames.Clear();
+        Plugin.Log.LogInfo($"[F4] 找到 {_currentCandidates.Count} 个剩余地图图标，开始筛选。");
+        _isDumpingSprites = false;
+    }
 
     private int _f4MsgCycleIndex;
+    private int _f4ComboTier;
+
+    /// <summary>F4 发光弹窗循环测试列表：四心（UI Msg Get Item Heart，CORAL/FLOWER/HUNTER/CLOVER）+
+    /// 三旋律（UI Msg Get Item Melody，CONDUCTOR/LIBRARIAN/ARCHITECT）+
+    /// 猎手 Combo（UI Msg Get Item 通用，Item 写 "Hunter Combo 1/2" → H COMBO 1/2 → Set H Combo 1/2）。
+    /// 全为含 Icon+Icon Glow 双层图标的官方全屏弹窗。</summary>
+    private static readonly (string kind, string evt)[] F4GlowPopupItems =
+    {
+        ("heart", "CORAL"),
+        ("heart", "FLOWER"),
+        ("heart", "HUNTER"),
+        ("heart", "CLOVER"),
+        ("melody", "CONDUCTOR"),
+        ("melody", "LIBRARIAN"),
+        ("melody", "ARCHITECT"),
+        ("hcombo", "1"),
+        ("hcombo", "2"),
+    };
+    private int _f4PopupIndex;
+    private static bool _f4Toggle;
+
+    /// <summary>F4 发光弹窗循环测试：依次走官方弹窗链路（HeartMsgHelper/MelodyMsgHelper/
+    /// OfficialMsgHelper.ShowHunterCombo →官方 UI Msg FSM），并在弹出后运行时反查实际
+    /// Icon/Icon Glow SpriteRenderer 显示的 sprite 名，核对双层图标是否正确。</summary>
+    private void TestGlowPopupCycle()
+    {
+        try
+        {
+            var (kind, evt) = F4GlowPopupItems[_f4PopupIndex++ % F4GlowPopupItems.Length];
+            Plugin.Log.LogInfo($"[F4发光弹窗] {kind}:{evt}");
+            bool ok = kind switch
+            {
+                "heart" => StartingAbilityPicker.HeartMsgHelper.Show(evt),
+                "melody" => StartingAbilityPicker.MelodyMsgHelper.Show(evt),
+                "hcombo" => StartingAbilityPicker.OfficialMsgHelper.ShowHunterCombo(int.Parse(evt)),
+                _ => false
+            };
+            if (!ok) Plugin.Log.LogWarning($"[F4发光弹窗] {kind} {evt} 弹出失败");
+            StartCoroutine(DumpGlowIconDelayed(kind, evt));
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4发光弹窗] 异常: {ex}");
+        }
+    }
+
+    /// <summary>延迟数帧，等官方 UI Msg 克隆体 FSM 完成图标填充后，反查全部
+    /// "UI Msg Get Item Heart/Melody/通用(Clone)" 实例 Icon 与 Icon Glow 子对象的
+    /// SpriteRenderer 实际 sprite 名。</summary>
+    private System.Collections.IEnumerator DumpGlowIconDelayed(string kind, string evt)
+    {
+        for (int f = 0; f < 6; f++) yield return null; // 等 Setup And Wait → Init → Set XX
+        try
+        {
+            var clones = UnityEngine.Object.FindObjectsOfType<GameObject>()
+                .Where(g => g && g.name.StartsWith("UI Msg Get Item", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            Plugin.Log.LogInfo($"[F4发光弹窗] {kind}:{evt}: 找到 {clones.Count} 个克隆体");
+            foreach (var go in clones)
+            {
+                var iconT = go.transform.Find("Icon");
+                var glowT = go.transform.Find("Icon Glow");
+                var sr = iconT ? iconT.GetComponentInChildren<SpriteRenderer>(true) : null;
+                var srGlow = glowT ? glowT.GetComponentInChildren<SpriteRenderer>(true) : null;
+                Plugin.Log.LogInfo($"[F4发光弹窗] {kind}:{evt}: Icon='{iconT?.name ?? "NULL"}' " +
+                    $"sprite={(sr && sr.sprite ? sr.sprite.name : "NULL")} | " +
+                    $"Glow='{glowT?.name ?? "NULL"}' sprite={(srGlow && srGlow.sprite ? srGlow.sprite.name : "NULL")}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4发光弹窗] 反查图标异常: {ex.Message}");
+        }
+    }
 
     /// <summary>F4 测试：依次调用 OfficialMsgHelper 三类官方弹窗（额外槽→丝之心→纹章），循环。</summary>
     //private void TestOfficialMsgCycle()
@@ -912,6 +1087,46 @@ public class HotkeyHandler : MonoBehaviour
         }
     }
 
+    /// <summary>F10 方向权限校准：依次只开一个移动方向权限（其他全关），补发本体能力，
+    /// 顶部通知显示当前方向名，玩家实测实际移动方向后按 F10 切下一个。</summary>
+    private static readonly (string label, string skillField, bool right, bool left)[] DirectionCalibList =
+    {
+        ("冲刺左", "hasDash", false, true),
+        ("冲刺右", "hasDash", true, false),
+        ("飞针左", "hasHarpoonDash", false, true),
+        ("飞针右", "hasHarpoonDash", true, false),
+        ("漂浮左", "hasBrolly", false, true),
+        ("漂浮右", "hasBrolly", true, false),
+        ("壁跳左", "hasWalljump", false, true),
+        ("壁跳右", "hasWalljump", true, false),
+    };
+    private int _dirCalibIndex = 0;
+
+    private void TestNextDirectionPermission()
+    {
+        try
+        {
+            var (label, skillField, right, left) = DirectionCalibList[_dirCalibIndex % DirectionCalibList.Length];
+            _dirCalibIndex++;
+
+            var perms = new StartingAbilityPicker.DirectionPermissions();
+            if (skillField == "hasDash") { perms.DashLeft = left; perms.DashRight = right; }
+            else if (skillField == "hasHarpoonDash") { perms.HarpoonLeft = left; perms.HarpoonRight = right; }
+            else if (skillField == "hasBrolly") { perms.FloatLeft = left; perms.FloatRight = right; }
+            else if (skillField == "hasWalljump") { perms.WallJumpLeft = left; perms.WallJumpRight = right; }
+
+            StartingAbilityPicker.StartingAbilityPickerAPI.SetMovementPermissions(perms);
+            StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill(skillField);
+
+            Plugin.ShowNotification(Locale.Get(label), 3f);
+            Plugin.Log.LogInfo($"[F10方向校准] 已只开 {label}（skill={skillField}, right={right}, left={left}），请实测实际移动方向");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F10方向校准] 异常: {ex}");
+        }
+    }
+
     private void TestUnlockEvaHeal()
     {
         var pd = PlayerData.instance;
@@ -1284,13 +1499,216 @@ public class HotkeyHandler : MonoBehaviour
 
     private void PickCurrent(bool pick)
     {
-        if (_pickerIndex >= SpritePickCandidates.Length) return;
-        if (pick) _pickedNames.Add(SpritePickCandidates[_pickerIndex].name);
+        var candidates = _currentCandidates.Count > 0 ? _currentCandidates : SpritePickCandidates.ToList();
+        if (_pickerIndex >= candidates.Count) return;
+        if (pick) _pickedNames.Add(candidates[_pickerIndex].name);
         _pickerIndex++;
-        if (_pickerIndex >= SpritePickCandidates.Length)
+        if (_pickerIndex >= candidates.Count)
             FinishPicker();
     }
+    /// <summary>
+    /// 加载 Addressables 图集，然后构建 flea 候选列表并启动筛选器。
+    /// 完全复用 LoadAtlasesThenStartPicker 的加载逻辑。
+    /// </summary>
+    private IEnumerator LoadAtlasesThenStartFleaPicker()
+    {
+        if (_isDumpingSprites) yield break;
+        _isDumpingSprites = true;
 
+        // 1. 枚举 Addressables 全部 key
+        var addrKeys = new List<string>();
+        try
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+                foreach (object key in locator.Keys)
+                    if (key is string sk && !string.IsNullOrEmpty(sk))
+                        addrKeys.Add(sk);
+        }
+        catch { }
+
+        // 2. 筛选图集类 key（与原逻辑一致）
+        var atlasKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var group in SpriteSearchGroups)
+        {
+            foreach (var k in addrKeys)
+            {
+                if (!IsLikelyAtlasKey(k)) continue;
+                bool match = false;
+                foreach (var kw in group.keys)
+                    if (k.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0) { match = true; break; }
+                if (match) atlasKeys.Add(k);
+            }
+        }
+
+        // 3. 加载图集资源
+        int loadedOk = 0, loadedFail = 0;
+        foreach (var k in atlasKeys)
+        {
+            AsyncOperationHandle<UnityEngine.Object> handle = default;
+            try { handle = Addressables.LoadAssetAsync<UnityEngine.Object>(k); }
+            catch { loadedFail++; continue; }
+
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (!handle.IsDone && Time.realtimeSinceStartup <= deadline)
+                yield return null;
+            if (handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded)
+                loadedOk++;
+            else
+            {
+                loadedFail++;
+                try { if (handle.IsValid()) Addressables.Release(handle); } catch { }
+            }
+        }
+
+        // 4. 重置缓存并重建 Sprite 缓存
+        SpriteCache.Reset();
+        SpriteCache.EnsureBuilt();
+
+        // 5. 构建 flea 候选列表
+        _currentCandidates.Clear();
+        var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+        foreach (var sp in allSprites)
+        {
+            if (sp == null) continue;
+            string name = sp.name;
+            if (!string.IsNullOrEmpty(name) && name.IndexOf("flea", StringComparison.OrdinalIgnoreCase) >= 0)
+                _currentCandidates.Add(("flea", name));
+        }
+
+        if (_currentCandidates.Count == 0)
+        {
+            Plugin.Log.LogInfo("[F4] 未找到任何包含 'flea' 的贴图。");
+            _isDumpingSprites = false;
+            yield break;
+        }
+
+        _pickerActive = true;
+        _pickerIndex = 0;
+        _pickedNames.Clear();
+        Plugin.Log.LogInfo($"[F4] 找到 {_currentCandidates.Count} 个 flea 图标，开始筛选。");
+        _isDumpingSprites = false;
+    }
+
+    /// <summary>名称归一化：去掉连字符/下划线/空格并小写，便于忽略格式差异地匹配关键词。</summary>
+    private static string NormalizeSpriteName(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return s ?? "";
+        var sb = new System.Text.StringBuilder(s.Length);
+        foreach (var c in s)
+            if (c != '-' && c != '_' && c != ' ')
+                sb.Append(char.ToLowerInvariant(c));
+        return sb.ToString();
+    }
+
+    /// <summary>F4 prompt 图标筛选器：优先找名字同时含 prompt+whiteflower / prompt+farsight 的贴图，
+    /// 各自找不到时回退到仅含 whiteflower / farsight。复用跳蚤筛选器的可视化预览窗口。</summary>
+    private IEnumerator LoadAtlasesThenStartPromptPicker()
+    {
+        if (_isDumpingSprites) yield break;
+        _isDumpingSprites = true;
+
+        // 1. 枚举 Addressables 全部 key
+        var addrKeys = new List<string>();
+        try
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+                foreach (object key in locator.Keys)
+                    if (key is string sk && !string.IsNullOrEmpty(sk))
+                        addrKeys.Add(sk);
+        }
+        catch { }
+
+        // 2. 筛选图集类 key（全集：不按关键字过滤，避免漏掉白花/遥观仪所在图集）
+        var atlasKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var k in addrKeys)
+        {
+            if (!IsLikelyAtlasKey(k)) continue;
+            atlasKeys.Add(k);
+        }
+
+        // 3. 加载图集资源
+        int loadedOk = 0, loadedFail = 0;
+        foreach (var k in atlasKeys)
+        {
+            AsyncOperationHandle<UnityEngine.Object> handle = default;
+            try { handle = Addressables.LoadAssetAsync<UnityEngine.Object>(k); }
+            catch { loadedFail++; continue; }
+
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (!handle.IsDone && Time.realtimeSinceStartup <= deadline)
+                yield return null;
+            if (handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded)
+                loadedOk++;
+            else
+            {
+                loadedFail++;
+                try { if (handle.IsValid()) Addressables.Release(handle); } catch { }
+            }
+        }
+
+        // 4. 重置缓存并重建 Sprite 缓存
+        SpriteCache.Reset();
+        SpriteCache.EnsureBuilt();
+
+        // 5. 构建 prompt 候选列表：白花、遥观仪各自先取 prompt+主词，找不到再回退单主词
+        _currentCandidates.Clear();
+        var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+var flowerPrompt = new List<string>();
+        var flowerAny = new List<string>();
+        var farsightPrompt = new List<string>();
+        var farsightAny = new List<string>();
+        var completionPrompt = new List<string>();
+        var completionAny = new List<string>();
+
+        foreach (var sp in allSprites)
+        {
+            if (sp == null) continue;
+            string name = sp.name;
+            if (string.IsNullOrEmpty(name)) continue;
+            string n = NormalizeSpriteName(name);
+            if (n.Contains("flower"))
+            {
+                if (n.Contains("prompt")) flowerPrompt.Add(name);
+                else flowerAny.Add(name);
+            }
+            // farsight 拆开：同时含 far 与 sight（覆盖 far-sight / far_sight / FarSight 等写法）
+            if (n.Contains("far") && n.Contains("sight"))
+            {
+                if (n.Contains("prompt")) farsightPrompt.Add(name);
+                else farsightAny.Add(name);
+            }
+            if (n.Contains("completion"))
+            {
+                if (n.Contains("prompt")) completionPrompt.Add(name);
+                else completionAny.Add(name);
+            }
+        }
+
+        foreach (var x in flowerPrompt) _currentCandidates.Add(("花+prompt", x));
+        if (flowerPrompt.Count == 0) foreach (var x in flowerAny) _currentCandidates.Add(("花", x));
+        foreach (var x in farsightPrompt) _currentCandidates.Add(("遥观仪+prompt", x));
+        if (farsightPrompt.Count == 0) foreach (var x in farsightAny) _currentCandidates.Add(("遥观仪", x));
+        foreach (var x in completionPrompt) _currentCandidates.Add(("completion+prompt", x));
+        if (completionPrompt.Count == 0) foreach (var x in completionAny) _currentCandidates.Add(("completion", x));
+
+        Plugin.Log.LogInfo(
+            $"[F4] 花: prompt命中{flowerPrompt.Count} / 回退{flowerAny.Count}，" +
+            $"遥观仪(far+sight): prompt命中{farsightPrompt.Count} / 回退{farsightAny.Count}，" +
+            $"completion: prompt命中{completionPrompt.Count} / 回退{completionAny.Count}");
+
+        if (_currentCandidates.Count == 0)
+        {
+            Plugin.Log.LogInfo("[F4] 未找到任何含 whiteflower / farsight 的贴图。");
+            _isDumpingSprites = false;
+            yield break;
+        }
+
+        _pickerActive = true;
+        _pickerIndex = 0;
+        _pickedNames.Clear();
+        Plugin.Log.LogInfo($"[F4] 找到 {_currentCandidates.Count} 个目标图标，开始筛选。");
+        _isDumpingSprites = false;
+    }
     private void FinishPicker()
     {
         _pickerActive = false;
@@ -2190,7 +2608,7 @@ public class HotkeyHandler : MonoBehaviour
         Rect imgRect = new Rect(wx + 30, wy + 60, 200f, 200f);
         var spr = SpriteCache.Find(name);
         if (spr != null && spr.texture != null)
-            GUI.DrawTextureWithTexCoords(imgRect, spr.texture, RectToUv(spr));
+            GUI.DrawTexture(imgRect, StartingAbilityPicker.SpriteBaker.Bake(spr), ScaleMode.ScaleToFit, true);
         else
             GUI.Box(imgRect, "未加载");
 
@@ -2217,31 +2635,41 @@ public class HotkeyHandler : MonoBehaviour
             SaveCurrentNote();
     }
 
+
     /// <summary>F4 筛选器窗口：左图右文，下方勾/叉/跳过按钮。</summary>
     private void DrawSpritePicker()
     {
-        if (_pickerIndex >= SpritePickCandidates.Length)
+        var candidates = _currentCandidates.Count > 0 ? _currentCandidates : SpritePickCandidates.ToList();
+        if (_pickerIndex >= candidates.Count)
         {
             FinishPicker();
             return;
         }
 
-        var (cat, name) = SpritePickCandidates[_pickerIndex];
+        var (cat, name) = candidates[_pickerIndex];
         const float winW = 720f, winH = 420f;
         float wx = (Screen.width - winW) / 2f;
         float wy = (Screen.height - winH) / 2f;
 
         GUI.Box(new Rect(wx, wy, winW, winH), "");
         GUI.Label(new Rect(wx + 20, wy + 12, winW - 40, 30),
-            $"图标筛选器  {_pickerIndex + 1}/{SpritePickCandidates.Length}  类别[{cat}]",
+            $"图标筛选器  {_pickerIndex + 1}/{candidates.Count}  类别[{cat}]",
             new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
 
-        // 左侧：图片预览
+        // 左侧：图片预览（直接使用 Sprite 纹理 + UV 裁剪）
         Rect imgRect = new Rect(wx + 30, wy + 60, 240f, 240f);
         var spr = SpriteCache.Find(name);
         if (spr != null && spr.texture != null)
         {
-            GUI.DrawTextureWithTexCoords(imgRect, spr.texture, RectToUv(spr));
+            Texture2D tex = spr.texture;
+            Rect texRect = spr.textureRect;
+            Rect uvRect = new Rect(
+                texRect.x / tex.width,
+                texRect.y / tex.height,
+                texRect.width / tex.width,
+                texRect.height / tex.height
+            );
+            GUI.DrawTextureWithTexCoords(imgRect, tex, uvRect, true);
         }
         else
         {
@@ -2270,18 +2698,6 @@ public class HotkeyHandler : MonoBehaviour
         {
             _pickerIndex++;
         }
-    }
-
-    /// <summary>根据 Sprite 的 textureRect 计算 GUI.DrawTextureWithTexCoords 需要的 UV 矩形（与 RecentItemsUI 一致，不做 y 翻转）。</summary>
-    private static Rect RectToUv(Sprite spr)
-    {
-        var t = spr.texture;
-        Rect r = spr.textureRect;
-        return new Rect(
-            r.x / t.width,
-            r.y / t.height,
-            r.width / t.width,
-            r.height / t.height);
     }
 
     private void OnGUI()

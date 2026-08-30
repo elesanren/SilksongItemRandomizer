@@ -224,6 +224,33 @@ namespace SilksongItemRandomizer
                 if (!__runOriginal || __instance == null) return;
                 if (!_isEnabled) return;
 
+                // ★ 跳蚤替换拾取点：走 flea:01~27 顺序映射，阻断原生 Simple Key
+                var fleaMarker = __instance.GetComponent<FleaSequentialPickupPoint>();
+                if (fleaMarker != null)
+                {
+                    var save = Plugin.SaveData;
+                    if (save != null)
+                    {
+                        IRandomReward reward = PreGeneratedMap.ResolveSequentialReward("flea", save.FleaSeq + 1);
+                        if (reward != null)
+                        {
+                            save.FleaSeq++;
+                            Plugin.SaveGlobalData();
+                            reward.Give();
+                            ItemRandomizer.AddGivenCount(reward.Id);
+                            ItemRandomizer.RecordMapping($"item:{__instance.name}", $"reward:{reward.Id}");
+                            RecentItemsUI.AddItem(reward);
+                            Plugin.Log.LogInfo($"[FleaRescue] 跳蚤拾取点已捡起，消费 flea:{save.FleaSeq:D2} -> {reward.Id}");
+                        }
+                        save.PickedPickupKeys.Add($"fleascene:{__instance.gameObject.scene.name}");
+                        Plugin.SaveGlobalData();
+                        FleaSceneMap.RecordFleaRescueByScene(__instance.gameObject.scene.name);
+                    }
+                    Plugin.Instance.StartCoroutine(DelayedCleanup(__instance));
+                    __runOriginal = false;
+                    return;
+                }
+
                 // ★★★ 检查调用栈：如果来自 Architect 或 CustomPickup，直接放行 ★★★
                 // 使用 StackFrame(false) 替代 Environment.StackTrace，避免构建完整字符串导致高开销
                 bool isArchitectCall = false;
@@ -507,6 +534,22 @@ namespace SilksongItemRandomizer
             newObj.SetActive(true);
         }
 
+        /// <summary>对外接口：在任意坐标生成拾取点（供 GeoRock 替换等场景使用）。</summary>
+        public static GameObject SpawnPickupAtPosition(Vector3 position, string itemId = "Simple Key")
+        {
+            SpawnPickupAt(position, itemId);
+            // 找到刚生成的拾取点（位置匹配的最近 CollectableItemPickup）
+            float bestDist = float.MaxValue;
+            GameObject best = null;
+            foreach (var p in Resources.FindObjectsOfTypeAll<CollectableItemPickup>())
+            {
+                if (p == null || !p.gameObject.activeInHierarchy) continue;
+                float d = Vector3.SqrMagnitude(p.transform.position - position);
+                if (d < bestDist) { bestDist = d; best = p.gameObject; }
+            }
+            return best;
+        }
+
         // ========== Harmony 补丁（记录物品获得坐标） ==========
         [HarmonyPatch(typeof(SavedItem), "TryGet")]
         [HarmonyPostfix]
@@ -712,39 +755,49 @@ namespace SilksongItemRandomizer
                     if (TryGetPatch.BypassRandom) return true; // ★ 自发发放（物品奖励池里的苔莓浆果/丝矛保底等）：放行原生 Collect，不被误伤
                     if (__instance == null) return true;
                     if (!SilksongItemRandomizerAPI.IsEnabled()) return true;
-                    if (!string.Equals(__instance.name, MossberryName, StringComparison.OrdinalIgnoreCase))
-                        return true;
 
-                    // ★ 命中苔莓：跳过原生 Collect（不给苔莓），改为按序映射奖励 + 记录房间
-                    string scene = CurrentSceneName();
-                    var reward = ResolveSequential();
-                    if (reward == null)
-                        reward = ItemRandomizer.GetRandomReward();
-                    if (reward == null) return true;
+                    // ★ 分派：苔莓 / 花芯(Shell Flower) 共用同一拦截点
+                    if (string.Equals(__instance.name, MossberryName, StringComparison.OrdinalIgnoreCase))
+                        return MossberryRandomizer.InterceptMossberry(__instance, ref __runOriginal);
+                    if (string.Equals(__instance.name, ShellFlowerRandomizer.ShellFlowerName, StringComparison.OrdinalIgnoreCase))
+                        return ShellFlowerRandomizer.InterceptShellFlower(__instance, ref __runOriginal);
 
-                    _isGiving = true;
-                    try
-                    {
-                        reward.Give();
-                        ItemRandomizer.AddGivenCount(reward.Id);
-                        ItemRandomizer.RecordMapping("item:Mossberry", "reward:" + reward.Id);
-                        RecentItemsUI.AddItem(reward);
-                    }
-                    finally
-                    {
-                        _isGiving = false;
-                    }
-
-                    MarkRoomCollected(scene);
-                    __runOriginal = false;
-                    return false; // 跳过原生 Collect
+                    return true;
                 }
                 catch (Exception ex)
                 {
-                    try { Plugin.Log.LogError($"[Mossberry] 拦截异常: {ex}"); } catch { }
+                    try { Plugin.Log.LogError($"[Collect] 拦截异常: {ex}"); } catch { }
                     return true;
                 }
             }
+        }
+
+        /// <summary>苔莓命中处理：跳过原生 Collect，发随机奖励并记录房间。</summary>
+        private static bool InterceptMossberry(CollectableItem __instance, ref bool __runOriginal)
+        {
+            string scene = CurrentSceneName();
+            var reward = ResolveSequential();
+            if (reward == null)
+                reward = ItemRandomizer.GetRandomReward();
+            if (reward == null) return true;
+
+            _isGiving = true;
+            try
+            {
+                reward.Give();
+                ItemRandomizer.AddGivenCount(reward.Id);
+                ItemRandomizer.RecordMapping("item:Mossberry", "reward:" + reward.Id);
+                RecentItemsUI.AddItem(reward);
+            }
+            finally
+            {
+                _isGiving = false;
+            }
+
+            MarkRoomCollected(scene);
+            Plugin.Log.LogInfo($"[Mossberry] 场景 {scene} 拦截苔莓 → 随机奖励 {reward.Id}");
+            __runOriginal = false;
+            return false; // 跳过原生 Collect
         }
 
         /// <summary>场景加载：已记录的房间隐藏全部苔莓（枝头果实 + 可拾取物）。</summary>
@@ -782,6 +835,135 @@ namespace SilksongItemRandomizer
             }
             for (int i = 0; i < t.childCount; i++)
                 count += HideMatchingRecursive(t.GetChild(i), names);
+            return count;
+        }
+    }
+
+    // ShellFlowerRandomizer.cs - 花芯(Shell Flower)随机化拦截
+    // 机制（来自 shellwood 场景 dump + quests.bundle 反编译）：
+    //   可砍紫花 _0015/_0016/_0018_shell_flower_purple（SlashableSpriteSwapper：砍击切换sprite+粒子）
+    //     → 打碎掉落花芯可拾取物
+    //     → 拾取走 CollectableItem.Collect（与苔莓同一入口）
+    //   任务物品资产 = collectableitems.bundle "Shell Flower"（INV_NAME_SHELL_FLOWER）
+    //     - uniqueCollectBool 为空 → 可连捡，customMaxAmount=0（默认上限由任务控制）
+    //     - 灰根任务内部名 "Shell Flowers"（quests.bundle）：targets[0].Counter=Shell Flower, Count=6
+    //     - consumeTargetIfApplicable=1：交付时按 Collectables 数据里的 Amount 扣除
+    //
+    // 本模块三个功能：
+    //   1. 拾取拦截：CollectableItem.Collect 命中 Shell Flower → 发随机奖励
+    //      并静默补 CollectableItemManager.AddItem(1)：Amount+1 使灰根任务进度照常推进（无原生UI弹窗）
+    //   2. 房间消失：场景加载时若该场景已记录过花芯，隐藏全部 *shell_flower_purple* 紫花（含花蕾形态）
+    //   3. 随机池自发发放的花芯（SavedItemReward 奖励池命中 flower:xx 映射）经 BypassRandom 放行，
+    //      不被本补丁误伤造成循环
+
+    /// <summary>花芯随机化：拦截 Shell Flower 拾取为随机奖励，静默保任务计数，并做房间级"已捡"持久化。</summary>
+    public static class ShellFlowerRandomizer
+    {
+        public const string ShellFlowerName = "Shell Flower";
+
+        /// <summary>紫花对象名包含匹配关键字（_0015/_0016/_0018_shell_flower_purple 及编号后缀变体）。</summary>
+        private const string FlowerNameKeyword = "shell_flower_purple";
+
+        /// <summary>苔莓拦截点复用入口（CollectableItem_Collect_Patch 分派调用，防重入由其 _isGiving 统一处理）。</summary>
+        public static bool InterceptShellFlower(CollectableItem __instance, ref bool __runOriginal)
+        {
+            try
+            {
+                string scene = MossberryRandomizer.CurrentSceneName();
+                var reward = ResolveSequential();
+                if (reward == null)
+                    reward = ItemRandomizer.GetRandomReward();
+                if (reward == null) return true;
+
+                reward.Give();
+                ItemRandomizer.AddGivenCount(reward.Id);
+                ItemRandomizer.RecordMapping("item:Shell Flower", "reward:" + reward.Id);
+                RecentItemsUI.AddItem(reward);
+
+                // ★ 静默补任务计数：灰根任务 target 直接读 Shell Flower 的 Amount，
+                //   不补则任务永远无法交付。AddItem→AffectItemData 内部 SetData+IncrementVersion，无 UI。
+                try
+                {
+                    CollectableItemManager.AddItem(__instance, 1);
+                }
+                catch (Exception exAdd)
+                {
+                    try { Plugin.Log.LogError($"[ShellFlower] 补计数失败: {exAdd}"); } catch { }
+                }
+
+                MarkRoomCollected(scene);
+                Plugin.Log.LogInfo($"[ShellFlower] 场景 {scene} 拦截花芯 → 随机奖励 {reward.Id}（已补任务计数）");
+                __runOriginal = false;
+                return false; // 跳过原生 Collect（避免原生 UI 弹窗/双计数）
+            }
+            catch (Exception ex)
+            {
+                try { Plugin.Log.LogError($"[ShellFlower] 拦截异常: {ex}"); } catch { }
+                return true;
+            }
+        }
+
+        /// <summary>按顺序从预生成映射取花芯奖励（flower:01~06），命中则递增计数器。</summary>
+        private static IRandomReward ResolveSequential()
+        {
+            var save = Plugin.SaveData;
+            if (save == null) return null;
+            var r = PreGeneratedMap.ResolveSequentialReward("flower", save.FlowerSeq + 1);
+            if (r != null) { save.FlowerSeq++; Plugin.SaveGlobalData(); }
+            return r;
+        }
+
+        public static bool IsRoomCollected(string sceneName)
+        {
+            var rooms = Plugin.SaveData?.ShellFlowerCollectedRooms;
+            return rooms != null && !string.IsNullOrEmpty(sceneName) && rooms.Contains(sceneName);
+        }
+
+        public static void MarkRoomCollected(string sceneName)
+        {
+            if (string.IsNullOrEmpty(sceneName)) return;
+            var rooms = Plugin.SaveData?.ShellFlowerCollectedRooms;
+            if (rooms == null) return;
+            if (rooms.Add(sceneName))
+                Plugin.SaveGlobalData(); // 去抖落盘
+        }
+
+        /// <summary>场景加载：已记录的房间隐藏全部紫花（花蕾不再出现）。</summary>
+        public static void OnSceneLoaded(Scene scene)
+        {
+            try
+            {
+                if (scene == null || string.IsNullOrEmpty(scene.name)) return;
+                if (!IsRoomCollected(scene.name)) return;
+
+                int hidden = 0;
+                var roots = scene.GetRootGameObjects();
+                foreach (var root in roots)
+                {
+                    if (root == null) continue;
+                    hidden += HideContainsRecursive(root.transform, FlowerNameKeyword);
+                }
+                if (hidden > 0)
+                    Plugin.Log.LogInfo($"[ShellFlower] 场景 {scene.name} 已捡过花芯，隐藏 {hidden} 个紫花对象");
+            }
+            catch (Exception ex)
+            {
+                try { Plugin.Log.LogError($"[ShellFlower] OnSceneLoaded 异常: {ex}"); } catch { }
+            }
+        }
+
+        /// <summary>名称包含匹配隐藏（紫花对象带编号后缀，精确名单不可穷举）。</summary>
+        private static int HideContainsRecursive(Transform t, string keyword)
+        {
+            int count = 0;
+            if (t == null) return 0;
+            if (t.name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                t.gameObject.SetActive(false);
+                count++;
+            }
+            for (int i = 0; i < t.childCount; i++)
+                count += HideContainsRecursive(t.GetChild(i), keyword);
             return count;
         }
     }
@@ -824,6 +1006,7 @@ namespace SilksongItemRandomizer
                 // ★ 碎片世界点触发（丝轴/面具）：跳过原生发放，给随机
                 // 标记静默窗口：后续被驱动的碎片 UI 动画流程不播动画/不加碎片/不加上限，但正常走完
                 SilkSpoolState.MarkNativeIntercept(5f);
+                if (SilkSpoolState.JustGaveViaUi) { __runOriginal = false; return false; } // UI 创建入口已发随机，防双发
                 var reward = ItemRandomizer.GetRandomReward();
                 if (reward == null) return true;
 

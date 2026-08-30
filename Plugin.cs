@@ -96,46 +96,7 @@ namespace SilksongItemRandomizer
                 CurrencyFirstThreshold = SaveData.CurrencyFirstThreshold,
                 CurrencySecondThreshold = SaveData.CurrencySecondThreshold,
                 SilkSpearPityCount = SaveData.SilkSpearPityCount,
-                Limits = new ItemLimitSettings
-                {
-                    SkillItem = ItemLimitConfig.LimitSkillItem,
-                    Relic = ItemLimitConfig.LimitRelic,
-                    OtherItem = ItemLimitConfig.LimitOtherItem,
-                    UpSlash = ItemLimitConfig.LimitUpSlash,
-                    LeftSlash = ItemLimitConfig.LimitLeftSlash,
-                    RightSlash = ItemLimitConfig.LimitRightSlash,
-                    DashLeft = ItemLimitConfig.LimitDashLeft,
-                    DashRight = ItemLimitConfig.LimitDashRight,
-                    HarpoonLeft = ItemLimitConfig.LimitHarpoonLeft,
-                    HarpoonRight = ItemLimitConfig.LimitHarpoonRight,
-                    FloatLeft = ItemLimitConfig.LimitFloatLeft,
-                    FloatRight = ItemLimitConfig.LimitFloatRight,
-                    WallJumpLeft = ItemLimitConfig.LimitWallJumpLeft,
-                    WallJumpRight = ItemLimitConfig.LimitWallJumpRight,
-                    Heal = ItemLimitConfig.LimitHeal,
-                    NeedleThrow = ItemLimitConfig.LimitNeedleThrow,
-                    ThreadSphere = ItemLimitConfig.LimitThreadSphere,
-                    HarpoonDash = ItemLimitConfig.LimitHarpoonDash,
-                    SilkCharge = ItemLimitConfig.LimitSilkCharge,
-                    SilkBomb = ItemLimitConfig.LimitSilkBomb,
-                    SilkBossNeedle = ItemLimitConfig.LimitSilkBossNeedle,
-                    Needolin = ItemLimitConfig.LimitNeedolin,
-                    Parry = ItemLimitConfig.LimitParry,
-                    NeedolinMemory = ItemLimitConfig.LimitNeedolinMemory,
-                    FastTravel = ItemLimitConfig.LimitFastTravel,
-                    EvaHeal = ItemLimitConfig.LimitEvaHeal,
-                    Dash = ItemLimitConfig.LimitDash,
-                    Brolly = ItemLimitConfig.LimitBrolly,
-                    DoubleJump = ItemLimitConfig.LimitDoubleJump,
-                    SuperJump = ItemLimitConfig.LimitSuperJump,
-                    WallJump = ItemLimitConfig.LimitWallJump,
-                    ChargeSlash = ItemLimitConfig.LimitChargeSlash,
-                    HeartPiece = ItemLimitConfig.LimitHeartPiece,
-                    SpoolPart = ItemLimitConfig.LimitSpoolPart,
-                    MaxSilkRegenUp = ItemLimitConfig.LimitMaxSilkRegenUp,
-                    UnlockCrestSlot = ItemLimitConfig.LimitUnlockCrestSlot,
-                    SimpleKey = ItemLimitConfig.LimitSimpleKey,
-                },
+                Limits = ItemLimitConfig.CaptureSettings(),
                 InfinitePool = new InfinitePoolSettings
                 {
                     Silk = ItemLimitConfig.EnableInfSilk,
@@ -158,6 +119,8 @@ namespace SilksongItemRandomizer
             OverrideBenchwarpLanguage();
             Extracurrencypickup.RegisterAll();
 
+            GeoRockBuilder.Init();                 // ★ 初始化 Core atlas（自建模式）
+            FleaRescueBuilder.Init();               // ★ 跳蚤救援克隆模板初始化
             StartCoroutine(InitializeAfterLoad(RandomSeed.Value));
             SceneManager.sceneLoaded += OnSceneLoaded;
             StartCoroutine(InitTrapsAfterLoad());
@@ -192,6 +155,9 @@ namespace SilksongItemRandomizer
             
             Log.LogInfo($"Randomizer initialized with seed: {RandomSeed.Value}");
             ItemLocalizationRegistrar.RegisterAllKnownItems();
+
+            // 进游戏后重放最近获得物品列表（图集已加载，图标可正常解析）
+            RecentItemsUI.RestoreFromSave();
         }
 
         private IEnumerator InitTrapsAfterLoad()
@@ -224,8 +190,14 @@ namespace SilksongItemRandomizer
                 StartCoroutine(SpawnTrapsAfterSceneLoad());
             }
             MapStationUnlockPatch.OnSceneLoaded(scene);
+            MapMachineGetPatch.OnSceneLoaded(scene);
             LoreTriggerPatch.OnSceneLoaded(scene);
             MossberryRandomizer.OnSceneLoaded(scene, mode);
+            ShellFlowerRandomizer.OnSceneLoaded(scene);   // ★ 花芯：已捡房间紫花消失
+            GeoRockBuilder.OnSceneLoaded(scene);   // ★ 钱堆生成：自建+克隆双模式
+            GeoRockReplacer.OnSceneLoaded(scene);   // ★ 钱堆替换：清除钱堆→生成拾取点
+            FleaRescueBuilder.OnSceneLoaded(scene);  // ★ 跳蚤救援：从 dock_16 克隆模板
+            FleaRescueReplacer.OnSceneLoaded(scene); // ★ 跳蚤救援：清除原生跳蚤→生成拾取点
             HeroRespawnReset.CheckAfterSceneLoad(scene.name);   // ★ 出梦境重生修复：检测冻结状态温和恢复
         }
 
@@ -283,6 +255,7 @@ namespace SilksongItemRandomizer
         private void Update()
         {
             FsmMasterGuard.Tick();
+            ChapelFadeRestore.Tick();
             CheckAutoSave();
         }
 
@@ -290,7 +263,6 @@ namespace SilksongItemRandomizer
         {
             try
             {
-                RecentItemsUI.Draw();
                 if (_notificationMessage != null && Time.time <= _notificationEndTime)
                 {
                     _notificationStyle ??= new GUIStyle(GUI.skin.box)
@@ -344,6 +316,50 @@ namespace SilksongItemRandomizer
         {
             _notificationMessage = message;
             _notificationEndTime = Time.time + duration;
+        }
+
+        // ========== 黑幕遮挡工具（背景加载时遮挡屏幕）==========
+        private static GameObject _blackoutGo;
+
+        public static void BlackoutShow()
+        {
+            try
+            {
+                if (_blackoutGo != null) return;
+                _blackoutGo = new GameObject("PrimeBlackout");
+                UnityEngine.Object.DontDestroyOnLoad(_blackoutGo);
+                var canvas = _blackoutGo.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 9999;
+                var img = _blackoutGo.AddComponent<UnityEngine.UI.Image>();
+                img.color = Color.black;
+                img.raycastTarget = false;
+                var rect = img.rectTransform;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                Log.LogInfo("[PrimeBlackout] 黑幕已显示");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"[PrimeBlackout] 显示黑幕失败: {ex.Message}");
+            }
+        }
+
+        public static void BlackoutHide()
+        {
+            try
+            {
+                if (_blackoutGo == null) return;
+                UnityEngine.Object.Destroy(_blackoutGo);
+                _blackoutGo = null;
+                Log.LogInfo("[PrimeBlackout] 黑幕已移除");
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarning($"[PrimeBlackout] 移除黑幕失败: {ex.Message}");
+            }
         }
 
         private Texture2D MakeTexture(int width, int height, Color col)

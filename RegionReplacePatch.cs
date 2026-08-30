@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;
 using System.Collections.Generic;
@@ -40,7 +40,10 @@ namespace SilksongItemRandomizer
             "mosstown_02", "bone_east_05", "crawl_05", "under_18", "greymoor_22", "shellwood_10",
             "slab_10b", "abyss_08", "cradle_03_destroyed", "organ_01", "memory_first_sinner",
             "belltown_shrine", "weave_10",
-            "bone_east_umbrella", "peak_08b", "room_pinstress", "tut_04", "bellway_centipede_arena"
+            "bone_east_umbrella", "peak_08b", "room_pinstress", "tut_04", "bellway_centipede_arena",
+            // 远视（belltown_room_spare 收藏板合成演出，UI Msg 全屏弹窗 Item="Farsight"，
+            // End 状态 SetPlayerDataBool 写 ConstructedFarsight——需 SkillFields 拦截）
+            "belltown_room_spare"
         };
 
         // UI Msg 全屏弹窗演出场景（没有 SpawnSkillGetMsg/SpawnPowerUpGetMsg，获得演出 =
@@ -50,6 +53,10 @@ namespace SilksongItemRandomizer
         // internal：PreGeneratedMap.EventKeys 引用收集 event: 预分配键。
         internal static readonly string[] UIMsgScenes = {
             "bone_east_umbrella", "peak_08b", "room_pinstress", "tut_04", "bellway_centipede_arena",
+            // 远视（belltown_room_spare 收藏板合成演出）：UI Msg 状态 CreateUIMsgGetItem
+            // Item="Farsight" → GET ITEM MSG END → End 状态（SendEventByNameV2 +
+            // SetPlayerDataBool(ConstructedFarsight=true)，字段写入由 Prefix_SetPdBool 拦截）。
+            "belltown_room_spare",
             // 丝之心梦境（钟兽 Boss 战后）：UI Prompt 状态 CreateUIMsgGetItem Item="SilkHeart"
             // 全屏弹窗 → GET ITEM MSG END → End Scene（写 defeatedBellBeast + 回 Bone_05，
             // 均不在拦截范围，原样保留）。lacelower/wardboss 两同款梦境无弹窗，不纳入。
@@ -71,7 +78,8 @@ namespace SilksongItemRandomizer
         {
             "hasNeedleThrow", "hasThreadSphere", "hasSilkCharge", "hasSilkBomb", "hasSilkBossNeedle", "hasParry",
             "hasHarpoonDash", "hasNeedolin", "hasDash", "hasBrolly", "hasDoubleJump", "hasChargeSlash",
-            "hasSuperJump", "hasWalljump", "HasSeenEvaHeal", "hasNeedolinMemoryPowerup", "hasFastTravelTeleport"
+            "hasSuperJump", "hasWalljump", "HasSeenEvaHeal", "hasNeedolinMemoryPowerup", "hasFastTravelTeleport",
+            "ConstructedFarsight"
         };
 
         // 已平替场景持久化于 Plugin.SaveData.SkillRandomizedRegions（跨会话生效），
@@ -83,8 +91,9 @@ namespace SilksongItemRandomizer
                 Plugin.SaveData.SkillRandomizedRegions.Clear();
         }
 
-        /// <summary>该场景是否已被平替（持久化标记：已平替后跨会话不再触发）</summary>
-        private static bool IsRegionRandomized(string scene)
+        /// <summary>该场景是否已被平替（持久化标记：已平替后跨会话不再触发）
+        /// internal：ChurchRandomizePatch 的 weave_10 织女升级分支跨类复用。</summary>
+        internal static bool IsRegionRandomized(string scene)
         {
             return Plugin.SaveData?.SkillRandomizedRegions?.Contains(scene) ?? false;
         }
@@ -165,6 +174,39 @@ namespace SilksongItemRandomizer
                 string scene = SceneManager.GetActiveScene().name;
                 if (scene == null || !IsSkillScene(scene))
                     return true;
+
+                // weave_10 织女最终绑定（风铃谣 EvaHeal）：官方弹窗宣称获得风铃谣会撒谎，平替为
+                // 独立点位 weave_10:EvaHeal（不走场景键，五点位粒度一致）。同状态
+                // AwardAchievementProgress / SetPlayerDataVariable(HasBoundCrestUpgrader，对话路由
+                // 依赖，勿拦) / QueueSaveGameV2 全放行。
+                if (string.Equals(scene, "weave_10", StringComparison.OrdinalIgnoreCase))
+                {
+                    var fsmP = __instance.Fsm;
+                    if (fsmP == null
+                        || !string.Equals(fsmP.Name, "Dialogue", StringComparison.OrdinalIgnoreCase)
+                        || !string.Equals(fsmP.ActiveStateName, "Set Bound", StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    const string evaKey = "weave_10:EvaHeal";
+                    Plugin.Log.LogInfo($"[技能随机] 织女风铃谣弹窗拦截: {evaKey}");
+                    if (!IsRegionRandomized(evaKey))
+                    {
+                        GiveRandomReward(evaKey, "EvaHeal");
+                        if (Plugin.SaveData != null)
+                        {
+                            Plugin.SaveData.SkillRandomizedRegions.Add(evaKey);
+                            Plugin.SaveGlobalData();
+                            Plugin.Log.LogInfo($"[技能随机] {evaKey} 已平替（风铃谣），持久化标记并落盘");
+                        }
+                    }
+
+                    else
+                    {
+                        Plugin.Log.LogInfo($"[技能随机] {evaKey} 已平替过（持久化），仅拦截弹窗");
+                    }
+                    __instance.Finish();
+                    return false;
+                }
 
                 var powerUp = __instance.PowerUp?.Value;
                 Plugin.Log.LogInfo($"[技能随机] 能力弹窗拦截: 场景 {scene}, PowerUp {powerUp}");
@@ -348,6 +390,28 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>
+        /// 丝之心外部给予放行：任何走 SkillRandomizer.GiveSilkHeart 的给予（含玩家主动给/其他 mod）
+        /// 都放行上方的 AddToMaxSilkRegen 梦境阻断，避免"自己给丝之心"在梦境场景被误伤。
+        /// 官方原生梦境剧情不调此方法（FSM dump 无 AddToMaxSilkRegen 调用），仍被阻断。
+        /// </summary>
+        [HarmonyPatch(typeof(StartingAbilityPicker.SkillRandomizer), "GiveSilkHeart")]
+        public static class GiveSilkHeartAllowPatch
+        {
+            [HarmonyPrefix]
+            private static void Prefix()
+            {
+                if (SilksongItemRandomizerAPI.IsEnabled())
+                    ItemRandomizer.GrantingSilkHeartFromPool = true;
+            }
+
+            [HarmonyPostfix]
+            private static void Postfix()
+            {
+                ItemRandomizer.GrantingSilkHeartFromPool = false;
+            }
+        }
+
         // weave_10 织女（纹章升级师，Eva 最终任务）额外槽平替：
 //   Check Slot1/Slot2 判定 pd 字段 UnlockedExtraBlueSlot/UnlockedExtraYellowSlot，
 //   未解锁 → Upgrade Slot1/2 Pre Dlg 对话 → 剧情到 Unlock First/Other Slot 状态
@@ -372,9 +436,26 @@ static string GetWeave10SlotKey(FsmStateAction action)
             return null;
         }
 
+        /// <summary>weave_10 织女升级演出的 Combo 弹窗状态判定：Unlock Crest Upg 1/2 解锁被平替后，
+        /// 剧情必经的 "Combo Bar Prompt" 状态会 CreateObject 实例化场景内嵌 UI Msg（Set H Combo
+        /// 分支全屏弹窗，宣称获得 Hunter Combo）。纹章升级奖励已被随机替换，此弹窗属撒谎必须拦截；
+        /// 拦截后补发收尾事件推进剧情（装配由 AutoEquipCrestV4 拦截）。</summary>
+        private static bool IsWeave10ComboPrompt(FsmStateAction action)
+        {
+            if (action == null || action.Fsm == null || action.Fsm.Name != "Dialogue")
+                return false;
+            string scene = SceneManager.GetActiveScene().name;
+            if (!string.Equals(scene, "weave_10", StringComparison.OrdinalIgnoreCase))
+                return false;
+            string state = action.Fsm.ActiveStateName;
+            return string.Equals(state, "Combo Bar Prompt", StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>织女额外槽演出拦截（CreateObject 实例化场景内嵌 UI Msg "Socket N"，带 Animator 动画）：
         /// 未平替发随机奖励并持久化；CreateObject 放行（return true），原生动画弹窗照常播放，
-        /// 弹窗演完由原生 FSM 自己走 GET ITEM MSG END 转移，无需补发。</summary>
+        /// <summary>weave_10 织女额外槽演出拦截（Unlock First/Other Slot 状态 CreateObject 实例化
+        /// 场景内嵌 UI Msg "Socket N"）：未平替发随机奖励并持久化；弹窗一律拦截（return false），
+        /// 补发 GET ITEM MSG END 放行剧情（写槽字段的解锁动作由另一补丁拦截）。</summary>
         [HarmonyPatch(typeof(CreateObject), "OnEnter")]
         [HarmonyPrefix]
         private static bool Prefix_WeaveUnlockMsg(CreateObject __instance)
@@ -383,6 +464,15 @@ static string GetWeave10SlotKey(FsmStateAction action)
             {
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
+
+                // 纹章升级弹窗（Combo Bar Prompt）：升级已平替为随机奖励，阻止原生 Set H Combo
+                // 弹窗实例化，并补发 GET ITEM MSG END 让剧情正常推进（Crest Change 装配另有拦截）。
+                if (IsWeave10ComboPrompt(__instance))
+                {
+                    BlockWeavePopupSendMsgEnd("[技能随机] 织女纹章升级 Combo 弹窗拦截", __instance);
+                    return false;
+                }
+
                 string key = GetWeave10SlotKey(__instance);
                 if (key == null)
                     return true;
@@ -404,7 +494,9 @@ static string GetWeave10SlotKey(FsmStateAction action)
                     Plugin.Log.LogInfo($"[技能随机] {key} 已平替过（持久化），仅拦截");
                 }
 
-                return true;
+                // 阻止原生槽位弹窗，并补发收尾事件让剧情正常推进。
+                BlockWeavePopupSendMsgEnd($"[技能随机] 织女额外槽弹窗拦截: {key}", __instance);
+                return false;
             }
             catch (Exception ex)
             {
@@ -413,7 +505,38 @@ static string GetWeave10SlotKey(FsmStateAction action)
             }
         }
 
-private static void GiveRandomReward(string scene, string skillName)
+        /// <summary>weave_10 弹窗拦截通用收尾：原弹窗实例化被阻止后无人发送收尾事件，补发
+        /// "GET ITEM MSG END" 推进演出 FSM（与 UI Msg 全屏弹窗拦截同法）。</summary>
+        private static void BlockWeavePopupSendMsgEnd(string log, CreateObject __instance)
+        {
+            Plugin.Log.LogInfo(log);
+            try
+            {
+                GameObject owner = __instance.Owner;
+                if (owner != null)
+                {
+                    EventRegister.GetRegisterGuaranteed(owner, GetItemMsgEnd);
+                    EventRegister.SendEvent(GetItemMsgEnd);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[技能随机] 织女弹窗收尾事件发送异常: {ex}");
+            }
+        }
+
+        /// <summary>weave_10 织女升级完成标记查询：复合键 "weave_10:CrestUpgN#&lt;纹章名&gt;" 是否已持久化。
+        /// internal：ChurchGateCheckPatch 的 GetIsCrestUnlocked 判定接管调用。</summary>
+        internal static bool IsWeave10UpgradeDone(string crestName)
+        {
+            if (string.IsNullOrEmpty(crestName) || Plugin.SaveData?.SkillRandomizedRegions == null)
+                return false;
+            return Plugin.SaveData.SkillRandomizedRegions.Contains("weave_10:CrestUpg1#" + crestName)
+                || Plugin.SaveData.SkillRandomizedRegions.Contains("weave_10:CrestUpg2#" + crestName);
+        }
+
+        /// <summary>发随机奖励并记录映射。internal：ChurchRandomizePatch 的 weave_10 织女升级分支跨类复用。</summary>
+        internal static void GiveRandomReward(string scene, string skillName)
         {
             // 种子预生成映射优先：event:{场景} 在开种时已绑定奖励（同一种子结果确定）；
             // 未命中回落现抽（兜底：老存档映射缺失/未重建）。
@@ -556,6 +679,30 @@ private static void GiveRandomReward(string scene, string skillName)
         //   场景外 PlayerDataTestResponse（已拥有技能→激活已收集替换对象/关闭交互点）→ 未随机
         //     强制走未拥有分支（保持交互点），已随机强制走已拥有分支（替换为已收集形态）。
 
+        // ===== 技能场景高频判定共享缓存 =====
+        // Evaluate/OnEnter 判定可能被引擎高频调用：SceneManager.GetActiveScene().name
+        // 每次访问都会分配新字符串，此处用 scene.handle(int) 判变化，稳态零分配。
+        private static int _evalSceneHandle = int.MinValue;
+        private static string _evalSceneName = null;
+        private static bool _evalIsSkill = false;
+        private static string _lastEvalLogScene = null;
+        private static bool _lastEvalLogRand = false;
+
+        /// <summary>刷新当前场景缓存；返回是否技能场景</summary>
+        private static bool RefreshEvalScene()
+        {
+            Scene s = SceneManager.GetActiveScene();
+            if (s.handle != _evalSceneHandle)
+            {
+                _evalSceneHandle = s.handle;
+                _evalSceneName = s.name;
+                _evalIsSkill = IsSkillScene(_evalSceneName);
+                _lastEvalLogScene = null;
+            }
+            return _evalIsSkill;
+        }
+
+        /// <summary>判定日志去重字段见 Prefix_PDTestResponse 内联实现</summary>
         /// <summary>Inspection 演出 Collected Check 判定强制（Fsm 名 Inspection 且处于技能场景）</summary>
         [HarmonyPatch(typeof(PlayerDataBoolTest), "OnEnter")]
         [HarmonyPrefix]
@@ -593,19 +740,18 @@ private static void GiveRandomReward(string scene, string skillName)
 
                 if (__instance.Fsm == null || __instance.Fsm.Name != "Inspection")
                     return true;
-                string scene = SceneManager.GetActiveScene().name;
-                if (scene == null || !IsSkillScene(scene))
+                if (!RefreshEvalScene())
                     return true;
 
-                if (IsRegionRandomized(scene))
+                if (IsRegionRandomized(_evalSceneName))
                 {
-                    Plugin.Log.LogInfo($"[技能随机] 获取点判定: {scene} 已触发随机 → 强制已收集（关闭交互）");
+                    Plugin.Log.LogInfo($"[技能随机] 获取点判定: {_evalSceneName} 已触发随机 → 强制已收集（关闭交互）");
                     if (__instance.isTrue != null)
                         __instance.Fsm.Event(__instance.isTrue);
                 }
                 else
                 {
-                    Plugin.Log.LogInfo($"[技能随机] 获取点判定: {scene} 未触发随机 → 强制可交互（放行演出）");
+                    Plugin.Log.LogInfo($"[技能随机] 获取点判定: {_evalSceneName} 未触发随机 → 强制可交互（放行演出）");
                     if (__instance.isFalse != null)
                         __instance.Fsm.Event(__instance.isFalse);
                 }
@@ -628,22 +774,24 @@ private static void GiveRandomReward(string scene, string skillName)
             {
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
-                string scene = SceneManager.GetActiveScene().name;
-                if (scene == null || !IsSkillScene(scene))
+                if (!RefreshEvalScene())
                     return true;
                 if (!TestsSkillField(__instance))
                     return true;
 
-                if (IsRegionRandomized(scene))
+                bool randomized = IsRegionRandomized(_evalSceneName);
+                // 该判定会被引擎反复评估：日志仅在场景/结论变化时打一条（零分配去重）
+                if (!ReferenceEquals(_lastEvalLogScene, _evalSceneName) || _lastEvalLogRand != randomized)
                 {
-                    Plugin.Log.LogInfo($"[技能随机] 获取点外观判定: {scene} 已触发随机 → 已收集形态");
+                    _lastEvalLogScene = _evalSceneName;
+                    _lastEvalLogRand = randomized;
+                    Plugin.Log.LogInfo($"[技能随机] 获取点外观判定: {_evalSceneName} {(randomized ? "已触发随机 → 已收集形态" : "未触发随机 → 可交互形态")}");
+                }
+
+                if (randomized)
                     __instance.IsFullfilled?.Invoke();
-                }
                 else
-                {
-                    Plugin.Log.LogInfo($"[技能随机] 获取点外观判定: {scene} 未触发随机 → 可交互形态");
                     __instance.IsNotFulfilled?.Invoke();
-                }
                 return false;
             }
             catch (Exception ex)
@@ -653,14 +801,16 @@ private static void GiveRandomReward(string scene, string skillName)
             }
         }
 
-        /// <summary>该 PlayerDataTestResponse 是否测试技能字段（反射读 test.TestGroups）</summary>
+        private static readonly System.Reflection.FieldInfo _pdtrTestField =
+            typeof(PlayerDataTestResponse).GetField("test",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+
+        /// <summary>该 PlayerDataTestResponse 是否测试技能字段（反射读 test.TestGroups，字段查表已静态缓存）</summary>
         private static bool TestsSkillField(PlayerDataTestResponse resp)
         {
             try
             {
-                var field = typeof(PlayerDataTestResponse).GetField("test",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-                var test = field?.GetValue(resp) as PlayerDataTest;
+                var test = _pdtrTestField?.GetValue(resp) as PlayerDataTest;
                 if (test?.TestGroups == null)
                     return false;
                 foreach (var group in test.TestGroups)
@@ -696,7 +846,7 @@ private static void GiveRandomReward(string scene, string skillName)
             {
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
-                if (__instance.Fsm == null || __instance.Fsm.Name != "Inspection")
+                if (!ChurchRandomizePatch.IsChapelShrineSceneNow())
                     return true;
                 string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                 if (scene == null || !IsSkillScene(scene))
@@ -711,6 +861,51 @@ private static void GiveRandomReward(string scene, string skillName)
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"[技能随机] 禁用演出 FSM 异常，放行: {ex}");
+                return true;
+            }
+        }
+
+        /// <summary>红色记忆白花拦截（memory_red）：演出动画后 White_Flower 对象自动收集
+        /// （CollectableItem.Collect，非 FSM 弹窗链路），命中即发随机奖励并阻断原生 Collect
+        /// （不写 HasWhiteFlower、无收集弹窗，动画已播完无卡点）。持久化同 UI Msg 标准流程。</summary>
+        [HarmonyPatch(typeof(CollectableItem), "Collect", new Type[] { typeof(int), typeof(bool) })]
+        [HarmonyPrefix]
+        private static bool Prefix_RedMemoryWhiteFlower(CollectableItem __instance, ref bool __runOriginal)
+        {
+            try
+            {
+                if (!SilksongItemRandomizerAPI.IsEnabled())
+                    return true;
+                // ★ 随机池自发发放（SavedItemReward.Give → TryGet → Collect）保护：放行不被误伤
+                if (TryGetPatch.BypassRandom)
+                    return true;
+                string scene = SceneManager.GetActiveScene().name;
+                if (!string.Equals(scene, "memory_red", StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (__instance == null || !string.Equals(__instance.name, "White_Flower", StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                if (!IsRegionRandomized(scene))
+                {
+                    GiveRandomReward(scene, "UIMsg");
+                    if (Plugin.SaveData != null)
+                    {
+                        Plugin.SaveData.SkillRandomizedRegions.Add(scene);
+                        Plugin.SaveGlobalData();
+                        Plugin.Log.LogInfo($"[技能随机] 红色记忆白花拦截: 场景 {scene} 已平替（发放随机奖励），持久化标记并落盘");
+                    }
+                }
+                else
+                {
+                    Plugin.Log.LogInfo($"[技能随机] 场景 {scene} 已平替过（持久化），仅阻断白花原生收集");
+                }
+
+                __runOriginal = false;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[技能随机] 拦截红色记忆白花异常，放行: {ex}");
                 return true;
             }
         }
@@ -729,6 +924,9 @@ private static void GiveRandomReward(string scene, string skillName)
 //   平替演出后纹章实际未解锁（原生会不关已平替的教堂）。接管规则（仅教堂门场景 + 6 教堂纹章）：
 //     已平替（演出完成、奖励已发）-> IsTrue 强制 true：走原生 DO CLOSE（关门动画 + 原生 SetPlayerDataBool 持久化）
 //     未平替（玩家还没去该教堂）-> IsTrue 强制 false：发 OPEN 强行开门（无视纹章解锁与 chapelClosed 脏值）
+//   同一接管覆盖神社场景：神社 Control FSM "Check Unlocked" 用 GetIsCrestUnlocked 决定
+//     Inactive（已拥有->交互对象关闭）/ Idle（可交互）。未平替强制 false 保持可交互，
+//     玩家即使已从随机池持有该纹章也能触发平替演出拿教堂随机奖励；已平替走原生 Inactive。
 // 依据（反向工程）：
 //   - 纹章弹窗唯一 C# 入口 = HutongGames.PlayMaker.Actions.ShowToolCrestUIMsg.OnEnter()
 //     （反编译 Assembly-CSharp，全工程仅此一处调用 ToolCrestUIMsg.Spawn）
@@ -767,14 +965,18 @@ namespace SilksongItemRandomizer
         };
 
         // 纹章名(兼容 _v2 等变体) -> PlayerData.chapelClosed_* 字段名
+        // 注意：资产名对应实际 bundle 中的 m_Name，游戏内显示名（野兽/萨满）与资产名不同：
+        //   beast 纹章资产名 Warrior，shaman 纹章资产名 Spell（UnityPy 解析 crestitems.bundle 确认，
+        //   bundle 内并无 Beast/Shaman 资产）。两个别名补充后野兽教堂(ant_19)与教学关萨满教堂
+        //   (tut_05) 才真正命中教堂判定。
         private static readonly Dictionary<string, string> CrestToClosedField = new()
         {
             { "reaper",     "chapelClosed_reaper" },
             { "wanderer",   "chapelClosed_wanderer" },
-            { "beast",      "chapelClosed_beast" },
+            { "warrior",    "chapelClosed_beast" },
             { "witch",      "chapelClosed_witch" },
             { "toolmaster", "chapelClosed_toolmaster" },
-            { "shaman",     "chapelClosed_shaman" },
+            { "spell",      "chapelClosed_shaman" },
         };
 
         // 纹章名 -> 映射结果缓存（GetIsCrestUnlocked.IsTrue 是门场景热路径，避免每帧做
@@ -791,16 +993,23 @@ namespace SilksongItemRandomizer
 
         // ================= 场景/纹章判定 =================
 
+        private static int _lastSceneHandle = int.MinValue;
+
         private static void UpdateSceneCache()
         {
-            string scene = SceneManager.GetActiveScene().name;
-            if (scene == _lastScene) return;
+            // 用 handle(int) 判变化：门场景 Gate 判定每帧进这里，
+            // Scene.name 每次访问都会分配新字符串，稳态必须零分配
+            Scene active = SceneManager.GetActiveScene();
+            int handle = active.handle;
+            if (handle == _lastSceneHandle) return;
+            _lastSceneHandle = handle;
+            string scene = active.name;
             _lastScene = scene;
             _lastIsShrine = IsInList(scene, ChapelShrineScenes);
             _lastIsDoor = IsInList(scene, ChapelDoorScenes);
         }
 
-        private static bool IsChapelShrineSceneNow()
+        internal static bool IsChapelShrineSceneNow()
         {
             UpdateSceneCache();
             return _lastIsShrine;
@@ -882,13 +1091,10 @@ namespace SilksongItemRandomizer
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
 
-                // 教学关放行原生（tut 场景非教堂，不改教学演出）
+                // 教学关不再一刀切放行：tut_05 存在萨满教堂演出（Shaman Msg 绑定 Spell 资产，
+                // 经 StringSwitch SHAMAN 分支进入），照常走教堂判定。其余教学记忆回放
+                // （completedMemory_*）若绑定非教堂纹章则自然放行。
                 string scene = SceneManager.GetActiveScene().name;
-                if (scene != null && scene.StartsWith("tut", StringComparison.OrdinalIgnoreCase))
-                {
-                    Plugin.Log.LogInfo($"[教堂随机] 教学场景 {scene}，放行原生纹章弹窗");
-                    return true;
-                }
 
                 // 取神社引用的纹章对象，按名字判定是否教堂演出（命中 6 字段之一才是教堂）
                 ToolCrest crest = __instance.Crest?.Value as ToolCrest;
@@ -918,6 +1124,7 @@ namespace SilksongItemRandomizer
                 // 2) 阻止原生弹窗并正常结束流程（与原生 OnCrestMsgEnd 收尾一致: 发 FinishEvent + Finish）
                 __instance.Fsm.Event(__instance.FinishEvent);
                 __instance.Finish();
+                ChapelFadeRestore.Mark();
                 return false;
             }
             catch (Exception ex)
@@ -932,6 +1139,7 @@ namespace SilksongItemRandomizer
         /// <summary>
         /// 跳过 UnlockCrest（玩家在教堂演出中不真正获得对应纹章，与自动装配拦截联动）。
         /// 仅神社场景 + 教堂纹章判定拦截，其余场景原生解锁不受影响。
+        /// 另含 weave_10 织女升级分支（见方法内注释）。
         /// </summary>
         [HarmonyPatch(typeof(UnlockCrest), "OnEnter")]
         [HarmonyPrefix]
@@ -941,6 +1149,47 @@ namespace SilksongItemRandomizer
             {
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
+
+                // weave_10 织女纹章升级拦截：Unlock Crest Upg 1/2 状态不真正解锁，平替为独立随机
+                // 点位（每级原生点数条件判定不动）。同时写复合持久化键 "weave_10:CrestUpgN#<纹章名>"，
+                // 供 ChurchGateCheckPatch 把后续 GetIsCrestUnlocked(该纹章) 强制 true——完成标记只有
+                // 被拦的原生 Unlock() 会写，不补则伊娃永远重复提供同一级。
+                if (__instance.Fsm != null
+                    && string.Equals(__instance.Fsm.Name, "Dialogue", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(SceneManager.GetActiveScene().name, "weave_10", StringComparison.OrdinalIgnoreCase))
+                {
+                    string state = __instance.Fsm.ActiveStateName;
+                    string upgKey = null;
+                    if (string.Equals(state, "Unlock Crest Upg 1", StringComparison.OrdinalIgnoreCase))
+                        upgKey = "weave_10:CrestUpg1";
+                    else if (string.Equals(state, "Unlock Crest Upg 2", StringComparison.OrdinalIgnoreCase))
+                        upgKey = "weave_10:CrestUpg2";
+
+                    if (upgKey != null)
+                    {
+                        ToolCrest upgCrest = __instance.Crest?.Value as ToolCrest;
+                        Plugin.Log.LogInfo($"[技能随机] 织女纹章升级拦截: {upgKey}, 纹章 {upgCrest?.name ?? "空"}");
+                        if (!SkillRegionRandomizePatch.IsRegionRandomized(upgKey))
+                        {
+                            SkillRegionRandomizePatch.GiveRandomReward(upgKey, "CrestUpgrade");
+                            if (Plugin.SaveData != null)
+                            {
+                                Plugin.SaveData.SkillRandomizedRegions.Add(upgKey);
+                                if (upgCrest != null)
+                                    Plugin.SaveData.SkillRandomizedRegions.Add(upgKey + "#" + upgCrest.name);
+                                Plugin.SaveGlobalData();
+                                Plugin.Log.LogInfo($"[技能随机] {upgKey} 已平替（织女纹章升级），持久化标记并落盘");
+                            }
+                        }
+                        else
+                        {
+                            Plugin.Log.LogInfo($"[技能随机] {upgKey} 已平替过（持久化），仅拦截");
+                        }
+                        __instance.Finish();
+                        return false;
+                    }
+                }
+
                 if (!IsChapelShrineSceneNow())
                     return true;
 
@@ -995,6 +1244,41 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>
+        /// 织女升级演出自动装配拦截：weave_10 "Crest Change" 状态的 AutoEquipCrestV4 强制装上刚
+        /// "升级"的纹章并清空现有装备。升级已被拦（玩家未必拥有该纹章），装配必须一并阻断，
+        /// 否则出现"装备未拥有纹章"。V4 与教堂拦的 V2 不同类需独立前缀；同状态
+        /// SetDeathRespawnMarker 放行，SendToolEquipChanged 在演出数据里本就禁用(actionEnabled=0)。
+        /// </summary>
+        [HarmonyPatch(typeof(AutoEquipCrestV4), "OnEnter")]
+        [HarmonyPrefix]
+        private static bool Prefix_AutoEquipV4(AutoEquipCrestV4 __instance)
+        {
+            try
+            {
+                if (!SilksongItemRandomizerAPI.IsEnabled())
+                    return true;
+                var fsm = __instance.Fsm;
+                if (fsm == null
+                    || !string.Equals(fsm.Name, "Dialogue", StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(SceneManager.GetActiveScene().name, "weave_10", StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(fsm.ActiveStateName, "Crest Change", StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                Plugin.Log.LogInfo("[技能随机] 织女纹章自动装配拦截(Crest Change)");
+                // 防御：原生按 SkipToAppear 置位 BindOrbHudFrame.SkipToNextAppear，拦截后保持干净
+                if (__instance.SkipToAppear.Value)
+                    BindOrbHudFrame.SkipToNextAppear = false;
+                __instance.Finish();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[技能随机] 拦截织女自动装配异常，放行: {ex}");
+                return true;
+            }
+        }
+
         // ================= 随机奖励发放 =================
 
         private static void GiveRandomReward(string crestName)
@@ -1042,7 +1326,31 @@ namespace SilksongItemRandomizer
             {
                 if (!SilksongItemRandomizerAPI.IsEnabled())
                     return true;
-                if (!ChurchRandomizePatch.IsChapelDoorSceneNow())
+
+                // weave_10 织女升级完成标记接管：测试的纹章已平替升级（复合键存在）→ 强制"已解锁"，
+                // 伊娃对话据此推进到下一级判断（原生标记只由被拦的 UnlockCrest 写入）。
+                // 未平替 → 放行原生（每级点数条件不变）。注意必须在下方门/神社场景闸之前，
+                // 否则 weave_10 被提前放行走不到这里。
+                if (string.Equals(SceneManager.GetActiveScene().name, "weave_10", StringComparison.OrdinalIgnoreCase))
+                {
+                    ToolCrest wCrest = __instance.Crest?.Value as ToolCrest;
+                    if (wCrest != null && SkillRegionRandomizePatch.IsWeave10UpgradeDone(wCrest.name))
+                    {
+                        __result = true;
+                        return false;
+                    }
+                    return true;
+                }
+
+                // 门场景：按 randomized 强制（已平替→true→原生关门+持久化；未平替→false→开门）。
+                // 神社场景：一律强制 false（保持 Idle、FSM 存活），两个目的：
+                //   1) 强行显示交互——玩家从随机池提前抽到纹章（真实已解锁）时，
+                //      原生判 true 会 Inactive 关闭神社，平替演出永远无法触发；
+                //   2) 演出主链 Reload Scene 重载落地后，FinishedEnteringScene 广播 "FSM CANCEL"
+                //      （HeroController.cs:2529），只有存活的 Idle 态神社才能收到并转入副链：
+                //      Set Return → Fade Back(官方渐亮) → Crest Change(纹章替换演出) → End 2。
+                //      若此处返回 true → UNLOCKED → Inactive 会 SetActive(false) 杀死 FSM，副链全丢。
+                if (!ChurchRandomizePatch.IsChapelDoorSceneNow() && !ChurchRandomizePatch.IsChapelShrineSceneNow())
                     return true;
 
                 ToolCrest crest = __instance.Crest?.Value as ToolCrest;
@@ -1057,13 +1365,54 @@ namespace SilksongItemRandomizer
                 }
 
                 bool randomized = ChurchRandomizePatch.IsChapelRandomized(crest.name);
-                __result = randomized;
+                // 神社一律 false（见上方注释）；门场景保持 randomized 语义
+                __result = ChurchRandomizePatch.IsChapelShrineSceneNow() ? false : randomized;
                 return false;
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"[教堂随机] 关门判定接管异常，放行: {ex}");
                 return true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 教堂演出拦截后的画面恢复。
+    /// 背景：拦截弹窗后主链 Reload Scene → 重载 → door_memoryEnd(customFade=True) 进场，
+    /// 官方 FadeSceneIn 被 customFade 短路，全链无任何画面恢复点 → 永久黑屏。
+    /// 此处在门进场完成后主动渐亮补上缺口；副链 Fade Back 若先到则此处自然变空操作。
+    /// </summary>
+    public static class ChapelFadeRestore
+    {
+        private static float _markTime = -1f;
+        private static bool _pending = false;
+
+        /// <summary>Prefix_ShowMsg 拦截时调用</summary>
+        public static void Mark()
+        {
+            _markTime = Time.time;
+            _pending = true;
+        }
+
+        /// <summary>Plugin.Update 每帧调用；稳态下仅一次浮点比较</summary>
+        public static void Tick()
+        {
+            if (!_pending) return;
+            float el = Time.time - _markTime;
+            var gm = GameManager.instance;
+            bool entered = gm != null && gm.HasFinishedEnteringScene;
+            // 时机：门进场完成(HasFinishedEnteringScene)后 2s；12s 兜底防异常卡死
+            if ((entered && el >= 2.0f) || el >= 12f)
+            {
+                _pending = false;
+                try
+                {
+                    Color cur = ScreenFaderUtils.GetColour();
+                    if (cur.a > 0.01f)
+                        ScreenFaderUtils.Fade(cur, new Color(cur.r, cur.g, cur.b, 0f), 1.0f);
+                }
+                catch { }
             }
         }
     }

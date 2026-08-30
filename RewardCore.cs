@@ -170,7 +170,7 @@ namespace SilksongItemRandomizer
             BuildUnlimitedVirtualRewards();
             BuildPreciousVirtualRewards();
             BuildLoreReward();
-            BuildInspectPermitRewards();
+            
             BuildProgressRewards();
             if (ItemLimitConfig.EnableMapRewards)
                 _limitedRewards.AddRange(MapStationRewards.BuildMapRewards());
@@ -194,7 +194,8 @@ namespace SilksongItemRandomizer
             {
                 "hasNeedleThrow", "hasThreadSphere", "hasSilkCharge", "hasSilkBomb", "hasSilkBossNeedle", "hasParry",
                 "hasHarpoonDash", "hasNeedolin", "hasDash", "hasBrolly", "hasDoubleJump", "hasChargeSlash",
-                "hasSuperJump", "hasWalljump", "HasSeenEvaHeal", "hasNeedolinMemoryPowerup", "hasFastTravelTeleport"
+                "hasSuperJump", "hasWalljump", "HasSeenEvaHeal", "hasNeedolinMemoryPowerup", "hasFastTravelTeleport",
+                "HasMelodyConductor", "HasMelodyLibrarian", "HasMelodyArchitect"
             };
 
             _abilityRewardIds.Clear();
@@ -542,13 +543,7 @@ namespace SilksongItemRandomizer
         /// 权限类 inspect 地点权限物入池：每个地点一个"允许走原生流程"的许可（virt:Permit:scene:name），
         /// 玩家随机获得后该地点放行原生流程（记录二）；inspect 每地只触发一次随机（记录一，见 LoreTriggerPatch）。
         /// </summary>
-        private static void BuildInspectPermitRewards()
-        {
-            if (!ItemLimitConfig.EnableInspectPermit)
-                return;
-            foreach (var e in InspectPermitRewards.Permits)
-                _limitedRewards.Add(new InspectPermissionReward(e.Scene, e.Name));
-        }
+        
 
         // ========== 辅助方法 ==========
         private static void BuildCrestCache()
@@ -619,7 +614,8 @@ namespace SilksongItemRandomizer
             if (IsSkillOwned(skillField))
             {
                 var (name, icon) = GetAbilityInfo(skillField);
-                StartingAbilityPicker.Plugin.ShowSkillPopup(icon, name);
+                // 重复获得也弹官方全屏弹窗
+                StartingAbilityPicker.SkillRandomizer.ShowBannerPopup(skillField, icon);
                 return;
             }
             StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill(skillField);
@@ -1118,20 +1114,7 @@ namespace SilksongItemRandomizer
     /// 权限类 inspect 地点的权限物：放进随机池，玩家获得后该地点"允许"走原生流程
     /// （把存储的不允许变成允许）。纯记录型奖励，发放记录由触发方统一 AddGivenCount。
     /// </summary>
-    public class InspectPermissionReward : IRandomReward
-    {
-        private readonly string _id, _displayName;
-        public InspectPermissionReward(string scene, string name)
-        {
-            _id = "virt:Permit:" + scene + ":" + name;
-            _displayName = $"地点权限:{scene}/{name}";
-        }
-        public string Id => _id;
-        public string DisplayName => _displayName;
-        public Sprite Icon => SpriteCache.Find("Map_prompt");
-        public void Give() { }
-        public bool IsAtMax() => ItemRandomizer.GetGivenCount(Id) >= 1;
-    }
+    
 
     public class DirectionPermissionReward : IRandomReward
     {
@@ -1190,11 +1173,15 @@ namespace SilksongItemRandomizer
             else
             {
                 // 累加语义：只置 true 不置 false，保留之前获得的方向
+                // ★ 游戏朝向语义（F10 实测）：Dash/Harpoon/Walljump 的引擎字段名与实际视觉方向相反
+                //   （DashLeft 字段实际向右，DashRight 实际向左，因 facingRight=localScale.x 反了），
+                //   Float 用 move 输入判定，不反。故此处 _allowLeft（视觉左）直接落到实际向左的字段：
+                //   冲刺/飞针/壁跳 → 反向字段（视觉左 = 引擎 *Right），漂浮 → 正向（视觉左 = FloatLeft）。
                 var perms = StartingAbilityPicker.StartingAbilityPickerAPI.GetMovementPermissions();
-                if (_skillField == "hasDash") { if (_allowLeft) perms.DashLeft = true; if (_allowRight) perms.DashRight = true; }
-                else if (_skillField == "hasHarpoonDash") { if (_allowLeft) perms.HarpoonLeft = true; if (_allowRight) perms.HarpoonRight = true; }
+                if (_skillField == "hasDash") { if (_allowLeft) perms.DashRight = true; if (_allowRight) perms.DashLeft = true; }
+                else if (_skillField == "hasHarpoonDash") { if (_allowLeft) perms.HarpoonRight = true; if (_allowRight) perms.HarpoonLeft = true; }
                 else if (_skillField == "hasBrolly") { if (_allowLeft) perms.FloatLeft = true; if (_allowRight) perms.FloatRight = true; }
-                else if (_skillField == "hasWalljump") { if (_allowLeft) perms.WallJumpLeft = true; if (_allowRight) perms.WallJumpRight = true; }
+                else if (_skillField == "hasWalljump") { if (_allowLeft) perms.WallJumpRight = true; if (_allowRight) perms.WallJumpLeft = true; }
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetMovementPermissions(perms);
 
                 // 补发本体能力（幂等：SkillRandomizer.GiveSkill 对已拥有字段直接返回，不重复弹窗）
@@ -1515,71 +1502,3 @@ namespace SilksongItemRandomizer
 
 // InspectPermitRewards.cs
 
-namespace SilksongItemRandomizer
-{
-    /// <summary>
-    /// 权限类 inspect 地点（总表 Lore 行 - lore 白名单）的权限物：
-    /// 每个地点一个"允许走原生流程"的许可放进随机池（记录二），
-    /// 玩家随机获得后该地点 inspect 放行原生流程；inspect 每地只触发一次随机（记录一）。
-    /// 车站权限（Station_Unlocked*）已有独立机制，不在本表。
-    /// </summary>
-    public static class InspectPermitRewards
-    {
-        public readonly struct InspectPermitEntry
-        {
-            public readonly string Scene;
-            public readonly string Name;
-            public InspectPermitEntry(string scene, string name)
-            {
-                Scene = scene;
-                Name = name;
-            }
-        }
-
-        /// <summary>权限类地点清单（scene|name，与 lore 白名单互补，仅保留车站收费机 26 处）
-        /// 其余权限类 inspect 地点已移除随机化，回归原生交互流程。</summary>
-        public static readonly InspectPermitEntry[] Permits =
-        {
-            new InspectPermitEntry("Arborium_Tube", "tube_toll_machine"),
-            new InspectPermitEntry("Belltown_basement", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_02", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_03", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_04", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_08", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_Aqueduct", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_City", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bellway_City", "Bellway Toll Machine (1)"),
-            new InspectPermitEntry("Bellway_City", "tube_toll_machine"),
-            new InspectPermitEntry("Bellway_Shadow", "Bellway Toll Machine"),
-            new InspectPermitEntry("Bone_East_10", "toll door interactible"),
-            new InspectPermitEntry("Hang_06b", "tube_toll_machine"),
-            new InspectPermitEntry("Shellwood_19", "Bellway Toll Machine"),
-            new InspectPermitEntry("Slab_06", "Bellway Toll Machine"),
-            new InspectPermitEntry("Song_01b", "tube_toll_machine"),
-            new InspectPermitEntry("Song_28", "Toll_machine_silk_ration"),
-            new InspectPermitEntry("Song_29", "Toll_machine_silk_ration"),
-            new InspectPermitEntry("Song_Enclave_Tube", "tube_toll_machine"),
-            new InspectPermitEntry("Tube_Hub", "tube_toll_machine"),
-            new InspectPermitEntry("Under_01b", "Understore Toll Bench"),
-            new InspectPermitEntry("Under_01b", "Understore Toll Bench (1)"),
-            new InspectPermitEntry("Under_08", "Understore Toll Bench"),
-            new InspectPermitEntry("Under_08", "Understore Toll Bench (1)"),
-            new InspectPermitEntry("Under_08", "Understore Toll Bench (2)"),
-            new InspectPermitEntry("Under_22", "tube_toll_machine"),
-        };
-
-        /// <summary>运行时应答：该地点是否为权限类（有权限物）</summary>
-        public static bool IsPermitObject(string scene, string name)
-            => !string.IsNullOrEmpty(scene) && !string.IsNullOrEmpty(name) && PermitKeys.Contains(scene + "|" + name);
-
-        private static readonly HashSet<string> PermitKeys = BuildPermitKeys();
-
-        private static HashSet<string> BuildPermitKeys()
-        {
-            var set = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
-            foreach (var e in Permits)
-                set.Add(e.Scene + "|" + e.Name);
-            return set;
-        }
-    }
-}

@@ -1,4 +1,4 @@
-Pickup|Abandoned_town|Memory Group/abandoned_town_memento_dropper/collectable item fall/Collectable Item Pickup|Collectable Item Pickup|Memento Surface|Abandoned_town_357.20_6.20_0.00|357.2|6.2|scan
+﻿Pickup|Abandoned_town|Memory Group/abandoned_town_memento_dropper/collectable item fall/Collectable Item Pickup|Collectable Item Pickup|Memento Surface|Abandoned_town_357.20_6.20_0.00|357.2|6.2|scan
 Pickup|Abandoned_town|Collectable Item Pickup|Collectable Item Pickup|Memento Surface|Abandoned_town_359.31_6.25_0.00|359.3|6.3|scan
 Lore|Abyss_02b|Abyss_lore_stone/Inspect Region|Inspect Region||loretrig:Abyss_02b:Inspect Region|148.8|47.1|scan
 Pickup|Abyss_04|Collectable Item Pickup|Collectable Item Pickup|Ancient Egg Abyss Middle|Abyss_04_98.24_50.34_0.00|98.2|50.3|scan
@@ -116,7 +116,6 @@ Pickup|Bone_17|Collectable Item Pickup|Collectable Item Pickup|Bone Necklace|Bon
 Pickup|Bone_18|Quest Scene/Final Encounter/Battle Scene/Collectable Item Pickup|Collectable Item Pickup|Crest Socket Unlocker|Bone_18_38.15_20.51_0.00|38.2|20.5|scan
 Lore|Bone_18|Inspect Region|Inspect Region||loretrig:Bone_18:Inspect Region|31.0|7.3|scan
 Pickup|Bone_19|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_19_28.00_13.50_0.00|28.0|13.5|extra
-Pickup|Bone_East_01|Demo Gate (2)/Collectable Item Pickup|Collectable Item Pickup|Shard Pouch|Bone_East_01_38.31_72.30_0.00|38.3|72.3|scan
 Pickup|Bone_East_03|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_03_153.00_22.50_0.00|153.0|22.5|extra
 Pickup|Bone_East_04b|Collectable Item Pickup|Collectable Item Pickup|Rosary_Set_Frayed|Bone_East_04b_Collectable Item Pickup|6.5|87.2|scan
 Pickup|Bone_East_07|<extra>|Collectable Item Pickup (extra)|Simple Key|Bone_East_07_10.00_165.50_0.00|10.0|165.5|extra
