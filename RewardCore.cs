@@ -102,9 +102,9 @@ namespace SilksongItemRandomizer
                 var counts = GetGivenCountsDict();
 
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetColdResist(
-                    counts.TryGetValue("ColdResist", out var c) && c > 0);
+                    GlobalConfig.ColdResist.Value);
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetSwimOwned(
-                    counts.TryGetValue("Swim", out var s) && s > 0);
+                    GlobalConfig.Swim.Value);
 
                 // 二段跳字段本身随游戏存档持久化（GiveSkill 写入 PlayerData），以字段为准
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetDoubleJumpOwned(
@@ -177,6 +177,14 @@ namespace SilksongItemRandomizer
             if (ItemLimitConfig.EnableStationRewards)
                 _limitedRewards.AddRange(MapStationRewards.BuildStationRewards());
 
+            // 跳蚤救援（无限池奖励，可被任意触发点随机到，最多 LimitFleaRescue 次）。
+            // Give = 生成一只可被救的跳蚤；救走后 FleaRescueSpawned 记救援并累积任务进度。
+            var fleaIcon = SpriteCache.Find("Flea_Scoreboard_Icons_0001_Generic");
+            _limitedRewards.Add(new VirtualReward("flea:Rescue", Locale.Get("跳蚤救援"), fleaIcon,
+                () => { AddGivenCount("flea:Rescue"); FleaRescueBuilder.SpawnAtHero(); },
+                () => GetGivenCount("flea:Rescue") >= ItemLimitConfig.LimitFleaRescue
+            ));
+
             _cachedCrestUnlocker = _limitedRewards.FirstOrDefault(r => r.Id == "virt:UnlockCrestSlot");
 
             _rewardById = new Dictionary<string, IRandomReward>(_limitedRewards.Count + _unlimitedRewards.Count);
@@ -248,8 +256,9 @@ namespace SilksongItemRandomizer
             _abilityRewardIds.Add("ColdResist");
 
             // 游泳权限：未持有时触碰水面受陷阱伤弹回（与一代 water 陷阱一致，见 AbilityGatePatch）。
-            // 游戏无原生生效道具，图标用通用回退图标。
-            var swimIcon = GetFallbackIcon();
+            // 游戏无原生生效道具，图标用官方飞针图（用户在 sprite 挑选器中选定 prompt_hornet_silk_dash，
+            // 与飞针奖励共用素材，泳与飞共用水面/冲刺意象）。
+            var swimIcon = SpriteCache.Find("prompt_hornet_silk_dash") ?? GetFallbackIcon();
             _limitedRewards.Add(new VirtualReward("Swim", Locale.Get("游泳"), swimIcon,
                 () => GrantSwim(),
                 () => GetGivenCount("Swim") >= ItemLimitConfig.GetAbilityLimit("Swim")
@@ -257,18 +266,31 @@ namespace SilksongItemRandomizer
             _abilityRewardIds.Add("Swim");
         }
 
-        /// <summary>寒冷抗性发放：SAP 运行时权限位置位 + 顶部通知。</summary>
+        /// <summary>寒冷抗性发放：SAP 运行时权限位置位 + 官方全屏 UI Msg 获得弹窗
+        /// （复用 UI Msg Get Item 的 Set Journal 分支走完整全屏演出，
+        /// 图标用二段跳官方 prompt（雪绒披风同系），名称覆盖为 "Cold Resistance"，描述自定义）。</summary>
         private static void GrantColdResist()
         {
+            // 局内获得必须以 cfg 为权威（审计契约）：写 GlobalConfig + 同步运行时（SetColdResist）。
+            // 只写内存会在面板校验/场景重载/重启后被 cfg(false) 覆盖回退（与上劈权限同款根因）。
+            SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.ColdResist, true);
             StartingAbilityPicker.StartingAbilityPickerAPI.SetColdResist(true);
-            Plugin.ShowNotification(Locale.Get("寒冷抗性"), 3f);
+            StartingAbilityPicker.UiMsgCustomBannerHelper.Show("Journal",
+                SpriteCache.Find("Hornet_Double_Jump_Prompt"), "Cold Resistance",
+                "寒冷不再冻僵，冰雪之地畅行无阻。", "Cold no longer freezes you; roam the frozen lands freely.");
         }
 
-        /// <summary>游泳发放：SAP 运行时权限位置位 + 顶部通知。</summary>
+        /// <summary>游泳发放：SAP 运行时权限位置位 + 官方全屏 UI Msg 获得弹窗
+        /// （复用 UI Msg Get Item 的 Set Journal 分支走完整全屏演出，图标传用户选定的
+        /// prompt_hornet_silk_dash，名称覆盖为 "Swim"，描述自定义）。</summary>
         private static void GrantSwim()
         {
+            // 局内获得必须以 cfg 为权威（审计契约）：写 GlobalConfig + 同步运行时（SetSwimOwned）。
+            SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.Swim, true);
             StartingAbilityPicker.StartingAbilityPickerAPI.SetSwimOwned(true);
-            Plugin.ShowNotification(Locale.Get("游泳"), 3f);
+            var icon = SpriteCache.Find("prompt_hornet_silk_dash");
+            StartingAbilityPicker.UiMsgCustomBannerHelper.Show("Journal", icon, "Swim",
+                "触水不再受伤，可自在游泳穿行水域。", "Touch no longer hurts; swim freely through the waters.");
         }
 
         /// <summary>丝之心发放：丝线恢复上限 +1 + 官方 UI Msg 全屏黑幕获得弹窗（每次发放都弹）。</summary>
@@ -366,7 +388,11 @@ namespace SilksongItemRandomizer
         {
             for (int i = 0; i < total; i++)
             {
-                EventRegister.SendEvent(EventRegisterEvents.AddBlueHealth, null);
+                // 蓝血奖励必须走官方入口 GameManager.AddBlueHealthQueued()：它会把蓝血计入
+                // QueuedBlueHealth（排队）并在攒满后触发蓝血形态转换。此前发 EventRegisterEvents.AddBlueHealth
+                // （"ADD BLUE HEALTH"，仅 FSM 用，无代码监听）导致既不排队也不转形态，卡蓝血状态。
+                if (GameManager.instance != null)
+                    GameManager.instance.AddBlueHealthQueued();
                 if (i < total - 1)
                     yield return new WaitForSeconds(interval);
             }
@@ -538,12 +564,6 @@ namespace SilksongItemRandomizer
             var pd = PlayerData.instance;
             return pd != null && pd.GetBool(boolName);
         }
-
-        /// <summary>
-        /// 权限类 inspect 地点权限物入池：每个地点一个"允许走原生流程"的许可（virt:Permit:scene:name），
-        /// 玩家随机获得后该地点放行原生流程（记录二）；inspect 每地只触发一次随机（记录一，见 LoreTriggerPatch）。
-        /// </summary>
-        
 
         // ========== 辅助方法 ==========
         private static void BuildCrestCache()
@@ -802,6 +822,7 @@ namespace SilksongItemRandomizer
             if (reward == null) return false;
             reward.Give();
             AddGivenCount(reward.Id);
+            RecentItemsUI.AddItem(reward);
             return true;
         }
 
@@ -1026,8 +1047,36 @@ namespace SilksongItemRandomizer
     {
         private SavedItem _item;
         private readonly int _limit;
-        private static bool _displayNameErrorLogged = false;
-        private static bool _iconErrorLogged = false;
+
+        // 原生物品名 → 官方获得弹窗（映射到此物品发放时补弹，覆盖四心/遥观仪/永绽花/法术类原生物品）。
+        // 四心走 HeartMsgHelper；遥观仪/永绽花走 banner；法术类原生物品走对应技能字段的官方技能弹窗。
+        private static readonly Dictionary<string, System.Action> EdgeItemPopupMap = new()
+        {
+            { "Coral Heart",      () => StartingAbilityPicker.HeartMsgHelper.Show("CORAL") },
+            { "Flower Heart",     () => StartingAbilityPicker.HeartMsgHelper.Show("FLOWER") },
+            { "Hunter Heart",     () => StartingAbilityPicker.HeartMsgHelper.Show("HUNTER") },
+            { "Clover Heart",     () => StartingAbilityPicker.HeartMsgHelper.Show("CLOVER") },
+            { "Farsight",         () => StartingAbilityPicker.SkillRandomizer.ShowBannerPopup("ConstructedFarsight") },
+            { "White Flower",     () => StartingAbilityPicker.SkillRandomizer.ShowBannerPopup("WhiteFlower") },
+            { "Silk Spear",       () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasNeedleThrow") },
+            { "Thread Sphere",    () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasThreadSphere") },
+            { "Silk Bomb",        () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasSilkBomb") },
+            { "Silk Charge",      () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasSilkCharge") },
+            { "Silk Boss Needle", () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasSilkBossNeedle") },
+            { "Parry",            () => StartingAbilityPicker.SkillRandomizer.ShowSkillPopupOfficial("hasParry") }
+        };
+
+        /// <summary>映射到此原生物品发放时，命中边缘物品表则补弹官方弹窗（不写字段）。</summary>
+        private static void TryShowEdgePopup(SavedItem item)
+        {
+            if (item == null) return;
+            if (item is ToolCrest) return; // 纹章已走 ShowToolCrest 专属弹窗
+            if (EdgeItemPopupMap.TryGetValue(item.name, out var popup))
+            {
+                try { popup?.Invoke(); }
+                catch (Exception ex) { Plugin.Log.LogWarning($"[边缘弹窗] {item.name} 弹窗失败: {ex.Message}"); }
+            }
+        }
 
         public string Id => _item?.name ?? "null";
         public string DisplayName
@@ -1064,9 +1113,14 @@ namespace SilksongItemRandomizer
             bool prevBypass = TryGetPatch.BypassRandom;
             string prevPending = PreGeneratedMap.PendingKey;
             TryGetPatch.BypassRandom = true;
+            // 此发奖窗口内拦截原生 CollectableItem 自弹的官方横幅（CollectableUIMsg.Spawn 非我们 BannerItem 跳过的），
+            // 由 RecentItemsUI.AddItem 统一弹一条，根治重复。
+            NativePopupDetector.Arm();
             try
             {
                 _item.TryGet(false, true);
+                // 原生物品为四心/遥观仪/永绽花/法术类等：原生 TryGet 无弹窗，补弹对应官方弹窗
+                TryShowEdgePopup(_item);
                 // 随机奖励为纹章：原生 ToolCrest.Get() 只解锁不弹窗（弹窗入口仅神社 FSM），
                 // 这里补全原生"获得纹章"完整演出（与神社演出顺序一致）：
                 //   弹窗（跳过键控制，自实例化自管理）-> 弹窗结束后自动装配（ToolItemManager.AutoEquip
@@ -1087,6 +1141,7 @@ namespace SilksongItemRandomizer
             }
             finally
             {
+                NativePopupDetector.Disarm();
                 TryGetPatch.BypassRandom = prevBypass;
                 PreGeneratedMap.PendingKey = prevPending;
             }
@@ -1116,11 +1171,10 @@ namespace SilksongItemRandomizer
     /// </summary>
     
 
-    public class DirectionPermissionReward : IRandomReward
+    public class DirectionPermissionReward : IRandomReward, IRotatableIcon
     {
         private readonly string _id;
         private readonly string _displayName;
-        private readonly Sprite _icon;
         private readonly string _skillField;
         private readonly bool _allowRight, _allowLeft;
         private readonly bool _isAttack, _isHeal;
@@ -1139,10 +1193,14 @@ namespace SilksongItemRandomizer
             _allowLeft = allowLeft;
             _isAttack = isAttack;
             _isHeal = isHeal;
-            _icon = null;
         }
         public string Id => _id;
         public string DisplayName => _displayName;
+        // 显示端旋转角度（后处理，不动纹理）。图标基图默认"朝下"（攻击方向朝下）：
+        //   上劈=180°（朝下转朝上）；左劈=-90°（逆时针转朝左）；右劈=+90°（逆时针转朝右）。
+        // 注意：Unity 旋转逆时针为正，此前 left/right 角度写反导致"左劈显示成右劈"，现已交换。
+        public float IconRotationAngle =>
+            _isAttack ? (_skillField == "upward" ? 180f : (_skillField == "left" ? -90f : 90f)) : 0f;
         private Sprite _cachedIcon;
         private bool _iconCached;
         public Sprite Icon
@@ -1157,49 +1215,74 @@ namespace SilksongItemRandomizer
         {
             if (_isAttack)
             {
-                // 累加语义：读当前权限 OR 上新方向，避免覆盖之前获得的其他攻击方向
+                // 累加语义：读当前权限 OR 上新方向，避免覆盖之前获得的其他攻击方向。
+                // 局内获得物品必须直接写入 cfg（方向权限本就是 cfg 持久化的权限分裂开关），
+                // 同时同步运行时 API；否则 cfg 保持 false，面板校验/重载被覆盖后上劈依旧被门控。
                 var (up, left, right) = StartingAbilityPicker.StartingAbilityPickerAPI.GetAttackPermissions();
-                if (_skillField == "upward") StartingAbilityPicker.StartingAbilityPickerAPI.SetAttackPermissions(true, left, right);
-                else if (_skillField == "left") StartingAbilityPicker.StartingAbilityPickerAPI.SetAttackPermissions(up, true, right);
-                else if (_skillField == "right") StartingAbilityPicker.StartingAbilityPickerAPI.SetAttackPermissions(up, left, true);
+                bool newUp = _skillField == "upward" || up;
+                bool newLeft = _skillField == "left" || left;
+                bool newRight = _skillField == "right" || right;
+                SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.AttackUp, newUp);
+                SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.AttackLeft, newLeft);
+                SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.AttackRight, newRight);
+                StartingAbilityPicker.StartingAbilityPickerAPI.SetAttackPermissions(newUp, newLeft, newRight);
             }
             else if (_isHeal)
             {
-                // 基于当前权限改 AllowHeal，禁止 new 全新对象（会清掉所有已获移动方向）
+                // 基于当前权限改 AllowHeal，禁止 new 全新对象（会清掉所有已获移动方向）；
+                // 局内获得必须同步写持久化 cfg，否则面板校验/重载后回血被门控。
                 var perms = StartingAbilityPicker.StartingAbilityPickerAPI.GetMovementPermissions();
                 perms.AllowHeal = true;
+                SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.Heal, true);
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetMovementPermissions(perms);
+
+                // 回血弹窗：UI Msg 自定义（丝之心图标，标题 Vincular，描述中文缚丝在上、英文在下）
+                var healIcon = SpriteCache.Find("prompt_silkheart");
+                StartingAbilityPicker.UiMsgCustomBannerHelper.Show("Brolly", healIcon, "Vincular", "缚丝", "enable heal");
             }
             else
             {
                 // 累加语义：只置 true 不置 false，保留之前获得的方向
-                // ★ 游戏朝向语义（F10 实测）：Dash/Harpoon/Walljump 的引擎字段名与实际视觉方向相反
-                //   （DashLeft 字段实际向右，DashRight 实际向左，因 facingRight=localScale.x 反了），
-                //   Float 用 move 输入判定，不反。故此处 _allowLeft（视觉左）直接落到实际向左的字段：
-                //   冲刺/飞针/壁跳 → 反向字段（视觉左 = 引擎 *Right），漂浮 → 正向（视觉左 = FloatLeft）。
+                // ★ 方向权限统一为视觉语义（与 cfg/面板/运行时门槛一致）：Left=视觉左、Right=视觉右。
+                // 引擎字段名虽与视觉相反（DashLeft 引擎字段=视觉右），但 DirectionPermissions 契约全程
+                // 按视觉命名直传（Plugin.Allow* → DirectionPatch facingRight ? Right : Left、SkillRandomizer
+                // EnsureUsableDirection giveLeft 直传），此处必须直传，不得再做引擎反向。
                 var perms = StartingAbilityPicker.StartingAbilityPickerAPI.GetMovementPermissions();
-                if (_skillField == "hasDash") { if (_allowLeft) perms.DashRight = true; if (_allowRight) perms.DashLeft = true; }
-                else if (_skillField == "hasHarpoonDash") { if (_allowLeft) perms.HarpoonRight = true; if (_allowRight) perms.HarpoonLeft = true; }
-                else if (_skillField == "hasBrolly") { if (_allowLeft) perms.FloatLeft = true; if (_allowRight) perms.FloatRight = true; }
-                else if (_skillField == "hasWalljump") { if (_allowLeft) perms.WallJumpRight = true; if (_allowRight) perms.WallJumpLeft = true; }
+                if (_skillField == "hasDash") { if (_allowLeft) { perms.DashLeft = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.DashLeft, true); } if (_allowRight) { perms.DashRight = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.DashRight, true); } }
+                else if (_skillField == "hasHarpoonDash") { if (_allowLeft) { perms.HarpoonLeft = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.HarpoonLeft, true); } if (_allowRight) { perms.HarpoonRight = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.HarpoonRight, true); } }
+                else if (_skillField == "hasBrolly") { if (_allowLeft) { perms.FloatLeft = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.FloatLeft, true); } if (_allowRight) { perms.FloatRight = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.FloatRight, true); } }
+                else if (_skillField == "hasWalljump") { if (_allowLeft) { perms.WallJumpLeft = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.WallJumpLeft, true); } if (_allowRight) { perms.WallJumpRight = true; SilksongItemRandomizer.GlobalConfig.SetPersisted(SilksongItemRandomizer.GlobalConfig.WallJumpRight, true); } }
                 StartingAbilityPicker.StartingAbilityPickerAPI.SetMovementPermissions(perms);
 
-                // 补发本体能力（幂等：SkillRandomizer.GiveSkill 对已拥有字段直接返回，不重复弹窗）
-                StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill(_skillField);
+                // 补发本体能力（幂等：SkillRandomizer.GiveSkill 对已拥有字段直接返回，不重复弹窗。
+                // nativePopup=false：方向分裂由下方 ShowDirectionSplit 统一弹官方方向弹窗，
+                // 本体能力不再额外弹原生技能弹窗，避免弹窗叠加。）
+                StartingAbilityPicker.StartingAbilityPickerAPI.GiveSkill(_skillField, false);
+
+                // 方向分裂弹窗：每个技能走自己对应的官方弹窗分支（漂浮=UI Msg Brolly，其余=PowerUpGetMsg），
+                // 图标用该技能自身图标，左侧水平翻转。
+                if (_allowLeft) StartingAbilityPicker.DirectionPopupHelper.ShowDirectionSplit(_skillField, true);
+                if (_allowRight) StartingAbilityPicker.DirectionPopupHelper.ShowDirectionSplit(_skillField, false);
             }
+
+            // 获得提示：横幅+右上列表统一由调用点（TryGetPatch/PickupSystem 等）的 RecentItemsUI.AddItem 弹出，
+            // Give 内部不再重复弹，避免同一次获得弹两次横幅。
         }
+
         public bool IsAtMax() => ItemRandomizer.GetGivenCount(Id) >= ItemLimitConfig.GetDirectionLimit(Id);
 
-        /// <summary>方向权限图标：优先取对应技能图标（冲刺/飞针/漂浮/壁跳），攻击/回血权限用通用图标。</summary>
+        /// <summary>方向权限图标：优先取对应技能图标（冲刺/飞针/漂浮/壁跳），攻击权限用旋转后的骨钉图，回血权限用通用图标。</summary>
         private Sprite GetIcon()
         {
             try
             {
-                if (_isAttack || _isHeal)
+                if (_isAttack)
                 {
-                    string iconName = _isHeal ? "prompt_silkheart" : "cross_slash_attack_circle";
-                    return SpriteCache.Find(iconName);
+                    // 攻击方向图标：后处理方案——返回原始骨钉图（针尖朝下），
+                    // 由显示端（右下横幅/右上列表）旋转 + 压扁长轴，不动像素纹理。
+                    return SpriteCache.Find("Inv_0033_inv_nail_05");
                 }
+                if (_isHeal) return SpriteCache.Find("prompt_silkheart");
                 return StartingAbilityPicker.StartingAbilityPickerAPI.GetIcon(_skillField);
             }
             catch { return null; }
@@ -1367,13 +1450,22 @@ namespace SilksongItemRandomizer
             {
                 try
                 {
-                    SilkSpoolState.MarkSelfGiving();
+                    // 学习丝轴（DoSpoolGet）做法：直接给自给标记 + Bypass，10 秒内无条件放行，
+                    // 防止原生心容器获得动画/上限逻辑把我们自己给的满四格面具拦掉。
+                    SilkSpoolState.MarkSelfGiving(10f);
+                    SpoolPartPatch.Bypass = true;
+                    SilkSpoolState.Bypass = true;
                     heartPiece.Get(true);
                     return;
                 }
                 catch (Exception ex)
                 {
                     Plugin.Log.LogWarning($"[NativeGive] HeartPiece Get 异常，回退 ++: {ex.Message}");
+                }
+                finally
+                {
+                    SpoolPartPatch.Bypass = false;
+                    SilkSpoolState.Bypass = false;
                 }
             }
             var pd = PlayerData.instance;

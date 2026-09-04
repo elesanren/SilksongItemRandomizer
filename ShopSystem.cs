@@ -169,7 +169,10 @@ namespace SilksongItemRandomizer
         {
             for (int i = 0; i < total; i++)
             {
-                EventRegister.SendEvent(EventRegisterEvents.AddBlueHealth, null);
+                // 蓝血奖励走官方入口 GameManager.AddBlueHealthQueued()（排队 + 攒满转蓝血形态），
+                // 与 RewardCore 同理，不能用 EventRegisterEvents.AddBlueHealth（仅 FSM 事件，不排队不转形态）。
+                if (GameManager.instance != null)
+                    GameManager.instance.AddBlueHealthQueued();
                 if (i < total - 1)
                     yield return new WaitForSeconds(1f);
             }
@@ -215,7 +218,7 @@ namespace SilksongItemRandomizer
                         () => false);
                     preReward = coinReward;
                 }
-                else if (preReward.Id == "virt:RandomFlea" || preReward.Id == "virt:FallbackFlea")
+                else if (preReward.Id == "virt:RandomFlea")
                 {
                     preReward = new VirtualReward(
                         "virt:RandomFlea",
@@ -916,6 +919,8 @@ namespace SilksongItemRandomizer
         // 与旧内联数组逐字一致，匹配/解析逻辑完全不变，只是数据源头外置。
         private const string CheckPointsResource = "SilksongItemRandomizer.Resources.check_points.txt";
         private const string ShopSlotKeysResource = "SilksongItemRandomizer.Resources.shop_slot_keys.txt";
+        private const string CollectibleSceneMapResource = "SilksongItemRandomizer.Resources.collectible_scene_map.txt";
+        private const string CheckSceneMapResource = "SilksongItemRandomizer.Resources.check_scene_map.txt";
 
         private static string[] _checkPoints = null;
         private static string[] _shopSlotKeys = null;
@@ -963,6 +968,50 @@ namespace SilksongItemRandomizer
         private static string[] LoadShopSlotKeys()
             => _shopSlotKeys ??= ReadExternalOverride("shop_slot_keys.txt") ?? ReadEmbeddedLines(ShopSlotKeysResource) ?? Array.Empty<string>();
 
+        /// <summary>
+        /// 收集类场景键清单（heart/spool/moss/flower，每行一个 "类型:场景名" 键）。
+        /// 键已含精确场景归属，ResolveRegion 可直接解析区域。
+        /// </summary>
+        private static string[] CollectibleSceneKeys()
+        {
+            var keys = new List<string>();
+            foreach (var raw in LoadAsLines(CollectibleSceneMapResource, "collectible_scene_map.txt"))
+            {
+                string key = raw.Trim();
+                if (string.IsNullOrEmpty(key) || key.StartsWith("#")) continue;
+                keys.Add(key);
+            }
+            return keys.ToArray();
+        }
+
+        /// <summary>
+        /// check 场景键清单（车站/管道各一行 "check:bool|场景名"）。
+        /// 供 ResolveRegion 把 check 键映射到具体场景。
+        /// </summary>
+        public static IReadOnlyDictionary<string, string> CheckSceneMap
+        {
+            get
+            {
+                if (_checkSceneMap != null) return _checkSceneMap;
+                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                var lines = LoadAsLines(CheckSceneMapResource, "check_scene_map.txt");
+                foreach (var raw in lines)
+                {
+                    string line = raw.Trim();
+                    if (string.IsNullOrEmpty(line) || line.StartsWith("#")) continue;
+                    var parts = line.Split('|');
+                    if (parts.Length < 2) continue;
+                    dict[parts[0].Trim()] = parts[1].Trim();
+                }
+                _checkSceneMap = dict;
+                return _checkSceneMap;
+            }
+        }
+        private static Dictionary<string, string> _checkSceneMap;
+
+        private static string[] LoadAsLines(string embedded, string fileName)
+            => ReadExternalOverride(fileName) ?? ReadEmbeddedLines(embedded) ?? Array.Empty<string>();
+
         /// <summary>检查点数据（外置加载，懒缓存）</summary>
         private static string[] EmbeddedPointLines => LoadCheckPoints();
 
@@ -980,15 +1029,19 @@ namespace SilksongItemRandomizer
         // 一个场景最多一个剧情拦截点，故键 = "event:" + 场景名（与拾取点坐标键/lore:/check:/shop: 天然不撞）。
         internal static IEnumerable<string> EventKeys()
         {
-            foreach (var s in SkillRegionRandomizePatch.SkillScenes) yield return "event:" + s;
-            foreach (var s in SkillRegionRandomizePatch.UIMsgScenes) yield return "event:" + s;
-            foreach (var s in SkillRegionRandomizePatch.MemoryNoPopupScenes) yield return "event:" + s;
-            foreach (var s in ChurchRandomizePatch.ChapelShrineScenes) yield return "event:" + s;
+            foreach (var s in SkillRegionRandomizePatch.SkillScenes) if (!IsWeave10Scene(s)) yield return "event:" + s;
+            foreach (var s in SkillRegionRandomizePatch.UIMsgScenes) if (!IsWeave10Scene(s)) yield return "event:" + s;
+            foreach (var s in SkillRegionRandomizePatch.MemoryNoPopupScenes) if (!IsWeave10Scene(s)) yield return "event:" + s;
+            foreach (var s in ChurchRandomizePatch.ChapelShrineScenes) if (!IsWeave10Scene(s)) yield return "event:" + s;
             // weave_10 织女五个独立随机点位（两纹章升级/两额外槽/风铃谣）：预注册保证同种子结果
-            // 确定。场景键 event:weave_10 因 SkillScenes 仍会预分配但永不 Resolve（无害预留）。
+            // 确定。纯场景键 event:weave_10 不再生成（织女演出全部走带后缀点位键，无 consumption 点）——
+            // 旧版误把 event:weave_10 预分配一份有限奖励却永不消费，等于该物品永久不可获得，已修正。
             foreach (var s in new[] { "weave_10:CrestUpg1", "weave_10:CrestUpg2", "weave_10:Slot1", "weave_10:Slot2", "weave_10:EvaHeal" })
                 yield return "event:" + s;
         }
+
+        private static bool IsWeave10Scene(string s)
+            => !string.IsNullOrEmpty(s) && string.Equals(s, "weave_10", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>触发侧查询：按当前拦截点场景取预生成奖励；未命中返回 null 由调用方回落现抽。</summary>
         public static IRandomReward ResolveEventReward(string scene)
@@ -996,8 +1049,6 @@ namespace SilksongItemRandomizer
             if (string.IsNullOrEmpty(scene)) return null;
             return ResolveReward("event:" + scene);
         }
-
-        private static bool _initialized = false;
 
         // 场景索引缓存（FindKeyByProximity 容差匹配用）：按场景分组 key，避免每次全表线性扫描
         private static Dictionary<string, string> _sceneIndexDictRef = null;
@@ -1055,7 +1106,6 @@ namespace SilksongItemRandomizer
             // 已持久化的指纹与本轮一致，且映射表已有内容：本次配置下已生成过，无需重建
             if (stampMatches && hasMappings)
             {
-                _initialized = true;
                 return;
             }
 
@@ -1064,7 +1114,6 @@ namespace SilksongItemRandomizer
             BuildAllMappings();
             Plugin.SaveData.MappingsConfigStamp = stamp;
             Plugin.SaveGlobalData();
-            _initialized = true;
             Plugin.Log.LogInfo($"[PreGeneratedMap] 全量映射构建完成，共 {Dict?.Count ?? 0} 条映射");
         }
 
@@ -1078,7 +1127,40 @@ namespace SilksongItemRandomizer
             // data5：删除简易版 virt:MaxSilkRegenUp（与丝之心重复），旧映射残留该奖励键，强制重建
             // data6：跳蚤救援 flea:01~27 顺序键纳入预分配，旧映射无这些键，强制重建
             // data7：删除收费机权限物（virt:Permit:*）与收费机 lore 键，收费机奖励改走 check 键，旧映射残留，强制重建
-            return $"L{ItemLimitConfig.BuildLimitsStamp()}|seed{Plugin.RandomSeed?.Value ?? 0}|data7";
+            // data8：删除永不消费的 event:weave_10 纯场景键（有限奖励名额浪费），旧映射残留该键，强制重建
+            // data10：洗牌改真 Fisher-Yates + 相邻打散，旧映射（data9 稳定排序）需强制重建
+            return $"L{ItemLimitConfig.BuildLimitsStamp()}|seed{Plugin.RandomSeed?.Value ?? 0}|data10";
+        }
+
+        /// <summary>标准 Fisher-Yates 原地洗牌（消除稳定排序在键碰撞时残留的同类相邻）。</summary>
+        private static void ShuffleList<T>(IList<T> list, Random rng)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        /// <summary>相邻打散：把"紧邻同类/同副本"的项向后交换到最近一个不同类型的项，减轻奖励扎堆。
+        /// 以奖励 Id（IRandomReward）或元素本身（字符串）作为归类键；尽力而做，不破坏整体随机分布。</summary>
+        private static void ScatterAdjacent<T>(IList<T> list, Random rng)
+        {
+            int n = list.Count;
+            if (n < 2) return;
+            int window = Math.Max(4, Math.Min(16, n));
+            object Key(T item) => item is IRandomReward rr ? (object)rr.Id : item;
+            for (int i = 1; i < n; i++)
+            {
+                object cur = Key(list[i]);
+                if (!Equals(cur, Key(list[i - 1]))) continue;
+                int best = -1;
+                for (int k = 1; k <= window && i + k < n; k++)
+                {
+                    if (!Equals(Key(list[i + k]), cur)) { best = i + k; break; }
+                }
+                if (best >= 0) { var tmp = list[i]; list[i] = list[best]; list[best] = tmp; }
+            }
         }
 
         /// <summary>
@@ -1144,13 +1226,10 @@ namespace SilksongItemRandomizer
             foreach (var key in ShopSlotKeys)
                 allKeys.Add(key);
 
-            // 2.4 原生碎片/苔莓顺序发放键（按获取顺序依次给；地点未知，先预编号）
-            //     袋面碎片 heart、丝轴 spool、苔莓 moss、花芯 flower、跳蚤救援 flea
-            //     份数统一由 ItemLimitConfig 表驱动（精确份数 = 收集类物理总数，各分支必须齐全）
-            for (int i = 1; i <= ItemLimitConfig.LimitHeartPiece; i++) allKeys.Add($"heart:{i:D2}");
-            for (int i = 1; i <= ItemLimitConfig.LimitSpoolPart; i++) allKeys.Add($"spool:{i:D2}");
-            for (int i = 1; i <= ItemLimitConfig.LimitMoss; i++) allKeys.Add($"moss:{i:D2}");
-            for (int i = 1; i <= ItemLimitConfig.LimitFlower; i++) allKeys.Add($"flower:{i:D2}");
+            // 2.4 收集类顺序键 → 场景键（heart/spool/moss/flower 各场景点精确归属）
+            //     数据源 collectible_scene_map.txt（每行 类型:场景名），键自带场景 → ResolveRegion 可解析
+            foreach (var key in CollectibleSceneKeys())
+                allKeys.Add(key);
             for (int i = 1; i <= FleaSceneMap.Count; i++) allKeys.Add($"flea:{i:D2}");
 
             // 2.5 剧情演出拦截点键（技能/丝之心/猎人日志/教堂神社；一场景至多一点，HashSet 去重重叠场景）
@@ -1209,8 +1288,13 @@ namespace SilksongItemRandomizer
             // 5. 打乱池和键列表（使用种子保证一致性）
             var seed = Plugin.RandomSeed.Value ^ 0x7F3E2D1C;
             var rng = new Random(seed);
-            var shuffledPool = pool.OrderBy(_ => rng.Next()).ToList();
-            var shuffledKeys = allKeys.OrderBy(_ => rng.Next()).ToList();
+            // 用真 Fisher-Yates 原地洗牌（替代 OrderBy(rng.Next())：稳定排序在键碰撞时会残留"同类副本仍相邻"，
+            // 这是奖励扎堆的根因之一）；再加一道相邻类型打散，尽量让同类/同副本不再连续。
+            ShuffleList(pool, rng);
+            var keysList = new List<string>(allKeys);
+            ShuffleList(keysList, rng);
+            // 相邻打散：相邻两项同属一个奖励（同 Id 副本）时，向后找最近的不同项交换，减轻连片。
+            ScatterAdjacent(pool, rng);
 
             // 6. 获取无限奖励并构建加权池
             var unlimitedSource = ItemRandomizer.UnlimitedRewards;
@@ -1224,33 +1308,44 @@ namespace SilksongItemRandomizer
                     for (int i = 0; i < repeat; i++)
                         weightedUnlimited.Add(reward);
                 }
-                // 打乱加权池，避免顺序固定
+                // 打乱加权池，避免顺序固定（用真 Fisher-Yates）
                 var weightedRng = new Random(Plugin.RandomSeed.Value ^ 0x7F3E2D1C);
-                weightedUnlimited = weightedUnlimited.OrderBy(_ => weightedRng.Next()).ToList();
+                ShuffleList(weightedUnlimited, weightedRng);
+                ScatterAdjacent(weightedUnlimited, weightedRng);
             }
 
             // 7. 分配映射
             int itemIndex = 0;
-            int totalPool = shuffledPool.Count;
+            int totalPool = pool.Count;
             int unlimitedIndex = 0;
             int unlimitedCount = weightedUnlimited.Count;
 
-            foreach (var key in shuffledKeys)
+            foreach (var key in keysList)
             {
                 string rewardId;
                 if (itemIndex < totalPool)
                 {
-                    rewardId = "reward:" + shuffledPool[itemIndex++].Id;
+                    rewardId = "reward:" + pool[itemIndex++].Id;
                 }
-                else if (unlimitedCount > 0)
+                else if (key.StartsWith("shop:", StringComparison.Ordinal))
                 {
-                    var reward = weightedUnlimited[unlimitedIndex % unlimitedCount];
-                    rewardId = "reward:" + reward.Id;
-                    unlimitedIndex++;
+                    // 商店槽位：直接给随机念珠（加权无限池，货币权重占大头；商店消费端转 AddGeo）
+                    if (unlimitedCount > 0)
+                    {
+                        var reward = weightedUnlimited[unlimitedIndex % unlimitedCount];
+                        rewardId = "reward:" + reward.Id;
+                        unlimitedIndex++;
+                    }
+                    else
+                    {
+                        // 极少数情况无限池也为空，则使用 fallback（商店消费端仍转念珠金额）
+                        rewardId = "virt:FallbackCoin";
+                    }
                 }
                 else
                 {
-                    // 极少数情况无限池也为空，则使用 fallback（实际上不会发生）
+                    // 非商店（拾取点/Lore/车站地图管道/收集类/剧情演出点）：填充位在人物位置生成钱堆
+                    // （跳蚤键 flea: 也一视同仁，不再单独生成跳蚤救援 fallback，与其它键一致）
                     rewardId = "virt:FallbackCoin";
                 }
                 dict[key] = rewardId;
@@ -1258,9 +1353,9 @@ namespace SilksongItemRandomizer
 
             // 8. 保存并输出日志
             Plugin.SaveGlobalData();
-            int fallbackCount = Math.Max(0, shuffledKeys.Count - totalPool);
-            int unlimitedUsed = Math.Min(fallbackCount, unlimitedCount > 0 ? shuffledKeys.Count - totalPool : 0);
-            Plugin.Log.LogInfo($"[PreGeneratedMap] 全量映射完成: 总点 {shuffledKeys.Count}，有限池容量 {totalPool}，使用无限池填充 {unlimitedUsed}，虚拟货币 {fallbackCount - unlimitedUsed}");
+            int fallbackCount = Math.Max(0, keysList.Count - totalPool);
+            int unlimitedUsed = Math.Min(fallbackCount, unlimitedCount > 0 ? keysList.Count - totalPool : 0);
+            Plugin.Log.LogInfo($"[PreGeneratedMap] 全量映射完成: 总点 {keysList.Count}，有限池容量 {totalPool}，使用无限池填充 {unlimitedUsed}，虚拟货币 {fallbackCount - unlimitedUsed}");
         }
 
         /// <summary>
@@ -1278,75 +1373,6 @@ namespace SilksongItemRandomizer
         }
 
         // 已废弃：全量映射在 BuildAllMappings 中一次性完成，不再调用此方法。
-        // 保留代码仅供参考。
-        /*
-        private static int LoadAndGenerateFromEmbedded()
-        {
-            int added = 0;
-            int skipped = 0;
-            int errors = 0;
-
-            foreach (var rawLine in EmbeddedPointLines)
-            {
-                string line = rawLine.Trim();
-                if (string.IsNullOrEmpty(line) || line.StartsWith("#")) continue;
-
-                var parts = line.Split('|');
-                if (parts.Length < 9) { errors++; continue; }
-
-                string type = parts[0].Trim();
-                string scene = parts[1].Trim();
-                string name = parts[3].Trim();
-                string xStr = parts[6].Trim();
-                string yStr = parts[7].Trim();
-                string generatedKey = null;
-                bool skipLore = false;
-
-                switch (type)
-                {
-                    case "Pickup":
-                        if (float.TryParse(xStr, out float px) && float.TryParse(yStr, out float py))
-                            generatedKey = $"{scene}_{px:F2}_{py:F2}_0.00";
-                        else
-                            generatedKey = parts[5].Trim(); // fallback
-                        break;
-
-                    case "Lore":
-                        generatedKey = $"loretrig:{scene}:{name}";
-                        skipLore = true;
-                        break;
-
-                    case "Toll":
-                    case "BellBench":
-                        // 通过场景名查找对应的车站 bool
-                        if (MapStationUnlockPatch.TryGetStationBoolForScene(scene, out string boolName))
-                            generatedKey = "check:" + boolName;
-                        else
-                            skipped++;
-                        break;
-
-                    default:
-                        skipped++;
-                        continue;
-                }
-
-                if (!string.IsNullOrEmpty(generatedKey))
-                {
-                    if (EnsureMapped(generatedKey, skipLore)) added++;
-                }
-            }
-
-            Plugin.Log.LogInfo($"[PreGeneratedMap] 嵌入解析完成: 新增 {added}，跳过 {skipped}，错误 {errors}");
-            return added;
-        }
-        */
-
-        public static void OnSceneLoaded(Scene scene)
-        {
-            if (!_initialized) return;
-            // 全量映射已覆盖所有点，不再补缺
-            return;
-        }
 
         public static IRandomReward ResolveReward(string key)
         {
@@ -1374,7 +1400,7 @@ namespace SilksongItemRandomizer
                         );
                     }
                     // 虚拟跳蚤奖励（地图点：生成跳蚤救援）
-                    if (id == "virt:FallbackFlea")
+                    if (id == "virt:RandomFlea")
                     {
                         return new VirtualReward(
                             "virt:FallbackFlea",
@@ -1466,7 +1492,6 @@ namespace SilksongItemRandomizer
                     Plugin.SaveData.MappingsConfigStamp = null;
                     Plugin.SaveGlobalData();
                 }
-                _initialized = false;
                 PendingKey = null;
                 _sceneIndexDictRef = null;
                 SceneKeysCache.Clear();
@@ -1485,6 +1510,106 @@ namespace SilksongItemRandomizer
             return $"{pickup.gameObject.scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
         }
 
+        /// <summary>按键取映射的原始奖励 id（去 "reward:" 前缀，不包装成奖励对象）。未命中返回 null。</summary>
+        public static string ResolveRawRewardId(string key)
+        {
+            var dict = Dict;
+            if (dict == null || string.IsNullOrEmpty(key) || !dict.TryGetValue(key, out string stored) || string.IsNullOrEmpty(stored))
+                return null;
+            return stored.StartsWith("reward:", StringComparison.Ordinal)
+                ? stored.Substring("reward:".Length)
+                : stored;
+        }
+
+        /// <summary>
+        /// 从任意映射键解析其所属场景（统一小写，用于与 scene.name.ToLowerInvariant() 匹配）。
+        /// 覆盖全部键类型，保证每个键都能归到完整场景：
+        ///   坐标键 scene_x_y_z          → 取开头场景（坐标固定尾 3 段，从右数第 4 个 _ 之前为场景）
+        ///   lore:scene:name             → 第 2 段场景
+        ///   heart:/spool:/moss:/flower: → 第 2 段场景（键自带场景）
+        ///   event:scene 或 event:scene:suffix → 场景段（可能带 weave_10:suffix 后缀）
+        ///   check:bool                  → 经 CheckSceneMap 反查（check 键本身不含场景）
+        ///   flea:index                  → 经 FleaSceneMap.IndexToScene 反查
+        ///   shop:permanentId            → 商店无场景，返回 null（不入"所在场景"筛选）
+        /// </summary>
+        public static string ResolveSceneOfKey(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+
+            if (key.StartsWith("check:", StringComparison.Ordinal))
+                return CheckSceneMap != null && CheckSceneMap.TryGetValue(key, out string checkScene)
+                    ? checkScene.ToLowerInvariant()
+                    : null;
+
+            if (key.StartsWith("lore:", StringComparison.Ordinal))
+            {
+                string rest = key.Substring("lore:".Length);
+                int colon = rest.IndexOf(':');
+                return (colon > 0 ? rest.Substring(0, colon) : rest).ToLowerInvariant();
+            }
+
+            if (key.StartsWith("heart:", StringComparison.Ordinal)
+                || key.StartsWith("spool:", StringComparison.Ordinal)
+                || key.StartsWith("moss:", StringComparison.Ordinal)
+                || key.StartsWith("flower:", StringComparison.Ordinal))
+            {
+                int colon = key.IndexOf(':');
+                return key.Substring(colon + 1).ToLowerInvariant();
+            }
+
+            if (key.StartsWith("event:", StringComparison.Ordinal))
+            {
+                string rest = key.Substring("event:".Length);
+                int colon = rest.IndexOf(':');
+                return (colon > 0 ? rest.Substring(0, colon) : rest).ToLowerInvariant();
+            }
+
+            if (key.StartsWith("flea:", StringComparison.Ordinal))
+            {
+                string rest = key.Substring("flea:".Length);
+                if (int.TryParse(rest, out int idx) && idx >= 1 && idx <= FleaSceneMap.Count)
+                {
+                    string scene = FleaSceneMap.IndexToScene(idx);
+                    return scene?.ToLowerInvariant();
+                }
+                return null;
+            }
+
+            if (key.StartsWith("shop:", StringComparison.Ordinal))
+                return null;
+
+            // 坐标键：scene_x_y_z（z 恒为 0.00，坐标固定 3 段）。坐标段可能为负/含小数点，但
+            // z/y/x 三段固定；从右第 4 个 '_' 即为场景与坐标的分界。场景名本身可能含 '_'（如 Bone_East_20），
+            // 故从右数而非从左数。
+            return ExtractSceneFromCoordinateKey(key);
+        }
+
+        /// <summary>从坐标键 scene_x_y_z 提取场景（小写）。从右数第 4 个下划线之前为场景名。</summary>
+        private static string ExtractSceneFromCoordinateKey(string key)
+        {
+            int last = key.LastIndexOf('_');
+            if (last <= 0) return null;
+            int second = key.LastIndexOf('_', last - 1);
+            if (second <= 0) return null;
+            int third = key.LastIndexOf('_', second - 1);
+            if (third <= 0) return null;
+            return key.Substring(0, third).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// 按场景+坐标取映射的原始奖励 id：先精确匹配坐标键；失败则按坐标容差找相近键。
+        /// 与 ResolveReward 的拾取点容差逻辑一致，供"点位自动生成跳蚤"这类进场景预扫描使用。
+        /// </summary>
+        public static string ResolveRawRewardIdAt(string scene, Vector3 pos)
+        {
+            string key = $"{scene}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
+            string exact = ResolveRawRewardId(key);
+            if (!string.IsNullOrEmpty(exact)) return exact;
+            string matched = FindKeyByProximity(scene, pos, CoordinateTolerance);
+            if (string.IsNullOrEmpty(matched)) return null;
+            return ResolveRawRewardId(matched);
+        }
+
         /// <summary>
         /// 按顺序发放的映射奖励：按前缀+序号（如 heart:01）从预生成映射取奖励。
         /// 命中则递增对应序号并返回奖励；未命中（映射未初始化/序号越界）返回 null，由调用方回退动态随机。
@@ -1501,9 +1626,18 @@ namespace SilksongItemRandomizer
                 string id = stored.StartsWith("reward:", StringComparison.Ordinal)
                     ? stored.Substring("reward:".Length)
                     : stored;
-                if (id == "virt:FallbackCoin") return null;
+                if (id == "virt:FallbackCoin")
+                {
+                    // 非商店顺序键填充位：人物位置生成钱堆（与 ResolveReward 一致，不直接给念珠）
+                    return new VirtualReward(
+                        "virt:FallbackCoin",
+                        Locale.Get("随机货币"),
+                        SpriteCache.Find("coinget_01"),
+                        () => GeoRockBuilder.SpawnAtHero(),
+                        () => false);
+                }
                 // 跳蚤顺序键：映射为跳蚤奖励时直接给跳蚤（生成救援跳蚤）
-                if (prefix == "flea" && (id == "virt:FallbackFlea" || id == "virt:RandomFlea"))
+                if (prefix == "flea" && id == "virt:RandomFlea")
                 {
                     return new VirtualReward(
                         id,

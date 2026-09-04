@@ -77,9 +77,9 @@ namespace SilksongItemRandomizer
         // ========== 配置修改 ==========
         public static void SetEnabled(bool enabled) { _cachedConfig.Enabled = enabled; MarkPendingAndApply(); }
         public static void SetCrestEnabled(bool enabled) { _cachedConfig.CrestEnabled = enabled; MarkPendingAndApply(); }
-        public static void SetTrapEnabled(bool enabled) { _cachedConfig.TrapEnabled = enabled; MarkPendingAndApply(); }
-        public static void SetTrapMovementEnabled(bool enabled) { _cachedConfig.TrapMovementEnabled = enabled; MarkPendingAndApply(); }
-        public static void SetTrapDifficulty(int difficulty) { _cachedConfig.TrapDifficulty = difficulty; MarkPendingAndApply(); }
+        public static void SetTrapEnabled(bool enabled) { _cachedConfig.TrapEnabled = enabled; StartingAbilityPicker.SharedRuntimeSettings.TrapEnabled = enabled; MarkPendingAndApply(); }
+        public static void SetTrapMovementEnabled(bool enabled) { _cachedConfig.TrapMovementEnabled = enabled; StartingAbilityPicker.SharedRuntimeSettings.TrapMovementEnabled = enabled; MarkPendingAndApply(); }
+        public static void SetTrapDifficulty(int difficulty) { _cachedConfig.TrapDifficulty = difficulty; StartingAbilityPicker.SharedRuntimeSettings.TrapDifficulty = difficulty; MarkPendingAndApply(); }
         public static void SetSeed(int seed) { _cachedConfig.Seed = seed; MarkPendingAndApply(); }
         public static void SetCrestRandomEnabled(bool enabled) { _cachedConfig.CrestRandomEnabled = enabled; MarkPendingAndApply(); }
         public static void SetSkillItemRandomEnabled(bool enabled) { _cachedConfig.SkillItemRandomEnabled = enabled; MarkPendingAndApply(); }
@@ -102,6 +102,15 @@ namespace SilksongItemRandomizer
             ApplyPending();
         }
 
+        // ========== 模板预加载 ==========
+
+        /// <summary>开始游戏时统一 Prime 各 Builder 模板（GeoRockBuilder、FleaRescueBuilder）。
+        /// 必须在 Architect 预加载完成之后调用（MenuChanger 点"开始游戏"时即满足）。</summary>
+        public static void PrimeAllTemplates()
+        {
+            GeoRockBuilder.PrimeNow();
+        }
+
         // ========== 查询方法 ==========
         public static bool IsEnabled() => _cachedConfig.Enabled;
         public static bool IsCrestEnabled() => _cachedConfig.CrestEnabled;
@@ -121,6 +130,7 @@ namespace SilksongItemRandomizer
         {
             if (Plugin.SilkRandomizerEnabled == null) return;
             Plugin.SilkRandomizerEnabled.Value = enabled;
+            Plugin.Instance?.Config.Save();
         }
 
         // ========== 运行时操作 ==========
@@ -168,19 +178,6 @@ namespace SilksongItemRandomizer
         {
             // 使用公开方法重置存档，而不是直接赋值
             Plugin.ResetSaveData();
-
-            // ★ 新开随机档：攻击方向权限重置为全未获得，并标记方向系统已启用，
-            //   否则 GlobalSaveData 默认 Ability* = true + AttackDirectionsSet=false
-            //   会让重进存档时所有分裂权限全部解锁。
-            var saveData = Plugin.SaveData;
-            if (saveData != null)
-            {
-                saveData.AbilityUpward = false;
-                saveData.AbilityLeft = false;
-                saveData.AbilityRight = false;
-                saveData.AttackDirectionsSet = true;
-                Plugin.SaveGlobalData();
-            }
 
             // 重建缓存
             SpriteCache.Reset();
@@ -235,18 +232,6 @@ namespace SilksongItemRandomizer
             saveData.CrestUnlockerProbability = _cachedConfig.CrestUnlockerProbability;
             saveData.NormalLimitedProbability = _cachedConfig.NormalLimitedProbability;
             saveData.MaxGivenPerItem = _cachedConfig.MaxGivenPerItem;
-
-            // ★★★ 修复：同步陷阱状态到 Plugin.SaveData ★★★
-            saveData.TrapEnabled = _cachedConfig.TrapEnabled;
-            saveData.TrapMovementEnabled = _cachedConfig.TrapMovementEnabled;
-            saveData.TrapDifficulty = _cachedConfig.TrapDifficulty switch
-            {
-                0 => "Beginner",
-                1 => "Focused",
-                2 => "Overflow",
-                _ => "Beginner"
-            };
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★★
 
             Plugin.SaveGlobalData();
 
@@ -315,6 +300,24 @@ namespace SilksongItemRandomizer
             if (Plugin.CrestRandomEnabled != null && Plugin.CrestRandomEnabled.Value != _cachedConfig.CrestRandomEnabled)
             {
                 Plugin.CrestRandomEnabled.Value = _cachedConfig.CrestRandomEnabled;
+                changed = true;
+            }
+
+            // ★ 陷阱开关必须持久化：面板/API SetTrap* 只改 _cachedConfig 并即时生效，
+            //   若不在此写回 cfg，则重启后陷阱开关丢失、回落到 cfg 原值（跨场景/读档丢失同类问题）。
+            if (SilksongItemRandomizer.GlobalConfig.TrapEnabled.Value != _cachedConfig.TrapEnabled)
+            {
+                SilksongItemRandomizer.GlobalConfig.TrapEnabled.Value = _cachedConfig.TrapEnabled;
+                changed = true;
+            }
+            if (SilksongItemRandomizer.GlobalConfig.TrapMovementEnabled.Value != _cachedConfig.TrapMovementEnabled)
+            {
+                SilksongItemRandomizer.GlobalConfig.TrapMovementEnabled.Value = _cachedConfig.TrapMovementEnabled;
+                changed = true;
+            }
+            if (SilksongItemRandomizer.GlobalConfig.TrapDifficulty.Value != _cachedConfig.TrapDifficulty)
+            {
+                SilksongItemRandomizer.GlobalConfig.TrapDifficulty.Value = _cachedConfig.TrapDifficulty;
                 changed = true;
             }
 
@@ -392,6 +395,7 @@ namespace SilksongItemRandomizer
             typeof(MapperPermanentPatch.ResetOnEnterPatch),
             typeof(DeactivateIfPlayerdataTruePatch),
             typeof(SkillRegionRandomizePatch.GiveSilkHeartAllowPatch),
+            typeof(NativePopupDetector.SpawnPatch),
         };
 
         /// <summary>常驻补丁是否已注册（避免重复 PatchAll）</summary>

@@ -26,13 +26,6 @@ using Plugin = SilksongItemRandomizer.Plugin;   // 别名，解决命名冲突
 /// F9: 转储所有随机映射到控制台
 /// ESC: 刷新 Benchwarp 菜单
 ///
-/// F4: 纹章原生获得弹窗测试（临时代码）：轮流显示 ToolItemManager.GetAllCrests() 中每个纹章的
-///     "获得纹章"原生弹窗，用于验证弹窗调用方式。
-///
-/// F4(当前): 依次发放全部能力（调试用）：按列表顺序每次按 F4 发放一个能力，走官方弹窗链路
-///     （6 能力弹窗 PowerUpGetMsg / 7 技能弹窗 SkillGetMsg / 4 官方横幅 CollectableUIMsg），
-///     发放前重置 pd 字段以便重复测试弹窗效果。
-///
 /// == 纹章原生弹窗技术方案（已实测验证通过, 2026-08-16）==
 /// 落地现状: 机制已实现于 CrestPopupHelper.cs（预制体加载+弹窗调用），随机奖励为纹章时
 ///   SavedItemReward.Give 自动弹原生纹章弹窗；下方为当时验证的技术要点。
@@ -83,10 +76,9 @@ public class HotkeyHandler : MonoBehaviour
         if (_annotateActive && Input.GetKeyDown(KeyCode.Return))
             SaveCurrentNote();
 
-        if (Input.GetKeyDown(KeyCode.F5))
-        {
-            TestUnlockEvaHeal();
-        }
+        // [调试] F5：按一次弹下一个（8 个分裂 + 回血，循环），人工逐个测试
+        //if (Input.GetKeyDown(KeyCode.F5))
+        //    TestDirectionSplitStep();
 
         if (Input.GetKeyDown(KeyCode.F6))
             WarpToLastBench();
@@ -94,19 +86,18 @@ public class HotkeyHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F8))
             ToggleRecentItemsUI();
 
-        if (Input.GetKeyDown(KeyCode.F9))
-            Plugin.Instance?.DumpAllMappings();
+        // [调试] F9：转储所有随机映射
+        //if (Input.GetKeyDown(KeyCode.F9))
+        //    Plugin.Instance?.DumpAllMappings();
 
-        if (Input.GetKeyDown(KeyCode.F10))
-            TestNextDirectionPermission();
+        // [调试] F10：方向权限校准测试
+        //if (Input.GetKeyDown(KeyCode.F10))
+        //    TestNextDirectionPermission();
 
-        if (Input.GetKeyDown(KeyCode.F4))
-        {
-            StartMapSpritePicker();
-        }
         if (Input.GetKeyDown(KeyCode.Escape))
             Plugin.Instance?.RefreshBenchwarpUI();
     }
+
     /// <summary>
     /// 启动跳蚤图标筛选器：搜索所有名称含 "flea" 的 Sprite，弹出预览窗口让用户浏览。
     /// </summary>
@@ -127,13 +118,35 @@ public class HotkeyHandler : MonoBehaviour
         StartCoroutine(LoadAtlasesThenStartMapPicker());
     }
 
+    /// <summary>
+    /// [调试] F4：直接发放上/左/右劈三个方向权限，用于一次性验证：权限持久化写 cfg、
+    /// 官方方向分裂弹窗、以及各方向旋转图标是否正确。
+    /// </summary>
+    private void TestGrantDirectionPermissions()
+    {
+        try
+        {
+            var up = new DirectionPermissionReward(Locale.Get("上劈权限"), "upward", false, false, true);
+            var left = new DirectionPermissionReward(Locale.Get("左劈权限"), "left", false, false, true);
+            var right = new DirectionPermissionReward(Locale.Get("右劈权限"), "right", false, false, true);
+            up.Give(); RecentItemsUI.AddItem(up);
+            left.Give(); RecentItemsUI.AddItem(left);
+            right.Give(); RecentItemsUI.AddItem(right);
+            Plugin.ShowNotification("已发放 上/左/右劈 方向权限（验证持久化+弹窗+图标）", 4f);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4方向测试] 发放失败: {ex}");
+        }
+    }
+
     private IEnumerator LoadAtlasesThenStartMapPicker()
     {
         if (_isDumpingSprites) yield break;
         _isDumpingSprites = true;
 
-        // 剩余待配图地图的关键词
-        var pendingKeys = new[] { "boneforest", "abyss", "songgate", "song_gate", "song-gate" };
+        // 待搜索的关键词（本次：骨钉升级图标 Inv_0033_inv_nail_0X）
+        var pendingKeys = new[] { "inv_nail" };
 
         // 1. 枚举 Addressables 全部 key
         var addrKeys = new List<string>();
@@ -230,6 +243,98 @@ public class HotkeyHandler : MonoBehaviour
     };
     private int _f4PopupIndex;
     private static bool _f4Toggle;
+
+    /// <summary>F4 泳图标选择器：加载图集后搜索名称含 Clawline / Harpoon Dash / HarpoonDash /
+    /// harpoon / dash 的 sprite，逐张预览勾选，勾选名单写入 sprite_picked.txt（供泳奖励弹窗挑图标）。</summary>
+    private void StartSwimIconPicker()
+    {
+        if (_isDumpingSprites) return;
+        StartCoroutine(LoadAtlasesThenStartSwimIconPicker());
+    }
+
+    private IEnumerator LoadAtlasesThenStartSwimIconPicker()
+    {
+        if (_isDumpingSprites) yield break;
+        _isDumpingSprites = true;
+
+        var pendingKeys = new[] { "clawline", "harpoon dash", "harpoondash", "harpoon", "dash" };
+
+        // 1. 枚举 Addressables 全部 key
+        var addrKeys = new List<string>();
+        try
+        {
+            foreach (var locator in Addressables.ResourceLocators)
+                foreach (object key in locator.Keys)
+                    if (key is string sk && !string.IsNullOrEmpty(sk))
+                        addrKeys.Add(sk);
+        }
+        catch { }
+
+        // 2. 筛选图集类 key（含关键词）
+        var atlasKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var k in addrKeys)
+        {
+            if (!IsLikelyAtlasKey(k)) continue;
+            foreach (var kw in pendingKeys)
+                if (k.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0) { atlasKeys.Add(k); break; }
+        }
+
+        // 3. 加载图集资源
+        int loadedOk = 0, loadedFail = 0;
+        foreach (var k in atlasKeys)
+        {
+            AsyncOperationHandle<UnityEngine.Object> handle = default;
+            try { handle = Addressables.LoadAssetAsync<UnityEngine.Object>(k); }
+            catch { loadedFail++; continue; }
+
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (!handle.IsDone && Time.realtimeSinceStartup <= deadline)
+                yield return null;
+            if (handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded)
+                loadedOk++;
+            else
+            {
+                loadedFail++;
+                try { if (handle.IsValid()) Addressables.Release(handle); } catch { }
+            }
+        }
+
+        // 4. 重置缓存并重建 Sprite 缓存
+        SpriteCache.Reset();
+        SpriteCache.EnsureBuilt();
+
+        // 5. 构建候选：所有名称含关键词的 sprite（日志打印名字，用户挑选）
+        _currentCandidates.Clear();
+        var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+        foreach (var sp in allSprites)
+        {
+            if (sp == null || string.IsNullOrEmpty(sp.name)) continue;
+            foreach (var kw in pendingKeys)
+            {
+                if (sp.name.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _currentCandidates.Add(("swimicon", sp.name));
+                    break;
+                }
+            }
+        }
+
+        foreach (var c in _currentCandidates)
+            Plugin.Log.LogInfo($"[F4泳图标] {c.name}");
+
+        if (_currentCandidates.Count == 0)
+        {
+            Plugin.Log.LogInfo("[F4泳图标] 未找到关键词图标。");
+            _isDumpingSprites = false;
+            yield break;
+        }
+
+        _pickerActive = true;
+        _pickerIndex = 0;
+        _pickedNames.Clear();
+        Plugin.Log.LogInfo($"[F4泳图标] 找到 {_currentCandidates.Count} 个图标，开始筛选。");
+        _isDumpingSprites = false;
+    }
 
     /// <summary>F4 发光弹窗循环测试：依次走官方弹窗链路（HeartMsgHelper/MelodyMsgHelper/
     /// OfficialMsgHelper.ShowHunterCombo →官方 UI Msg FSM），并在弹出后运行时反查实际
@@ -809,6 +914,36 @@ public class HotkeyHandler : MonoBehaviour
         }
     }
 
+    private static int _splitTestIndex = 0;
+
+    /// <summary>F4 按一次弹下一个：8 个方向分裂（疾风步/飞针/漂浮/壁跳 各左右）+ 回血，循环。</summary>
+    private void TestDirectionSplitStep()
+    {
+        var steps = new (string skill, bool isLeft)[]
+        {
+            ("hasDash", true), ("hasDash", false),
+            ("hasHarpoonDash", true), ("hasHarpoonDash", false),
+            ("hasBrolly", true), ("hasBrolly", false),
+            ("hasWalljump", true), ("hasWalljump", false),
+        };
+
+        int i = _splitTestIndex;
+        _splitTestIndex = (_splitTestIndex + 1) % (steps.Length + 1);
+
+        if (i < steps.Length)
+        {
+            var s = steps[i];
+            Plugin.Log.LogInfo($"[分裂弹窗测试] 弹出 {s.skill} {(s.isLeft ? "LEFT" : "RIGHT")}");
+            StartingAbilityPicker.DirectionPopupHelper.ShowDirectionSplit(s.skill, s.isLeft);
+        }
+        else
+        {
+            Plugin.Log.LogInfo("[分裂弹窗测试] 弹出 回血");
+            var healIcon = SpriteCache.Find("prompt_silkheart");
+            StartingAbilityPicker.UiMsgCustomBannerHelper.Show("Brolly", healIcon, "Vincular", "缚丝", "enable heal");
+        }
+    }
+
     /// <summary>导出 GameObject 完整结构（树、组件、FSM 变量、Animator、Sprite 等）到文本文件。</summary>
     private void DumpGameObjectStructure(GameObject root, string outputPath)
     {
@@ -1101,6 +1236,51 @@ public class HotkeyHandler : MonoBehaviour
         ("壁跳右", "hasWalljump", true, false),
     };
     private int _dirCalibIndex = 0;
+
+    /// <summary>F4 测试：一键授予全部权限（攻击上/左/右 + 移动冲刺/飞针/漂浮/壁跳左右 + 回血），
+    /// 授予前/后打印各权限的 GlobalConfig 值与运行时状态，用于验证获得时是否持久化到 cfg、跨场景是否保留。</summary>
+    private void TestGrantAllPermissions()
+    {
+        try
+        {
+            Plugin.Log.LogInfo($"[F4全部权限] ===== 授予前 GlobalConfig =====");
+            Plugin.Log.LogInfo($"[F4全部权限] 攻击: Up={SilksongItemRandomizer.GlobalConfig.AttackUp.Value}, Left={SilksongItemRandomizer.GlobalConfig.AttackLeft.Value}, Right={SilksongItemRandomizer.GlobalConfig.AttackRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 冲刺: L={SilksongItemRandomizer.GlobalConfig.DashLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.DashRight.Value} | 飞针: L={SilksongItemRandomizer.GlobalConfig.HarpoonLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.HarpoonRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 漂浮: L={SilksongItemRandomizer.GlobalConfig.FloatLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.FloatRight.Value} | 壁跳: L={SilksongItemRandomizer.GlobalConfig.WallJumpLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.WallJumpRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 回血: Heal={SilksongItemRandomizer.GlobalConfig.Heal.Value}");
+
+            // 1. 攻击方向权限（上/左/右）
+            StartingAbilityPicker.StartingAbilityPickerAPI.SetAttackPermissions(true, true, true);
+
+            // 2. 移动方向权限（冲刺/飞针/漂浮/壁跳 左右）
+            var perms = new StartingAbilityPicker.DirectionPermissions();
+            perms.DashLeft = true; perms.DashRight = true;
+            perms.HarpoonLeft = true; perms.HarpoonRight = true;
+            perms.FloatLeft = true; perms.FloatRight = true;
+            perms.WallJumpLeft = true; perms.WallJumpRight = true;
+            perms.AllowHeal = true;
+            StartingAbilityPicker.StartingAbilityPickerAPI.SetMovementPermissions(perms);
+
+            Plugin.Log.LogInfo($"[F4全部权限] ===== 授予后 GlobalConfig =====");
+            Plugin.Log.LogInfo($"[F4全部权限] 攻击: Up={SilksongItemRandomizer.GlobalConfig.AttackUp.Value}, Left={SilksongItemRandomizer.GlobalConfig.AttackLeft.Value}, Right={SilksongItemRandomizer.GlobalConfig.AttackRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 冲刺: L={SilksongItemRandomizer.GlobalConfig.DashLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.DashRight.Value} | 飞针: L={SilksongItemRandomizer.GlobalConfig.HarpoonLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.HarpoonRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 漂浮: L={SilksongItemRandomizer.GlobalConfig.FloatLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.FloatRight.Value} | 壁跳: L={SilksongItemRandomizer.GlobalConfig.WallJumpLeft.Value}, R={SilksongItemRandomizer.GlobalConfig.WallJumpRight.Value}");
+            Plugin.Log.LogInfo($"[F4全部权限] 回血: Heal={SilksongItemRandomizer.GlobalConfig.Heal.Value}");
+
+            // 运行时状态复查
+            var atk = StartingAbilityPicker.StartingAbilityPickerAPI.GetAttackPermissions();
+            var mv = StartingAbilityPicker.StartingAbilityPickerAPI.GetMovementPermissions();
+            Plugin.Log.LogInfo($"[F4全部权限] 运行时攻击: Up={atk.up}, Left={atk.left}, Right={atk.right}");
+            Plugin.Log.LogInfo($"[F4全部权限] 运行时移动: 冲刺L={mv.DashLeft},R={mv.DashRight} 飞针L={mv.HarpoonLeft},R={mv.HarpoonRight} " +
+                $"漂浮L={mv.FloatLeft},R={mv.FloatRight} 壁跳L={mv.WallJumpLeft},R={mv.WallJumpRight} 回血={mv.AllowHeal}");
+
+            Plugin.ShowNotification("已授予全部权限", 3f);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"[F4全部权限] 异常: {ex}");
+        }
+    }
 
     private void TestNextDirectionPermission()
     {
@@ -2783,75 +2963,69 @@ var flowerPrompt = new List<string>();
 
     private bool _isScanningSpecial;
 
-    /// <summary>
-    /// 手动触发（F4）：枚举当前场景所有与丝轴/面具相关的 PlayMakerFSM（含未激活对象）、
-    /// 所有 PersistentBoolItem，并对名字含 "Silk Spool" 的对象输出全部组件列表 + Control FSM
-    /// 完整状态机（状态/动作/转换），用于定位丝轴世界触发点的发放动作。
-    /// </summary>
-    private void ManualDumpCurrentSceneSpoolFsms()
+    /// <summary>枚举场景内全部 GameObject（含未激活子对象），供碎片点扫描复用。</summary>
+    public static IEnumerable<GameObject> EnumerateSceneGameObjects(UnityEngine.SceneManagement.Scene scene)
+    {
+        var result = new List<GameObject>();
+        try
+        {
+            var rootObjs = scene.GetRootGameObjects();
+            var seen = new HashSet<GameObject>();
+            foreach (var root in rootObjs)
+            {
+                if (root == null) continue;
+                foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (t == null || t.gameObject == null) continue;
+                    if (seen.Add(t.gameObject)) result.Add(t.gameObject);
+                }
+            }
+        }
+        catch { }
+        return result;
+    }
+
+    /// <summary>判断 GameObject 是否为碎片点（丝轴/面具）。名称关键词 + PersistentBoolItem ID 兜底。</summary>
+    public static bool IsFragmentObject(GameObject go)
+    {
+        string[] fragKeywords =
+            { "silk spool", "heart piece", "spool", "mask piece", "heartpiece", "maskpiece", "fragment" };
+        return IsFragmentObject(go, fragKeywords);
+    }
+
+    /// <summary>判断 GameObject 是否为碎片点（丝轴/面具）。名称关键词 + PersistentBoolItem ID 兜底。</summary>
+    private static bool IsFragmentObject(GameObject go, string[] fragKeywords)
     {
         try
         {
-            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-            string outPath = Path.Combine(BepInEx.Paths.PluginPath, "spool_fsm_scan.txt");
-            var lines = new List<string>();
-            lines.Add($"# 当前场景: {scene.name}  触发时间: {DateTime.Now:HH:mm:ss}");
-            lines.Add("#FSM|objectPath|fsmName|enabled|activeInHierarchy|activeState");
+            string lower = (go.name ?? "").ToLowerInvariant();
+            foreach (string k in fragKeywords)
+                if (lower.Contains(k)) return true;
 
-            int fsmTotal = 0, pbiTotal = 0;
-            foreach (GameObject root in scene.GetRootGameObjects())
+            var pbi = go.GetComponent<PersistentBoolItem>();
+            if (pbi != null)
             {
-                // 1. 所有含 spool/silk/heart 关键词的 PlayMakerFSM（含未激活）
-                foreach (var fsm in root.GetComponentsInChildren<PlayMakerFSM>(true))
-                {
-                    if (fsm == null) continue;
-                    string objName = fsm.gameObject.name ?? "";
-                    string fsmName = !string.IsNullOrEmpty(fsm.FsmName) ? fsm.FsmName : (fsm.Fsm != null ? fsm.Fsm.Name : "");
-                    string lower = (objName + " " + fsmName).ToLowerInvariant();
-                    if (!lower.Contains("spool") && !lower.Contains("silk") && !lower.Contains("heart"))
-                        continue;
-                    string state = "";
-                    try { state = fsm.ActiveStateName ?? ""; } catch { }
-                    lines.Add($"FSM|{GetObjectPath(fsm.transform)}|{fsmName}|{fsm.enabled}|{fsm.gameObject.activeInHierarchy}|{state}");
-                    fsmTotal++;
-                }
-
-                // 2. 所有 PersistentBoolItem（含 ID，丝轴点 ID=="Silk Spool"）
-                foreach (var pbi in root.GetComponentsInChildren<PersistentBoolItem>(true))
-                {
-                    if (pbi == null) continue;
-                    string id = GetPersistentBoolItemId(pbi);
-                    if (string.IsNullOrEmpty(id)) continue;
-                    var pos = pbi.transform.position;
-                    lines.Add($"PBI|{GetObjectPath(pbi.transform)}|{pbi.gameObject.name}|id={id}|({pos.x:F1},{pos.y:F1})");
-                    pbiTotal++;
-                }
-
-                // 3. 对 Silk Spool 对象输出全部组件 + Control FSM 完整细节
-                foreach (var go in root.GetComponentsInChildren<Transform>(true))
-                {
-                    if (go == null || !string.Equals(go.name, "Silk Spool", StringComparison.OrdinalIgnoreCase))
-                        continue;
-                    lines.Add($"===== Silk Spool 对象: {GetObjectPath(go)} 组件列表 =====");
-                    foreach (var comp in go.GetComponents<Component>())
-                    {
-                        if (comp == null) continue;
-                        lines.Add($"组件: {comp.GetType().FullName}");
-                        if (comp is PlayMakerFSM fsm)
-                        {
-                            lines.Add($"  FSM: {fsm.FsmName} 当前状态: {fsm.ActiveStateName}");
-                            DumpFsmDetail(fsm, lines);
-                        }
-                    }
-                }
+                string id = GetPersistentBoolItemId(pbi);
+                if (!string.IsNullOrEmpty(id) && id.IndexOf("spool", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
             }
+        }
+        catch { }
+        return false;
+    }
 
-            System.IO.File.WriteAllLines(outPath, lines, System.Text.Encoding.UTF8);
-        }
-        catch (Exception ex)
+    /// <summary>读取 PersistentBoolItem 的 IsSemiPersistent 字段（公共属性或字段，尽力而为）。</summary>
+    private static string GetPbiSemiPersistent(PersistentBoolItem pbi)
+    {
+        try
         {
-            Plugin.Log.LogWarning($"[SpoolFSM] 手动枚举异常: {ex}");
+            var prop = pbi.GetType().GetProperty("IsSemiPersistent", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (prop != null) return prop.GetValue(pbi)?.ToString();
+            var fld = pbi.GetType().GetField("IsSemiPersistent", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fld != null) return fld.GetValue(pbi)?.ToString();
         }
+        catch { }
+        return "?";
     }
 
     /// <summary>将动作字段值格式化为可读文本，PlayMaker 变量取 .Value 实值。</summary>

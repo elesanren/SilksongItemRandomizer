@@ -1,0 +1,39 @@
+# check_points.txt 非白名单 Lore 行 → 新键 对应记录
+# 来源：check_points.txt 中 type=Lore 且不在 LoreTable 白名单内的对象行。
+# 这些行不会生成 lore:{scene}:{name} 键（BuildAllMappings 2.1 仅取白名单对象），
+# 但对象真实存在于场景内，其坐标是车站收费机/管道收费机等检查点落点，
+# 后续改造需让这些场景坐标对应到新键（check:Unlocked*Station / check:Unlocked*Tube 等）。
+#
+# 列格式：对应键|场景|对象名(去路径尾段)|x|y|备注
+#
+# ── 车站收费机（Bellway Toll Machine）→ Unlocked*Station（10 行） ──
+check:UnlockedBelltownStation|Belltown_basement|Bellway Toll Machine|28.3|95.2
+check:UnlockedDocksStation|Bellway_02|Bellway Toll Machine|83.7|16.1
+check:UnlockedBoneforestEastStation|Bellway_03|Bellway Toll Machine|69.3|8.2
+check:UnlockedGreymoorStation|Bellway_04|Bellway Toll Machine|69.5|8.1
+check:UnlockedCoralTowerStation|Bellway_08|Bellway Toll Machine|94.3|12.2
+check:UnlockedAqueductStation|Bellway_Aqueduct|Bellway Toll Machine|51.5|21.1
+check:UnlockedCityStation|Bellway_City|Bellway Toll Machine|39.9|10.2
+check:UnlockedCityStation|Bellway_City|Bellway Toll Machine (1)|59.6|10.2
+check:UnlockedShadowStation|Bellway_Shadow|Bellway Toll Machine|51.5|21.1
+check:UnlockedPeakStation|Slab_06|Bellway Toll Machine|44.5|5.3
+check:UnlockedShellwoodStation|Shellwood_19|Bellway Toll Machine|57.9|5.1
+#
+# ── 管道收费机（tube_toll_machine）→ Unlocked*Tube ──
+check:UnlockedArboriumTube|Arborium_Tube|tube_toll_machine|16.0|4.7
+check:UnlockedHangTube|Hang_06b|tube_toll_machine|31.4|2.7
+check:UnlockedSongTube|Song_01b|tube_toll_machine|47.9|2.7
+check:UnlockedEnclaveTube|Song_Enclave_Tube|tube_toll_machine|16.0|4.6
+check:UnlockedUnderTube|Under_22|tube_toll_machine|66.1|2.6
+check:UnlockedCityBellwayTube|Bellway_City|tube_toll_machine|81.6|9.7
+# [废弃] Tube_Hub|tube_toll_machine|75.9|37.6 —— 车站枢纽自动解锁废案，无需购买，不入池
+#
+# ── 其他功能物（待确认归属/是否入池） ──
+# Bone_East_10|toll door interactible|77.7|6.3 —— 收费门？对应哪个键？
+# Song_28|Toll_machine_silk_ration|12.8|7.6  —— 丝草收费机（silk ration）？对应 silk 相关键？
+# Song_29|Toll_machine_silk_ration|24.0|7.6
+# Under_01b|Understore Toll Bench|18.3|2.9  —— 下村收费长椅？共 5 台
+# Under_01b|Understore Toll Bench (1)|29.6|2.9
+# Under_08|Understore Toll Bench|79.3|15.8
+# Under_08|Understore Toll Bench (1)|83.3|15.8
+# Under_08|Understore Toll Bench (2)|87.3|15.8

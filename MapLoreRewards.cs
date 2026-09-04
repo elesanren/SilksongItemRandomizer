@@ -333,6 +333,7 @@ namespace SilksongItemRandomizer
                 {
                     reward.Give();
                     ItemRandomizer.AddGivenCount(reward.Id);
+                    RecentItemsUI.AddItem(reward);
                 }
             }
             catch (Exception ex)

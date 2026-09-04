@@ -30,8 +30,7 @@ namespace SilksongItemRandomizer
         private static bool _delayedScheduled = false;
         public static readonly string[] PieceUiFsmNames = new string[]
         {
-            "Silk Spool UI", "Heart Container UI",
-            "Heart Container Control", "Clear Spool", "Max Spool", "Silk Spool Instant"
+            "Silk Spool UI", "Heart Container UI"
         };
         private static float _lastUiGiveTime = -1f;
         private static bool _isGiving = false;
@@ -156,14 +155,6 @@ namespace SilksongItemRandomizer
 
                     try { fsm.Fsm.Stop(); } catch { }
                     try { fsm.enabled = false; } catch { }
-                    try
-                    {
-                        if (fsm.gameObject != null && fsm.gameObject.activeInHierarchy)
-                        {
-                            UnityEngine.Object.Destroy(fsm.gameObject);
-                        }
-                    }
-                    catch { }
                 }
             }
             catch { }
@@ -215,43 +206,6 @@ namespace SilksongItemRandomizer
                 if (!hit || Bypass || IsSelfGiving || (IsNativeIntercept && !JustGaveViaUi)) return;
 
                 MarkNativeIntercept();
-                if (JustGaveViaUi) return;
-
-                _lastUiGiveTime = Time.realtimeSinceStartup;
-                var reward = ItemRandomizer.GetRandomReward();
-                if (reward == null) return;
-
-                bool isHeart = name.IndexOf("Heart Container", StringComparison.OrdinalIgnoreCase) >= 0;
-                Bypass = true;
-                try
-                {
-                    reward.Give();
-                }
-                finally
-                {
-                    Bypass = false;
-                }
-                ItemRandomizer.AddGivenCount(reward.Id);
-                ItemRandomizer.RecordMapping(isHeart ? "item:Heart Piece" : "item:Silk Spool", "reward:" + reward.Id);
-                RecentItemsUI.AddItem(reward);
-
-                if (isHeart)
-                {
-                    try
-                    {
-                        foreach (var f in UnityEngine.Object.FindObjectsOfType<PlayMakerFSM>())
-                        {
-                            if (f != null && f.Fsm != null && string.Equals(f.FsmName, "Heart Container Control", StringComparison.OrdinalIgnoreCase))
-                            {
-                                f.Fsm.Event("HEART PIECE COLLECTED");
-                            }
-                        }
-                    }
-                    catch { }
-                }
-
-                MinimalRestore("UI入口给奖后");
-                ScheduleDelayedRestore("UI入口");
             }
             catch { }
         }
@@ -336,43 +290,52 @@ namespace SilksongItemRandomizer
                 Bypass = false;
                 _isGiving = false;
             }
-            // ★ 销毁记录兜底：本路径（写字段拦截）未经过 PrefabCollectable.Get/TryGet 入口，
-            // 场景级 key 与 Plugin.DestroyMarkedPickups 的 killAllSpools/killAllHearts 匹配，
-            // 重进场景整场景销毁碎片点，防重生。
+
+            // ★ 碎片点防重生：给奖成功后记录当前场景（与 spool:{scene} / heart:{scene} 映射键格式一致）
             try
             {
-                var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                if (!string.IsNullOrEmpty(activeScene.name))
+                string scene = CurrentSceneName();
+                if (!string.IsNullOrEmpty(scene))
                 {
-                    string sceneKey = string.Equals(canonical, "heartPieces", StringComparison.OrdinalIgnoreCase)
-                        ? $"heartpiecescene:{activeScene.name}"
-                        : $"spoolscene:{activeScene.name}";
-                    Plugin.AddDestroyedPickupKey(sceneKey);
+                    string kindKey = string.Equals(itemField, "item:Heart Piece", StringComparison.OrdinalIgnoreCase)
+                        ? $"heart:{scene}" : $"spool:{scene}";
+                    Plugin.AddDestroyedSpoolPointKey(kindKey);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[SilkSpoolState] 记录碎片点场景异常: {ex}");
+            }
             return true;
         }
 
-        /// <summary>按顺序从预生成映射取面具/丝轴奖励，命中则递增计数器。</summary>
+        /// <summary>按当前场景名从预生成映射取面具/丝轴奖励（键=类型:场景名，Keys 由 collectible_scene_map.txt 生成）。</summary>
         private static IRandomReward ResolveSequential(string canonical)
         {
             var save = Plugin.SaveData;
             if (save == null) return null;
+            string scene = CurrentSceneName();
+            if (string.IsNullOrEmpty(scene)) return null;
             if (string.Equals(canonical, "heartPieces", StringComparison.OrdinalIgnoreCase))
-            {
-                var r = PreGeneratedMap.ResolveSequentialReward("heart", save.HeartSeq + 1);
-                if (r != null) { save.HeartSeq++; Plugin.SaveGlobalData(); }
-                return r;
-            }
+                return PreGeneratedMap.ResolveReward($"heart:{NormalizeScene(scene)}");
             if (string.Equals(canonical, "silkSpoolParts", StringComparison.OrdinalIgnoreCase))
-            {
-                var r = PreGeneratedMap.ResolveSequentialReward("spool", save.SpoolSeq + 1);
-                if (r != null) { save.SpoolSeq++; Plugin.SaveGlobalData(); }
-                return r;
-            }
+                return PreGeneratedMap.ResolveReward($"spool:{NormalizeScene(scene)}");
             return null;
         }
+
+        /// <summary>取当前激活场景名（小写，与 collectible_scene_map.txt 键一致）。</summary>
+        private static string CurrentSceneName()
+        {
+            try
+            {
+                var s = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                return s.IsValid() ? NormalizeScene(s.name) : null;
+            }
+            catch { return null; }
+        }
+
+        private static string NormalizeScene(string name)
+            => string.IsNullOrEmpty(name) ? null : name.ToLowerInvariant();
 
         /// <summary>统一命中判定+执行逻辑，避免各 patch 重复。命中原生碎片时开启静默窗口。</summary>
         public static bool TryIntercept(string prefix, string name, ref bool __runOriginal)

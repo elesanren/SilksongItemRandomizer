@@ -1,0 +1,22 @@
+# check 车站/管道键 → 场景归属表
+# 格式：键|场景（场景名可被 PrefixResolver 解析）
+# 地图 check:HasXMap 不入表（纯奖池，商店/收费机购买场景已覆盖）
+# 共 16 行 = 车站 10 + 管道 6
+# ── 车站 ──
+check:UnlockedDocksStation|Bellway_02
+check:UnlockedBoneforestEastStation|Bellway_03
+check:UnlockedGreymoorStation|Bellway_04
+check:UnlockedBelltownStation|Belltown_basement
+check:UnlockedCoralTowerStation|Bellway_08
+check:UnlockedCityStation|Bellway_City
+check:UnlockedAqueductStation|Bellway_Aqueduct
+check:UnlockedShadowStation|Bellway_Shadow
+check:UnlockedPeakStation|Slab_06
+check:UnlockedShellwoodStation|Shellwood_19
+# ── 管道 ──
+check:UnlockedArboriumTube|Arborium_Tube
+check:UnlockedHangTube|Hang_06b
+check:UnlockedSongTube|Song_01b
+check:UnlockedEnclaveTube|Song_Enclave_Tube
+check:UnlockedUnderTube|Under_22
+check:UnlockedCityBellwayTube|Bellway_City

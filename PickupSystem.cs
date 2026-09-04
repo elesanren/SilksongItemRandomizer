@@ -242,7 +242,11 @@ namespace SilksongItemRandomizer
                             RecentItemsUI.AddItem(reward);
                             Plugin.Log.LogInfo($"[FleaRescue] 跳蚤拾取点已捡起，消费 flea:{save.FleaSeq:D2} -> {reward.Id}");
                         }
-                        save.PickedPickupKeys.Add($"fleascene:{__instance.gameObject.scene.name}");
+                        // 已捡记录以「拾取点坐标」为准（与机制一重复生成判断一致，对齐 Extracurrencypickup）
+                        string pickedKey = !string.IsNullOrEmpty(fleaMarker.PickupKey)
+                            ? fleaMarker.PickupKey
+                            : $"fleascene:{__instance.gameObject.scene.name}";
+                        save.PickedPickupKeys.Add(pickedKey);
                         Plugin.SaveGlobalData();
                         FleaSceneMap.RecordFleaRescueByScene(__instance.gameObject.scene.name);
                     }
@@ -494,7 +498,7 @@ namespace SilksongItemRandomizer
             SpawnPickupAt(position, itemId);
         }
 
-        private static void SpawnPickupAt(Vector3 position, string itemId)
+        private static GameObject SpawnPickupAt(Vector3 position, string itemId)
         {
             CollectableItemPickup prefabComp = Gameplay.CollectableItemPickupPrefab;
             if (prefabComp == null)
@@ -504,7 +508,7 @@ namespace SilksongItemRandomizer
                 if (anyPickup == null)
                 {
                     Plugin.Log.LogError("[Extracurrencypickup] No pickup prefab found.");
-                    return;
+                    return null;
                 }
                 prefabComp = anyPickup;
             }
@@ -515,7 +519,7 @@ namespace SilksongItemRandomizer
             {
                 Plugin.Log.LogError("[Extracurrencypickup] Instantiated object has no CollectableItemPickup.");
                 Object.Destroy(newObj);
-                return;
+                return null;
             }
 
             // 缓存 SavedItem 查找，避免每次 spawn 扫描全部资源
@@ -524,7 +528,7 @@ namespace SilksongItemRandomizer
             {
                 Plugin.Log.LogError($"[Extracurrencypickup] Item '{itemId}' not found.");
                 Object.Destroy(newObj);
-                return;
+                return null;
             }
 
             pickup.SetItem(item, false);
@@ -532,22 +536,13 @@ namespace SilksongItemRandomizer
             if (pbi != null) pbi.enabled = false;
 
             newObj.SetActive(true);
+            return newObj;
         }
 
-        /// <summary>对外接口：在任意坐标生成拾取点（供 GeoRock 替换等场景使用）。</summary>
+        /// <summary>对外接口：在任意坐标生成拾取点（供 GeoRock 替换等场景使用）。直接返回刚生成的对象，避免二次全资源扫描。</summary>
         public static GameObject SpawnPickupAtPosition(Vector3 position, string itemId = "Simple Key")
         {
-            SpawnPickupAt(position, itemId);
-            // 找到刚生成的拾取点（位置匹配的最近 CollectableItemPickup）
-            float bestDist = float.MaxValue;
-            GameObject best = null;
-            foreach (var p in Resources.FindObjectsOfTypeAll<CollectableItemPickup>())
-            {
-                if (p == null || !p.gameObject.activeInHierarchy) continue;
-                float d = Vector3.SqrMagnitude(p.transform.position - position);
-                if (d < bestDist) { bestDist = d; best = p.gameObject; }
-            }
-            return best;
+            return SpawnPickupAt(position, itemId);
         }
 
         // ========== Harmony 补丁（记录物品获得坐标） ==========
@@ -717,6 +712,10 @@ namespace SilksongItemRandomizer
             return scene.IsValid() ? scene.name : "";
         }
 
+        /// <summary>场景名规范化（小写，与 collectible_scene_map.txt 键一致；空返回 null）。</summary>
+        private static string NormalizeScene(string name)
+            => string.IsNullOrEmpty(name) ? null : name.ToLowerInvariant();
+
         public static bool IsRoomCollected(string sceneName)
         {
             var rooms = Plugin.SaveData?.MossberryCollectedRooms;
@@ -732,14 +731,12 @@ namespace SilksongItemRandomizer
                 Plugin.SaveGlobalData(); // 去抖落盘
         }
 
-        /// <summary>按顺序从预生成映射取苔莓奖励（moss:01~06），命中则递增计数器。</summary>
+        /// <summary>按当前场景名从预生成映射取苔莓奖励（键=moss:场景名，Keys 由 collectible_scene_map.txt 生成）。</summary>
         private static IRandomReward ResolveSequential()
         {
-            var save = Plugin.SaveData;
-            if (save == null) return null;
-            var r = PreGeneratedMap.ResolveSequentialReward("moss", save.MossSeq + 1);
-            if (r != null) { save.MossSeq++; Plugin.SaveGlobalData(); }
-            return r;
+            string scene = CurrentSceneName();
+            if (string.IsNullOrEmpty(scene)) return null;
+            return PreGeneratedMap.ResolveReward($"moss:{NormalizeScene(scene)}");
         }
 
         /// <summary>拾取拦截：CollectableItem.Collect 命中 Mossberry 时改发随机奖励。</summary>
@@ -903,15 +900,17 @@ namespace SilksongItemRandomizer
             }
         }
 
-        /// <summary>按顺序从预生成映射取花芯奖励（flower:01~06），命中则递增计数器。</summary>
+        /// <summary>按当前场景名从预生成映射取花芯奖励（键=flower:场景名，Keys 由 collectible_scene_map.txt 生成）。</summary>
         private static IRandomReward ResolveSequential()
         {
-            var save = Plugin.SaveData;
-            if (save == null) return null;
-            var r = PreGeneratedMap.ResolveSequentialReward("flower", save.FlowerSeq + 1);
-            if (r != null) { save.FlowerSeq++; Plugin.SaveGlobalData(); }
-            return r;
+            string scene = MossberryRandomizer.CurrentSceneName();
+            if (string.IsNullOrEmpty(scene)) return null;
+            return PreGeneratedMap.ResolveReward($"flower:{NormalizeScene(scene)}");
         }
+
+        /// <summary>场景名规范化（小写，与 collectible_scene_map.txt 键一致；空返回 null）。</summary>
+        private static string NormalizeScene(string name)
+            => string.IsNullOrEmpty(name) ? null : name.ToLowerInvariant();
 
         public static bool IsRoomCollected(string sceneName)
         {
@@ -1006,7 +1005,6 @@ namespace SilksongItemRandomizer
                 // ★ 碎片世界点触发（丝轴/面具）：跳过原生发放，给随机
                 // 标记静默窗口：后续被驱动的碎片 UI 动画流程不播动画/不加碎片/不加上限，但正常走完
                 SilkSpoolState.MarkNativeIntercept(5f);
-                if (SilkSpoolState.JustGaveViaUi) { __runOriginal = false; return false; } // UI 创建入口已发随机，防双发
                 var reward = ItemRandomizer.GetRandomReward();
                 if (reward == null) return true;
 
@@ -1023,51 +1021,12 @@ namespace SilksongItemRandomizer
                     _isGiving = false;
                 }
                 __runOriginal = false;
-                TryRecordPiecePoint(__instance.name);
                 return false;
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"[SpoolPart] 异常: {ex}");
                 return true;
-            }
-        }
-
-        /// <summary>
-        /// 碎片世界点（丝轴 Silk Spool / 面具 Heart Piece，PrefabCollectable）无原生持久标记
-        /// （PersistentBoolItem itemData 为空，原生机制只是用完即销毁场景预制体，重进场景会重新出现）。
-        /// 由模组 global data 代记"已拿"：优先记坐标 key；拦截时点对象已销毁则退化为场景级 key。
-        /// 重进场景时由 Plugin.DestroyMarkedPickups 按 key 销毁点对象。
-        /// </summary>
-        public static void TryRecordPiecePoint(string pieceName)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(pieceName)) return;
-                bool isHeart = pieceName.IndexOf("Heart", StringComparison.OrdinalIgnoreCase) >= 0;
-                string prefix = isHeart ? "heartpiece" : "spool";
-                var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                if (string.IsNullOrEmpty(scene.name)) return;
-                bool found = false;
-                foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
-                {
-                    if (go == null || go.transform == null || go.scene != scene) continue;
-                    if (!string.Equals(go.name, pieceName, StringComparison.OrdinalIgnoreCase)) continue;
-                    var pos = go.transform.position;
-                    Plugin.AddDestroyedPickupKey($"{prefix}:{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}");
-                    found = true;
-                }
-                if (found)
-                    Plugin.Log.LogInfo($"[SpoolPart] {pieceName} 点已记入 global data（坐标）: 场景 {scene.name}");
-                else
-                {
-                    Plugin.AddDestroyedPickupKey($"{prefix}scene:{scene.name}");
-                    Plugin.Log.LogInfo($"[SpoolPart] {pieceName} 点已记入 global data（场景级）: 场景 {scene.name}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.LogError($"[SpoolPart] 记录碎片点异常: {ex}");
             }
         }
     }

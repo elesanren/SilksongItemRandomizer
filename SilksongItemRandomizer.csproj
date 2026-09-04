@@ -137,6 +137,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="CrestSystem.cs" />
     <Compile Include="EnemyRandoAdjuster.cs" />
+    <Compile Include="FleaAutoSpawner.cs" />
     <Compile Include="GeoFleaSystem.cs" />
     <Compile Include="GlobalSaveData.cs" />
     <Compile Include="HotkeyHandler.cs" />
@@ -150,9 +151,11 @@
     <Compile Include="RecentItemsUI.cs" />
     <Compile Include="RegionReplacePatch.cs" />
     <Compile Include="RewardCore.cs" />
+    <Compile Include="SpriteTextureUtil.cs" />
     <Compile Include="ShopSystem.cs" />
     <Compile Include="SilksongItemRandomizerAPI.cs" />
     <Compile Include="SilkSystem.cs" />
+    <Compile Include="GlobalConfig.cs" />
     <Compile Include="ToolEffectRandomizer.cs" />
     <Compile Include="TrapSystem.cs" />
     <Compile Include="TryGetPatch.cs" />
@@ -163,6 +166,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\check_points.txt" />
     <EmbeddedResource Include="Resources\shop_slot_keys.txt" />
+    <EmbeddedResource Include="Resources\collectible_scene_map.txt" />
+    <EmbeddedResource Include="Resources\check_scene_map.txt" />
     <EmbeddedResource Include="Resources\zh.json" />
     <EmbeddedResource Include="Resources\en.json" />
   </ItemGroup>

@@ -1,7 +1,9 @@
 // TryGetPatch.cs
 using HarmonyLib;
+using StartingAbilityPicker;
 using System;
 using System.Collections.Generic;
+using TeamCherry.Localization;
 using UnityEngine;
 
 namespace SilksongItemRandomizer
@@ -103,6 +105,19 @@ namespace SilksongItemRandomizer
                 if (reward == null)
                     return true;
 
+                // ★ 重复能力：已满的能力类型（纹章/丝技能/工具/额外槽/四心/三旋律/丝之心）替换为 200 念珠
+                if (reward.IsAtMax() && IsAbilityReward(reward))
+                {
+                    string displayName = reward.DisplayName;
+                    Plugin.Log.LogInfo($"[TryGetPatch] 能力 {reward.Id} 已达上限，替换为 200 念珠");
+                    reward = new VirtualReward(
+                        "virt:DuplicateGeo",
+                        $"{displayName} (200)",
+                        null,
+                        () => HeroController.instance?.AddGeo(200),
+                        () => false);
+                }
+
                 // ★ 在 Give 之前标记已随机化，防止同帧嵌套调用再次触发
                 _randomizedThisFrame.Add(originalName);
 
@@ -118,11 +133,6 @@ namespace SilksongItemRandomizer
 
                     // 添加到 UI 显示
                     RecentItemsUI.AddItem(reward);
-
-                    // 碎片世界点（丝轴/面具点）随机化后记持久 key，防重进场景复活
-                    if (originalName.IndexOf("Spool", StringComparison.OrdinalIgnoreCase) >= 0
-                        || string.Equals(originalName, "Heart Piece", StringComparison.OrdinalIgnoreCase))
-                        SpoolPartPatch.TryRecordPiecePoint(originalName);
 
                 }
                 catch (Exception ex)
@@ -142,6 +152,26 @@ namespace SilksongItemRandomizer
                 Plugin.Log.LogError($"[TryGetPatch] 异常: {ex}");
                 return true;
             }
+        }
+
+        /// <summary>判断奖励是否为 STA 弹窗覆盖的能力类型（纹章/丝技能/工具/额外槽/四心/三旋律/丝之心）。</summary>
+        private static bool IsAbilityReward(IRandomReward reward)
+        {
+            if (reward is SavedItemReward savedReward && savedReward.Item != null)
+            {
+                var t = savedReward.Item.GetType();
+                return t == typeof(ToolCrest) || t.IsSubclassOf(typeof(ToolCrest))
+                    || t == typeof(ToolItemSkill) || t.IsSubclassOf(typeof(ToolItemSkill))
+                    || t == typeof(ToolItem) || t.IsSubclassOf(typeof(ToolItem))
+                    || t == typeof(ToolItemType) || t.IsSubclassOf(typeof(ToolItemType));
+            }
+            if (reward is VirtualReward virtualReward)
+            {
+                string id = virtualReward.Id;
+                return id == "SilkHeart" || id == "Journal" || id == "ColdResist" || id == "Swim"
+                    || id == "virt:HeartPiece" || id == "virt:SpoolPart";
+            }
+            return false;
         }
     }
 }

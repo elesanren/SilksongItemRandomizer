@@ -4,6 +4,8 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +17,7 @@ using UnityEngine.SceneManagement;
 
 namespace SilksongItemRandomizer
 {
-    [BepInPlugin("HardItemRandomizer.SilksongItemRandomizer", "Silksong Item Randomizer", "1.0.0.0")]
+    [BepInPlugin("HardItemRandomizer.GlobalConfig", "Silksong Item Randomizer", "1.0.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;
@@ -59,6 +61,7 @@ namespace SilksongItemRandomizer
         public static void ResetSaveData()
         {
             SaveData = new GlobalSaveData();
+            RecentItemsUI.Reset(); // 同步清空最近物品 UI 运行时缓存，避免重置种子世界后残留上个存档的条目
             SaveGlobalDataNow(); // 重置即时落盘
         }
 
@@ -68,13 +71,20 @@ namespace SilksongItemRandomizer
             Instance = this;
             Log = Logger;
 
-            RandomSeed = Config.Bind("General", "RandomSeed", 0, "随机种子 (0 表示随机)");
-            ItemRandomEnabled = Config.Bind("General", "ItemRandomEnabled", true, "Enable/disable item randomization");
-            CrestRandomEnabled = Config.Bind("General", "CrestRandomEnabled", false, "启用纹章随机（独立开关，仅在物品随机总开关开启时生效）");
+            // ========== 统一配置系统：GlobalConfig 承载三 mod 全部条目 ==========
+            GlobalConfig.Init(Config);
 
-            SilkRandomizerEnabled = Config.Bind("Silk Randomizer", "Enabled", false, "启用灵丝获得/消耗随机化（默认关闭，仅在物品随机总开关开启时生效）");
-            SilkRandomMin = Config.Bind("Silk Randomizer", "MinAmount", 1, "随机获得/消耗的最小灵丝数量（1-9）");
-            SilkRandomMax = Config.Bind("Silk Randomizer", "MaxAmount", 9, "随机获得/消耗的最大灵丝数量（1-9）");
+            RandomSeed = GlobalConfig.RandomSeed;
+            ItemRandomEnabled = GlobalConfig.ItemRandomEnabled;
+            CrestRandomEnabled = GlobalConfig.CrestRandomEnabled;
+            SilkRandomizerEnabled = GlobalConfig.SilkRandomizerEnabled;
+            SilkRandomMin = GlobalConfig.SilkRandomMin;
+            SilkRandomMax = GlobalConfig.SilkRandomMax;
+
+            // 怪物随机：以 cfg 字段为准，启动时应用到 EnemyRandoAdjuster（未就绪会自动排队，MarkGameReady 后重放）
+            EnemyRandoAdjuster.Enabled = GlobalConfig.EnemyRandoAdjustEnabled.Value;
+            // 恢复怪物缩放的 cfg 持久化值到运行时内存（LoadFromConfig 需在 Init 之后调用）
+            EnemyRandoAdjuster.LoadFromConfig();
 
             LoadGlobalData();
 
@@ -87,9 +97,9 @@ namespace SilksongItemRandomizer
                 Seed = RandomSeed.Value,
                 Enabled = ItemRandomEnabled.Value,
                 CrestEnabled = CrestRandomEnabled.Value,
-                TrapEnabled = SaveData.TrapEnabled,
-                TrapMovementEnabled = SaveData.TrapMovementEnabled,
-                TrapDifficulty = ParseTrapDifficulty(SaveData.TrapDifficulty),
+                TrapEnabled = GlobalConfig.TrapEnabled.Value,
+                TrapMovementEnabled = GlobalConfig.TrapMovementEnabled.Value,
+                TrapDifficulty = GlobalConfig.TrapDifficulty.Value,
                 CrestRandomEnabled = CrestRandomEnabled.Value,
                 SkillItemRandomEnabled = ItemTypeRandomFilter.EnableSkillItemRandom,
                 RelicRandomEnabled = ItemTypeRandomFilter.EnableRelicRandom,
@@ -152,7 +162,7 @@ namespace SilksongItemRandomizer
             CrestRandomizer.Initialize(RandomSeed.Value, CrestRandomEnabled.Value, new SilksongItemRandomizerAPI.CrestSaveDataAccessor());
             // ★ 预生成映射表：从随机池提前摸出所有检查点奖励并落盘
             PreGeneratedMap.Initialize();
-            
+
             Log.LogInfo($"Randomizer initialized with seed: {RandomSeed.Value}");
             ItemLocalizationRegistrar.RegisterAllKnownItems();
 
@@ -163,7 +173,7 @@ namespace SilksongItemRandomizer
         private IEnumerator InitTrapsAfterLoad()
         {
             yield return new WaitForSeconds(5f);
-            if (SaveData.TrapEnabled)
+            if (GlobalConfig.TrapEnabled.Value)
                 Log.LogInfo("陷阱随机系统已由 API 初始化");
         }
 
@@ -182,9 +192,9 @@ namespace SilksongItemRandomizer
                 PickupPatch.ApplyStateToSceneWithDelay(scene, 0.2f);
 
             Extracurrencypickup.SpawnPickupsForScene(scene);
-            PreGeneratedMap.OnSceneLoaded(scene);   // ★ 场景加载时为检查点补齐预生成映射
             StartCoroutine(DestroyMarkedPickups(scene));
-            if (SaveData.TrapEnabled && scene.name != "Menu_Title" && scene.name != "Menu" && scene.name != "Loading")
+            StartCoroutine(DestroyMarkedFragmentPoints(scene));   // ★ 碎片点防重生：按场景级 key 全对象扫描销毁
+            if (GlobalConfig.TrapEnabled.Value && scene.name != "Menu_Title" && scene.name != "Menu" && scene.name != "Loading")
             {
                 TrapRandomizer.ClearAndRescan();
                 StartCoroutine(SpawnTrapsAfterSceneLoad());
@@ -196,8 +206,22 @@ namespace SilksongItemRandomizer
             ShellFlowerRandomizer.OnSceneLoaded(scene);   // ★ 花芯：已捡房间紫花消失
             GeoRockBuilder.OnSceneLoaded(scene);   // ★ 钱堆生成：自建+克隆双模式
             GeoRockReplacer.OnSceneLoaded(scene);   // ★ 钱堆替换：清除钱堆→生成拾取点
-            FleaRescueBuilder.OnSceneLoaded(scene);  // ★ 跳蚤救援：从 dock_16 克隆模板
-            FleaRescueReplacer.OnSceneLoaded(scene); // ★ 跳蚤救援：清除原生跳蚤→生成拾取点
+            // —— 机制一【FleaRescueReplacer】与机制三【FleaAutoSpawner】是两条完全无关的独立链路，
+            //    彼此不共享任何生成/判重真值，不要混为一谈 ——
+            FleaRescueReplacer.OnSceneLoaded(scene); // ★ 机制一：27 原生场景销毁原生跳蚤→生成拾取点（坐标记已捡）
+            FleaAutoSpawner.OnSceneLoaded(scene);    // ★ 机制三：任意识别点实时生成跳蚤；进场景时先当场克隆模板
+            if (scene.name == "Menu_Title" || scene.name == "Menu" || scene.name == "Pre_Menu_Intro")
+            {
+                // 回到主菜单 = 存档会话结束
+                EnemyRandoAdjuster.MarkSessionEnd();
+            }
+            else if (scene.name != "Loading")
+            {
+                // 每个真实游戏场景都复核一次开关：EnemyRando 会在敌人重建/切换场景时
+                // 把字段重置回 Disabled，必须逐场景对齐（Flush 内部自身做了字段值短路）
+                EnemyRandoAdjuster.MarkSessionStart();
+                StartCoroutine(FlushEnemyRandoConfigAfterSceneLoad());
+            }
             HeroRespawnReset.CheckAfterSceneLoad(scene.name);   // ★ 出梦境重生修复：检测冻结状态温和恢复
         }
 
@@ -205,6 +229,13 @@ namespace SilksongItemRandomizer
         {
             yield return new WaitForSeconds(0.5f);
             TrapRandomizer.SpawnTraps();
+        }
+
+        private IEnumerator FlushEnemyRandoConfigAfterSceneLoad()
+        {
+            // 延迟到 EnemyRando 完成本场景处理之后写入，保证我们的开关状态最终生效
+            yield return new WaitForSeconds(0.3f);
+            EnemyRandoAdjuster.FlushEnabledState();
         }
 
         private IEnumerator DestroyMarkedPickups(Scene scene)
@@ -221,35 +252,51 @@ namespace SilksongItemRandomizer
                     Log.LogInfo("场景加载时销毁已标记点: " + key);
                 }
             }
-            // 碎片世界点（丝轴 Silk Spool / 面具 Heart Piece，PrefabCollectable 场景对象，非 CollectableItemPickup）
-            // 无原生持久标记，仅由模组 global data 记录后在此销毁；Repacked 对象延迟实例化，等一小段再扫
-            yield return new WaitForSeconds(0.3f);
-            bool killAllSpools = SaveData.DestroyedPickupKeys.Contains($"spoolscene:{scene.name}");
-            bool killAllHearts = SaveData.DestroyedPickupKeys.Contains($"heartpiecescene:{scene.name}");
-            foreach (var go in Resources.FindObjectsOfTypeAll<GameObject>())
+        }
+
+        /// <summary>
+        /// 碎片点（丝轴 Silk Spool / 面具 Heart Piece）防重生：
+        /// 触发时由 SpoolPartPatch 记到 DestroyedSpoolPointKeys：场景级 key
+        /// （spoolscene:{scene} / heartpiecescene:{scene}）及坐标 key（spool:{scene}_x_y_z）。
+        /// 重进该场景时按「场景级 key」或「坐标 key 场景前缀」判断该场景是否被摸过，
+        /// 命中则全对象扫描（含未激活子对象）用 IsFragmentObject 判据销毁。
+        /// 销毁只能按场景判断（场景内只能枚举对象、无法按坐标定位），与 F4 已验证逻辑一致。
+        /// </summary>
+        private IEnumerator DestroyMarkedFragmentPoints(Scene scene)
+        {
+            string sceneName = scene.name;
+            if (string.IsNullOrEmpty(sceneName)) yield break;
+            string sceneLower = sceneName.ToLowerInvariant();
+
+            // 场景级 key（spool:{scene} / heart:{scene}，GiveRandom 触发时记录；spoolscene:/heartpiecescene: 为旧版格式向后兼容）
+            bool markSpool = SaveData.DestroyedSpoolPointKeys.Contains("spool:" + sceneLower)
+                || SaveData.DestroyedSpoolPointKeys.Contains("spoolscene:" + sceneLower)
+                || SaveData.DestroyedSpoolPointKeys.Any(k => k.StartsWith("spool:" + sceneLower + "_"));
+            bool markHeart = SaveData.DestroyedSpoolPointKeys.Contains("heart:" + sceneLower)
+                || SaveData.DestroyedSpoolPointKeys.Contains("heartpiecescene:" + sceneLower)
+                || SaveData.DestroyedSpoolPointKeys.Any(k => k.StartsWith("heartpiece:" + sceneLower + "_"));
+            if (!markSpool && !markHeart) yield break;
+
+            // 轮询：场景对象可能延迟实例化（Addressables/Repacked），每 0.4s 扫一次当前场景，
+            // 直到找到碎片点并销毁为止（最多约 8s）。解决固定延时可能过早、对象未生成的问题。
+            for (int attempt = 0; attempt < 20; attempt++)
             {
-                if (go == null || go.transform == null || go.scene != scene) continue;
-                if (string.Equals(go.name, "Silk Spool", StringComparison.OrdinalIgnoreCase))
+                yield return new WaitForSeconds(0.4f);
+                int destroyed = 0;
+                foreach (var go in HotkeyHandler.EnumerateSceneGameObjects(scene))
                 {
-                    var pos = go.transform.position;
-                    var key = $"spool:{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
-                    if (killAllSpools || SaveData.DestroyedPickupKeys.Contains(key))
-                    {
-                        Destroy(go);
-                        Log.LogInfo("场景加载时销毁已标记丝轴点: " + key);
-                    }
+                    if (go == null || go.scene != scene) continue;
+                    if (!HotkeyHandler.IsFragmentObject(go)) continue;
+                    Destroy(go);
+                    destroyed++;
                 }
-                else if (string.Equals(go.name, "Heart Piece", StringComparison.OrdinalIgnoreCase))
+                if (destroyed > 0)
                 {
-                    var pos = go.transform.position;
-                    var key = $"heartpiece:{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
-                    if (killAllHearts || SaveData.DestroyedPickupKeys.Contains(key))
-                    {
-                        Destroy(go);
-                        Log.LogInfo("场景加载时销毁已标记面具点: " + key);
-                    }
+                    Log.LogInfo($"[碎片点] 场景 {sceneName} 命中标记(spool={markSpool},heart={markHeart})，销毁碎片点 {destroyed} 个 (第{attempt + 1}次轮询)");
+                    yield break;
                 }
             }
+            Log.LogWarning($"[碎片点] 场景 {sceneName} 已标记但 8s 内未扫描到可销毁碎片点对象");
         }
 
         private void Update()
@@ -278,38 +325,6 @@ namespace SilksongItemRandomizer
                 else _notificationMessage = null;
             }
             catch { }
-        }
-
-        public void DumpAllMappings()
-        {
-            var seed = RandomSeed.Value;
-            Log.LogInfo($"===== 当前种子: {seed} =====");
-            var crestList = CrestRandomizer.CrestList;
-            if (crestList != null && crestList.Count > 0)
-            {
-                Log.LogInfo("--- 纹章映射 (来自外部存储) ---");
-                foreach (var crest in crestList)
-                    Log.LogInfo($"  {crest.name} -> {CrestRandomizer.GetMappedCrestName(crest.name)}");
-            }
-            else Log.LogInfo("--- 未找到纹章 ---");
-
-            Log.LogInfo("--- 当前场景拾取点映射 ---");
-            var pickups = Resources.FindObjectsOfTypeAll<CollectableItemPickup>().Where(p => p.gameObject.scene.isLoaded).ToList();
-            if (pickups.Count == 0) Log.LogInfo("当前场景无拾取点。");
-            else
-            {
-                foreach (var p in pickups)
-                {
-                    var original = p.Item;
-                    if (original == null) continue;
-                    var rng = new System.Random(seed + p.GetInstanceID());
-                    var random = ItemRandomizer.PeekRandomItem(rng);
-                    if (random != null)
-                        Log.LogInfo($"  {original.name} (位置 {p.transform.position}) -> {random.name}");
-                    else Log.LogInfo($"  {original.name} -> 随机失败");
-                }
-            }
-            Log.LogInfo("===============================");
         }
 
         public static void ShowNotification(string message, float duration = 3f)
@@ -463,6 +478,12 @@ namespace SilksongItemRandomizer
             SaveGlobalData(); // 去抖落盘（OnDestroy 兜底强制落盘）
         }
 
+        public static void AddDestroyedSpoolPointKey(string key)
+        {
+            SaveData.DestroyedSpoolPointKeys.Add(key);
+            SaveGlobalData(); // 去抖落盘（OnDestroy 兜底强制落盘）
+        }
+
         public static void ResetDestroyedPickupKeys()
         {
             SaveData.DestroyedPickupKeys.Clear();
@@ -477,18 +498,6 @@ namespace SilksongItemRandomizer
             RandomSeed.Value = 0;
             Instance?.Config.Save();
             Log.LogInfo("物品随机MOD所有静态数据已重置，随机系统已重新初始化，并传送回椅子");
-        }
-
-        private int ParseTrapDifficulty(string difficultyStr)
-        {
-            if (string.IsNullOrEmpty(difficultyStr)) return 0;
-            return difficultyStr switch
-            {
-                "Beginner" => 0,
-                "Focused" => 1,
-                "Overflow" => 2,
-                _ => 0
-            };
         }
 
         private void OverrideBenchwarpLanguage()

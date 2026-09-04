@@ -8,17 +8,14 @@ using System.Linq;
 namespace SilksongItemRandomizer
 {
     /// <summary>
-    /// 怪物随机调整器（与 EnemyRando 模组交互）
-    /// 改造后：通过 SilksongItemRandomizerAPI 的总开关控制是否启用 EnemyRando 的随机替换
-    /// 保留所有原有功能：动态启用/禁用 EnemyRando、恢复被替换的敌人、可选随机缩放怪物大小
+    /// 怪物随机调整器（与 EnemyRando 模组交互）。
+    /// 开关唯一权威：GlobalConfig.EnemyRandoAdjustEnabled（HardItemRandomizer.GlobalConfig.cfg）。
+    /// 开启 = 把 EnemyRando 的 EnemyRandoType/BossRandoType/MiscRandoType 三字段设为 Any；
+    /// 关闭 = 设为 Disabled。字段是 EnemyRando 自己的 ConfigEntry&lt;RandoType&gt;，写 .Value 即生效并持久化。
     /// </summary>
     public static class EnemyRandoAdjuster
     {
-        // 反射 EnemyRando 的类型和成员
         private static bool _patched = false;
-        private static object _originalEnemyRandoType;
-        private static object _originalBossRandoType;
-        private static object _originalMiscRandoType;
 
         private static Type _randoTypeEnum;
         private static Type _settingsType;
@@ -30,8 +27,8 @@ namespace SilksongItemRandomizer
         private static Type _replacementEnemyType;
         private static FieldInfo _replacementsField;
 
-        // 配置属性（可通过 API 设置）
         private static bool _enabled = false;
+        /// <summary>开关。设置时立即同步到 EnemyRando 三字段，并反写统一 cfg。</summary>
         public static bool Enabled
         {
             get => _enabled;
@@ -39,35 +36,88 @@ namespace SilksongItemRandomizer
             {
                 if (_enabled == value) return;
                 _enabled = value;
-                SetEnemyRandoConfig(value);
+                ApplyToEnemyRando(value);
                 if (!value)
-                {
                     RestoreAllReplacedEnemies();
-                }
             }
         }
 
-        public static bool ScaleRandomEnabled { get; set; } = true;
-        public static float ScaleMin { get; set; } = 1.0f;
-        public static float ScaleMax { get; set; } = 1.0f;
+        private static bool _scaleRandom = true;
+        private static float _scaleMin = 1.0f;
+        private static float _scaleMax = 1.0f;
+
+        /// <summary>怪物随机：是否启用缩放随机。写值仅更新运行时内存，cfg 由开始游戏时统一固化。</summary>
+        public static bool ScaleRandomEnabled
+        {
+            get => _scaleRandom;
+            set
+            {
+                if (_scaleRandom == value) return;
+                _scaleRandom = value;
+            }
+        }
+        /// <summary>怪物随机：缩放最小值。写值仅更新运行时内存，cfg 由开始游戏时统一固化。</summary>
+        public static float ScaleMin
+        {
+            get => _scaleMin;
+            set
+            {
+                if (_scaleMin == value) return;
+                _scaleMin = value;
+            }
+        }
+        /// <summary>怪物随机：缩放最大值。写值仅更新运行时内存，cfg 由开始游戏时统一固化。</summary>
+        public static float ScaleMax
+        {
+            get => _scaleMax;
+            set
+            {
+                if (_scaleMax == value) return;
+                _scaleMax = value;
+            }
+        }
 
         static EnemyRandoAdjuster()
         {
-            // 反射 EnemyRando.Settings
-            _settingsType = Type.GetType("EnemyRando.Settings, EnemyRando");
-            if (_settingsType != null)
-            {
-                _enemyRandoTypeField = _settingsType.GetField("EnemyRandoType", BindingFlags.Public | BindingFlags.Static);
-                _bossRandoTypeField = _settingsType.GetField("BossRandoType", BindingFlags.Public | BindingFlags.Static);
-                _miscRandoTypeField = _settingsType.GetField("MiscRandoType", BindingFlags.Public | BindingFlags.Static);
-                _randoTypeEnum = Type.GetType("EnemyRando.Settings+RandoType, EnemyRando");
-            }
+            EnsureReflection();
+        }
 
-            // 反射 EnemyRando 的替换组件
-            _replacedEnemyType = Type.GetType("EnemyRando.ReplacedEnemy, EnemyRando");
-            _replacementEnemyType = Type.GetType("EnemyRando.ReplacementEnemy, EnemyRando");
-            if (_replacedEnemyType != null)
-                _replacementsField = _replacedEnemyType.GetField("replacements", BindingFlags.Instance | BindingFlags.Public);
+        /// <summary>
+        /// GlobalConfig.Init 完成后调用：从 cfg 恢复怪物缩放设置到运行时内存。
+        /// 必须在 GlobalConfig.Bind 全部执行后调用（在 Plugin.Awake 中于 Init 之后调用）。
+        /// </summary>
+        public static void LoadFromConfig()
+        {
+            _scaleRandom = SilksongItemRandomizer.GlobalConfig.EnemyScaleRandom.Value;
+            _scaleMin = SilksongItemRandomizer.GlobalConfig.EnemyScaleMin.Value;
+            _scaleMax = SilksongItemRandomizer.GlobalConfig.EnemyScaleMax.Value;
+        }
+
+        /// <summary>
+        /// 懒解析 EnemyRando 反射字段：EnemyRando 可能在本 mod 静态初始化之后才加载，
+        /// 若一次性缓存会导致 _settingsType 恒为 null、后续写入全部落空（面板打开怪物随机无效）。
+        /// 每次写入前若字段未命中则重新解析一次，保证 EnemyRando 后加载也能生效。
+        /// </summary>
+        private static void EnsureReflection()
+        {
+            if (_settingsType == null)
+            {
+                _settingsType = Type.GetType("EnemyRando.Settings, EnemyRando");
+                if (_settingsType != null)
+                {
+                    _enemyRandoTypeField = _settingsType.GetField("EnemyRandoType", BindingFlags.Public | BindingFlags.Static);
+                    _bossRandoTypeField = _settingsType.GetField("BossRandoType", BindingFlags.Public | BindingFlags.Static);
+                    _miscRandoTypeField = _settingsType.GetField("MiscRandoType", BindingFlags.Public | BindingFlags.Static);
+                    _randoTypeEnum = Type.GetType("EnemyRando.Settings+RandoType, EnemyRando");
+                }
+            }
+            if (_replacedEnemyType == null)
+            {
+                _replacedEnemyType = Type.GetType("EnemyRando.ReplacedEnemy, EnemyRando");
+                _replacementEnemyType = Type.GetType("EnemyRando.ReplacementEnemy, EnemyRando");
+                if (_replacedEnemyType != null)
+                    _replacementsField = _replacedEnemyType.GetField("replacements", BindingFlags.Instance | BindingFlags.Public);
+            }
         }
 
         public static void TryPatch(Harmony harmony)
@@ -97,45 +147,79 @@ namespace SilksongItemRandomizer
             harmony.Patch(target, prefix, postfix);
             _patched = true;
             Plugin.Log.LogInfo("[EnemyRandoAdjuster] Patch applied successfully.");
-
-            SaveOriginalConfig();
         }
 
-        private static void SaveOriginalConfig()
+        // ========== 开关应用 ==========
+
+        /// <summary>把开关同步到 EnemyRando 的三个 RandoType 字段（Any=开 / Disabled=关）。</summary>
+        private static void ApplyToEnemyRando(bool enabled)
         {
-            if (_settingsType == null) return;
+            EnsureReflection();
+            if (_settingsType == null || _randoTypeEnum == null)
+            {
+                Plugin.Log.LogWarning($"[EnemyRandoAdjuster] 反射缺失无法写入: settingsType={_settingsType != null}, enum={_randoTypeEnum != null}");
+                return;
+            }
             try
             {
-                _originalEnemyRandoType = GetFieldRandoValue(_enemyRandoTypeField);
-                _originalBossRandoType = GetFieldRandoValue(_bossRandoTypeField);
-                _originalMiscRandoType = GetFieldRandoValue(_miscRandoTypeField);
+                object target = enabled
+                    ? Enum.Parse(_randoTypeEnum, "Any")
+                    : Enum.Parse(_randoTypeEnum, "Disabled");
+
+                bool applied = SetFieldRandoValue(_enemyRandoTypeField, target);
+                applied &= SetFieldRandoValue(_bossRandoTypeField, target);
+                applied &= SetFieldRandoValue(_miscRandoTypeField, target);
+
+                if (applied)
+                    Plugin.Log.LogInfo($"[EnemyRandoAdjuster] 设置随机配置: {(enabled ? "开启" : "关闭")}");
+                else
+                    Plugin.Log.LogInfo("[EnemyRandoAdjuster] 配置已排队，等待 EnemyRando 就绪后重放");
             }
             catch (Exception ex)
             {
-                Plugin.Log.LogWarning($"保存 EnemyRando 原始配置失败: {ex.Message}");
+                Plugin.Log.LogError($"设置 EnemyRando 配置失败: {ex}");
             }
         }
 
-        // EnemyRando 的 RandoType 字段可能是裸枚举，也可能是 BepInEx 的 ConfigEntry<T>。
-        // 统一通过 Value 属性读写，避免把枚举直接 SetValue 到 ConfigEntry 字段导致类型转换异常。
-        private static object GetFieldRandoValue(FieldInfo field)
+        /// <summary>游戏就绪后重放当前开关（EnemyRando 早期未初始化时写入会失败，此调用补上）。</summary>
+        public static void ReapplyConfig()
         {
-            if (field == null) return null;
-            object entry = TryGetFieldEntry(field);
-            return IsConfigEntry(entry) ? field.FieldType.GetProperty("Value")?.GetValue(entry) : entry;
+            EnsureReflection();
+            if (_settingsType == null || _randoTypeEnum == null) return;
+            ApplyToEnemyRando(_enabled);
         }
 
+        /// <summary>每个真实场景进入后强制对齐：EnemyRando 会在敌人重建/场景切换时重置字段，逐场景同步一次。</summary>
+        public static void FlushEnabledState()
+        {
+            EnsureReflection();
+            if (_settingsType == null || _randoTypeEnum == null) return;
+            ApplyToEnemyRando(_enabled);
+        }
+
+        // ========== 存档会话标记 ==========
+        private static bool _sessionVerified;
+        public static bool SessionActive { get; private set; }
+        public static void MarkSessionStart() { SessionActive = true; _sessionVerified = false; }
+        public static void MarkSessionEnd() { SessionActive = false; _sessionVerified = false; }
+
+        // ========== 反射写字段 ==========
+
+        // EnemyRando 的 RandoType 字段是 ConfigEntry<T>，通过 .Value 属性读写。
         private static bool SetFieldRandoValue(FieldInfo field, object value)
         {
-            if (field == null) return true;
+            if (field == null)
+            {
+                Plugin.Log.LogWarning("[EnemyRandoAdjuster] 目标字段为 null（反射未命中），写入失败——请检查 EnemyRando 字段名");
+                return false;
+            }
             Type fieldType = field.FieldType;
-            // 按字段【声明类型】判断是否为 ConfigEntry<T>（不依赖实例值，避免启动早期字段未初始化导致误判）
             if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition().Name == "ConfigEntry`1")
             {
                 object entry = TryGetFieldEntry(field);
                 if (entry == null)
                 {
-                    Plugin.Log.LogWarning("[EnemyRandoAdjuster] EnemyRando 配置尚未初始化，跳过本次写入（MarkGameReady 后会重放）");
+                    Plugin.Log.LogWarning("[EnemyRandoAdjuster] EnemyRando 配置尚未初始化，跳过本次写入（进入游戏场景后会重试）");
                     return false;
                 }
                 fieldType.GetProperty("Value")?.SetValue(entry, value);
@@ -168,60 +252,13 @@ namespace SilksongItemRandomizer
             }
         }
 
-        private static bool _configApplied;
-        private static bool _pendingEnabled;
-
-        // 启动早期 EnemyRando 尚未初始化时写入会被跳过；MarkGameReady 后调用本方法重放一次
-        public static void ReapplyConfig()
-        {
-            if (_configApplied || !_pendingEnabled) return;
-            SetEnemyRandoConfig(_pendingEnabled);
-        }
-
         private static bool IsConfigEntry(object value)
         {
             return value != null && value.GetType().IsGenericType
                 && value.GetType().GetGenericTypeDefinition().Name == "ConfigEntry`1";
         }
 
-        private static void SetEnemyRandoConfig(bool enabled)
-        {
-            if (_settingsType == null || _randoTypeEnum == null) return;
-            _pendingEnabled = enabled;
-            try
-            {
-                object disabledValue = Enum.Parse(_randoTypeEnum, "Disabled");
-                object anyValue = Enum.Parse(_randoTypeEnum, "Any");
-
-                bool applied;
-                if (enabled)
-                {
-                    applied = SetFieldRandoValue(_enemyRandoTypeField, _originalEnemyRandoType ?? anyValue);
-                    applied &= SetFieldRandoValue(_bossRandoTypeField, _originalBossRandoType ?? anyValue);
-                    applied &= SetFieldRandoValue(_miscRandoTypeField, _originalMiscRandoType ?? anyValue);
-                }
-                else
-                {
-                    applied = SetFieldRandoValue(_enemyRandoTypeField, disabledValue);
-                    applied &= SetFieldRandoValue(_bossRandoTypeField, disabledValue);
-                    applied &= SetFieldRandoValue(_miscRandoTypeField, disabledValue);
-                }
-                if (applied)
-                {
-                    _configApplied = true;
-                    Plugin.Log.LogInfo($"[EnemyRandoAdjuster] 设置随机配置: {(enabled ? "开启" : "关闭")}");
-                }
-                else
-                {
-                    Plugin.Log.LogInfo("[EnemyRandoAdjuster] 配置已排队，等待 EnemyRando 就绪后重放");
-                }
-            }
-            catch (Exception ex)
-            {
-                Plugin.Log.LogError($"设置 EnemyRando 配置失败: {ex}");
-            }
-        }
-
+        // ========== 关闭时恢复已被替换的敌人 ==========
         private static void RestoreAllReplacedEnemies()
         {
             if (_replacedEnemyType == null) return;
@@ -254,6 +291,7 @@ namespace SilksongItemRandomizer
             Plugin.Log.LogInfo("[EnemyRandoAdjuster] 已恢复所有被替换的敌人");
         }
 
+        // ========== Harmony 补丁 ==========
         private static bool Prefix(HealthManager source, int hp)
         {
             if (!_enabled)
@@ -267,7 +305,6 @@ namespace SilksongItemRandomizer
                     if (replaced != null)
                         UnityEngine.Object.Destroy(replaced);
                 }
-                // 每个敌人生成都会走到这里，不打日志（避免刷屏与字符串分配）
                 return false;
             }
             return true;

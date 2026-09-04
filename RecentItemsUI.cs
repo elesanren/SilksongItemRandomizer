@@ -49,7 +49,40 @@ namespace SilksongItemRandomizer
             Sprite icon = null;
             try { icon = reward.Icon; }
             catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 取图标失败: {reward.Id} - {ex.Message}"); }
-            AddEntry(icon != null ? icon.name : "", name, GetCurrentAreaName());
+            // 右下角官方横幅：原生 CollectableItem 的自弹已被 NativePopupDetector 发奖窗口内拦截
+            // （CollectableUIMsg.Spawn 里非我们 BannerItem 的调用一律跳过），因此这里只需同步弹一条，
+            // 既无重复、也不漏虚拟奖励。
+            TrySpawnBanner(reward, icon, name);
+            // 可旋转展示的奖励（如方向权限）：显示端旋转 + 压扁长轴（后处理，不动纹理）。
+            float rotation = reward is IRotatableIcon ri ? ri.IconRotationAngle : 0f;
+            AddEntry(icon != null ? icon.name : "", name, GetCurrentAreaName(), rotation);
+        }
+
+        /// <summary>
+        /// 右下角官方 CollectableUIMsg 横幅：所有类型奖励统一入口（与右上列表同批）。
+        /// 可旋转展示的奖励（方向权限）按 IconRotationAngle 旋转 + 压扁长轴（后处理，不动纹理）。
+        /// </summary>
+        private static void TrySpawnBanner(IRandomReward reward, Sprite icon, string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name)) return;
+                // 统一的官方横幅入口：原生 CollectableItem 自弹已由 NativePopupDetector 发奖窗口内拦截，
+                // 这里只弹一条原生样式横幅；方向权限等虚奖励也一并正确显示。
+                var item = new BannerItem(name, icon ?? reward?.Icon);
+                var msg = CollectableUIMsg.Spawn(item);
+                if (msg == null || !(reward is IRotatableIcon rotatable)) return;
+                GameObject root = msg.gameObject;
+                var srField = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+                var sr = typeof(CollectableUIMsg).GetField("icon", srField)?.GetValue(msg) as SpriteRenderer;
+                var target = sr != null ? sr.transform : SpriteTextureUtil.FindRenderTransform(root, "Icon");
+                if (target == null) return;
+                SpriteTextureUtil.ApplyRotationAndCompress(target, rotatable.IconRotationAngle, 0.5f);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[RecentItems] 横幅弹出失败: {ex.Message}");
+            }
         }
 
         /// <summary>进游戏后把存档历史条目暂存（由 Plugin 在随机器就绪后调用一次）。
@@ -66,6 +99,25 @@ namespace SilksongItemRandomizer
             catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 重放暂存失败: {ex.Message}"); }
         }
 
+        /// <summary>重置种子世界/重置存档时同步清空运行时缓存：
+        /// 清掉 RestoreFromSave 暂存的跨档历史（_pendingRestore）与已铺开的 UI 条目（_items），
+        /// 避免局内重置后 UI 仍显示上个存档的最近物品。数据层（Plugin.SaveData）由 ResetSaveData 重建，
+        /// 此处仅同步 UI 运行时状态。</summary>
+        public static void Reset()
+        {
+            try
+            {
+                _pendingRestore.Clear();
+                while (_items.Count > 0)
+                {
+                    var go = _items.Dequeue();
+                    if (go != null) UnityEngine.Object.Destroy(go);
+                }
+                _restorePending = false;
+            }
+            catch (Exception ex) { Plugin.Log.LogWarning($"[RecentItems] 重置失败: {ex.Message}"); }
+        }
+
         public static void Toggle()
         {
             _visible = !_visible;
@@ -74,7 +126,7 @@ namespace SilksongItemRandomizer
 
         // ========== 内部 ==========
 
-        private static void AddEntry(string iconName, string displayName, string source)
+        private static void AddEntry(string iconName, string displayName, string source, float rotation = 0f)
         {
             // 原 mod GetMessage(): "{名字}<br>from {来源}"，无来源时只显示名字
             string text = string.IsNullOrEmpty(source) ? displayName : $"{displayName}\nfrom {source}";
@@ -103,7 +155,7 @@ namespace SilksongItemRandomizer
             EnsureCanvas();
             if (_canvas == null) return;
 
-            BuildEntry(FindSprite(iconName), text);
+            BuildEntry(FindSprite(iconName), text, rotation);
             if (_items.Count > MaxStored)
             {
                 UnityEngine.Object.Destroy(_items.Dequeue());
@@ -162,7 +214,7 @@ namespace SilksongItemRandomizer
 
         /// <summary>单条目：原 mod CreateBasePanel((200,50)) + 图标 ImagePanel((50,50), 锚(-0.1,0.5))
         /// + 文字面板((400,100), 字号24, MiddleLeft, 锚(1.1,0.5))。</summary>
-        private static void BuildEntry(Sprite sprite, string text)
+        private static void BuildEntry(Sprite sprite, string text, float rotation = 0f)
         {
             var panel = new GameObject("RecentItem");
             panel.transform.SetParent(_canvas.transform, false);
@@ -185,6 +237,9 @@ namespace SilksongItemRandomizer
                 image.raycastTarget = false;
                 if (sprite.name == "bellbench_toll_machine")
                     iconRt.localRotation = Quaternion.Euler(0f, 0f, 180f);
+                // 可旋转展示图标：显示端旋转 + 压扁长轴（后处理，不动纹理），与右下横幅一致
+                if (rotation != 0f)
+                    SpriteTextureUtil.ApplyRotationAndCompress(iconRt, rotation, 0.5f);
             }
 
             var labelGo = new GameObject("Text");
@@ -330,6 +385,47 @@ namespace SilksongItemRandomizer
         {
             if (string.IsNullOrEmpty(name)) return null;
             return SpriteCache.Find(name);
+        }
+
+        /// <summary>右下角官方 CollectableUIMsg 横幅数据（实现 ICollectableUIMsgItem，照 RewardCore.DirectionBannerItem 同构）。</summary>
+        internal sealed class BannerItem : ICollectableUIMsgItem
+        {
+            private readonly string _name;
+            private readonly Sprite _icon;
+            public BannerItem(string name, Sprite icon) { _name = name; _icon = icon; }
+            public UnityEngine.Object GetRepresentingObject() => null;
+            public Sprite GetUIMsgSprite() => _icon;
+            public string GetUIMsgName() => _name;
+            public float GetUIMsgIconScale() => 1f;
+            public bool HasUpgradeIcon() => false;
+        }
+    }
+
+    /// <summary>
+    /// 原生弹窗拦截（仅随机器发奖窗口内生效）：patch CollectableUIMsg.Spawn。
+    /// 原生物品（CollectableItem）在 Collect(showPopup=true) 时原生自弹官方横幅，
+    /// 其调用在 SavedItemReward.Give 发奖窗口（Arm/Disarm）内被拦截跳过，从而只由
+    /// RecentItemsUI.AddItem 统一弹一条，根治重复。
+    /// 窗口外（普通游玩/未随机化流程）原生弹窗照常放行，不影响原生既定弹窗。
+    /// </summary>
+    public static class NativePopupDetector
+    {
+        private static bool _armed;
+
+        internal static void Arm() { _armed = true; }
+        internal static void Disarm() { _armed = false; }
+
+        [HarmonyLib.HarmonyPatch(typeof(CollectableUIMsg), nameof(CollectableUIMsg.Spawn),
+            new System.Type[] { typeof(ICollectableUIMsgItem), typeof(Color), typeof(CollectableUIMsg), typeof(bool) })]
+        internal static class SpawnPatch
+        {
+            [HarmonyLib.HarmonyPrefix]
+            private static bool Prefix(ICollectableUIMsgItem item)
+            {
+                if (item is RecentItemsUI.BannerItem) return true; // 我们自己的，放行
+                if (!_armed) return true;                          // 非发奖窗口：原生照常弹
+                return false;                                      // 发奖窗口内原生的：毙掉，由我们弹
+            }
         }
     }
 }

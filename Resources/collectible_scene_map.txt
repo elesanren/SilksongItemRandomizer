@@ -1,0 +1,40 @@
+# 收集类顺序键 → 场景归属表（可归属点；商店/任务/生物点不可归属，未列入）
+# 每行一个可解析键，格式：类型:场景名；键即场景键，PrefixResolver 可直接解析区域。
+# 共 37 点 = heart 14 + spool 13 + moss 4 + flower 6
+heart:bone_east_20
+heart:bone_east_lavachallenge
+heart:coral_19b
+heart:crawl_02
+heart:dock_08
+heart:library_05
+heart:peak_04c
+heart:peak_06
+heart:shadow_13
+heart:shellwood_14
+heart:slab_17
+heart:song_09
+heart:weave_05b
+heart:wisp_07
+spool:arborium_09
+spool:bone_11b
+spool:bone_east_13
+spool:cog_07
+spool:dock_03c
+spool:greymoor_02
+spool:hang_03_top
+spool:library_11b
+spool:peak_01
+spool:song_19_entrance
+spool:under_10
+spool:ward_01
+spool:weave_11
+moss:arborium_04
+moss:tut_01b
+moss:tut_02
+moss:weave_03
+flower:shellwood_01
+flower:shellwood_02
+flower:shellwood_10
+flower:shellwood_15
+flower:shellwood_20
+flower:shellwood_26

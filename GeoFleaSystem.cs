@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using HutongGames.PlayMaker;
@@ -99,6 +100,7 @@ namespace SilksongItemRandomizer
             }
         }
 
+        /// <summary>顺带记录下一只尚未救援的跳蚤为已救（进入 27 只后不再记录）。</summary>
         public static void RecordFleaRescueNextAvailable()
         {
             var pd = PlayerData.instance;
@@ -141,43 +143,35 @@ namespace SilksongItemRandomizer
 
         public static void OnSceneLoaded(Scene scene)
         {
+            // ★ Prime 时机已移至 MenuChanger 点击"开始游戏"(PrimeNow)，此处不再自动触发，
+            // 避免场景内 LoadSceneAsync/UnloadSceneAsync + 黑幕打断 Architect 的 bundle 预加载（敌军随机等依赖 Architect 的功能）。
+            // 场景内直接克隆模板 BuildTemplateFromScene 保留：纯内存克隆，无场景加载无黑幕。
             if (_template == null)
             {
                 var rocks = UnityEngine.Object.FindObjectsOfType<GeoRock>();
                 if (rocks.Length > 0)
                     BuildTemplateFromScene(rocks[0].gameObject, scene.name);
             }
-
-            if (!_autoPrimed && _cachedCollection == null)
-            {
-                _autoPrimed = true;
-                Plugin.Instance.StartCoroutine(WaitAndPrimeAsync());
-            }
         }
 
-        private static IEnumerator WaitAndPrimeAsync()
+        /// <summary>
+        /// 由 MenuChanger 在点击"开始游戏"时调用：异步加载 Aspid_01 获取 tk2d sprite collection。
+        /// 已就绪或已触发过则忽略，可重复调用。
+        /// </summary>
+        public static void PrimeNow()
         {
-            int waitFrames = 0;
-            while (HeroController.instance == null)
-            {
-                yield return null;
-                waitFrames++;
-                if (waitFrames > 300)
-                {
-                    Plugin.Log.LogWarning("[GeoRockBuilder] 等待 HeroController 超时(300帧)，强制 Prime");
-                    break;
-                }
-            }
-            yield return new WaitForSeconds(0.5f);
-            yield return PrimeCollectionAsync();
+            if (_cachedCollection != null || _autoPrimed) return;
+            _autoPrimed = true;
+            if (Plugin.Instance != null)
+                Plugin.Instance.StartCoroutine(PrimeCollectionAsync());
         }
 
         private static IEnumerator PrimeCollectionAsync()
         {
             if (_cachedCollection != null) yield break;
 
-            Plugin.BlackoutShow();
-
+            // 黑幕由 MenuChanger 页面层统一管理（点开始游戏时显示、页面 Hide 时隐藏），
+            // Prime 只负责后台加载，不介入黑幕。
             var op = Addressables.LoadSceneAsync("Scenes/" + Tk2dSourceScene, LoadSceneMode.Additive, true, 100);
             yield return op;
 
@@ -214,8 +208,8 @@ namespace SilksongItemRandomizer
             if (col != null)
                 _cachedCollection = col;
 
-            yield return new WaitForSeconds(0.2f);
-            Plugin.BlackoutHide();
+            // 黑幕隐藏改由 MenuChanger 在种子计算页面 Hide() 时统一调用 Plugin.BlackoutHide()，
+            // 这里不再自行结束，避免黑幕早于页面销毁。
         }
 
         private static void UnloadAdditiveScene(AsyncOperationHandle<SceneInstance> handle, Scene scene)
@@ -277,6 +271,8 @@ namespace SilksongItemRandomizer
 
         public static GameObject SpawnAtPosition(Vector3 position)
         {
+            if (_template == null && _cachedCollection == null && !_autoPrimed)
+                PrimeNow();
             if (_template != null)
                 return SpawnFromTemplate(position);
             return SpawnFromCode(position);
@@ -465,6 +461,11 @@ namespace SilksongItemRandomizer
 
         private static IEnumerator ProcessScene(Scene scene)
         {
+            if (!scene.IsValid() || !scene.isLoaded || string.IsNullOrEmpty(scene.name))
+            {
+                Plugin.Log.LogInfo($"[GeoRockReplacer] 跳过无效场景处理: {scene.name}");
+                yield break;
+            }
             yield return new WaitForSeconds(0.3f);
             var rocks = UnityEngine.Object.FindObjectsOfType<GeoRock>();
             if (rocks.Length == 0) yield break;
@@ -539,40 +540,37 @@ namespace SilksongItemRandomizer
             Plugin.Log.LogInfo("[FleaRescueBuilder] 初始化完成");
         }
 
-        public static void OnSceneLoaded(Scene scene)
+        /// <summary>
+        /// 由 MenuChanger 在点击"开始游戏"时调用：加载 Dock_16 跳蚤模板（异步）。
+        /// 模板已就绪或已触发过则忽略，可重复调用。
+        /// </summary>
+        public static void PrimeNow()
         {
-            // ★ 不扫描当前场景的原生跳蚤——原生跳蚤由 FleaRescueReplacer 处理（替换为拾取点）。
-            // 模板仅通过异步加载 Dock_16 获取（用于随机池/F4 生成救援跳蚤）。
-            if (!_autoPrimed && _template == null)
-            {
-                _autoPrimed = true;
-                Plugin.Instance.StartCoroutine(WaitAndPrimeAsync());
-            }
+            if (_template != null || _autoPrimed) return;
+            _autoPrimed = true;
+            if (Plugin.Instance != null)
+                Plugin.Instance.StartCoroutine(PrimeTemplateAsync());
         }
 
-        private static IEnumerator WaitAndPrimeAsync()
+        /// <summary>
+        /// [生成即克隆] 无条件当场从 Dock_16 克隆一次模板，无视之前是否已就绪。
+        /// 由场景生成逻辑在生成前调用，保证本次生成一定有新鲜模板可克隆。
+        /// 克隆期间黑幕遮挡，避免局内加法加载画面闪动。
+        /// </summary>
+        public static IEnumerator CloneTemplateNowAsync()
         {
-            int waitFrames = 0;
-            while (HeroController.instance == null)
-            {
-                yield return null;
-                waitFrames++;
-                if (waitFrames > 300)
-                {
-                    Plugin.Log.LogWarning("[FleaRescueBuilder] 等待 HeroController 超时(300帧)，强制 Prime");
-                    break;
-                }
-            }
-            yield return new WaitForSeconds(0.5f);
+            _template = null;
+            Plugin.BlackoutShow();
             yield return PrimeTemplateAsync();
+            Plugin.BlackoutHide();
         }
 
         private static IEnumerator PrimeTemplateAsync()
         {
             if (_template != null) yield break;
 
-            Plugin.BlackoutShow();
-
+            // 黑幕由 MenuChanger 页面层统一管理（点开始游戏时显示、页面 Hide 时隐藏），
+            // Prime 只负责后台加载，不介入黑幕。
             var op = Addressables.LoadSceneAsync("Scenes/" + SourceScene, LoadSceneMode.Additive, true, 100);
             yield return op;
 
@@ -615,8 +613,8 @@ namespace SilksongItemRandomizer
 
             UnloadAdditiveScene(op, scene);
 
-            yield return new WaitForSeconds(0.2f);
-            Plugin.BlackoutHide();
+            // 黑幕隐藏改由 MenuChanger 在种子计算页面 Hide() 时统一调用 Plugin.BlackoutHide()，
+            // 这里不再自行结束，避免黑幕早于页面销毁。
         }
 
         private static void UnloadAdditiveScene(AsyncOperationHandle<SceneInstance> handle, Scene scene)
@@ -660,29 +658,25 @@ namespace SilksongItemRandomizer
                 }
             }
 
+            // 模板阶段只禁用声音（AudioSource），其余组件（Renderer/PlayMakerFSM/Animator/Collider 等）
+            // 全部保留启用，避免克隆后跳蚤本体 sprite/动画/互动逻辑被禁用导致"只剩灰尘"。
             foreach (Transform t in _template.GetComponentsInChildren<Transform>(true))
             {
                 foreach (var comp in t.gameObject.GetComponents<Component>())
                 {
                     if (comp is Transform) continue;
-                    if (comp is Renderer r) { r.enabled = false; continue; }
-                    // 保留 PlayMakerFSM/PlayMakerTriggerEnter2D/tk2dSpriteAnimator/AudioSource：跳蚤互动逻辑依赖它们
-                    if (comp is PlayMakerFSM || comp is PlayMakerTriggerEnter2D || comp is tk2dSpriteAnimator || comp is AudioSource) continue;
-                    if (comp is Behaviour b) b.enabled = false;
+                    if (comp is AudioSource audioSrc)
+                    {
+                        try { audioSrc.Stop(); } catch { }
+                        audioSrc.playOnAwake = false;
+                        audioSrc.enabled = false;
+                    }
                 }
             }
 
-            // 模板不应发声：停止并禁用所有 AudioSource（模板仅作克隆源，克隆时再按需启用），
-            // 避免 DontDestroyOnLoad 常驻模板让跳蚤叫声跨场景持续播放。
-            foreach (var audioSrc in _template.GetComponentsInChildren<AudioSource>(true))
-            {
-                if (audioSrc == null) continue;
-                try { audioSrc.Stop(); } catch { }
-                audioSrc.playOnAwake = false;
-                audioSrc.enabled = false;
-            }
-
-            _template.SetActive(true);
+            // 模板作为生成源始终隐藏，不直接显示给玩家（防"露馅"）。
+            // 仅当 SpawnFromTemplate 克隆出实际跳蚤时才 SetActive(true) 显示。
+            _template.SetActive(false);
             Plugin.Log.LogInfo($"[FleaRescueBuilder] 克隆模板建立 (来源: {sceneName})");
         }
 
@@ -701,7 +695,8 @@ namespace SilksongItemRandomizer
         {
             if (_template == null)
             {
-                Plugin.Log.LogWarning("[FleaRescueBuilder] 模板未就绪，跳过生成");
+                if (!_autoPrimed) PrimeNow();
+                Plugin.Log.LogWarning("[FleaRescueBuilder] 模板未就绪，跳过生成（已触发 PrimeNow，下次生成将就绪）");
                 return null;
             }
             return SpawnFromTemplate(position);
@@ -742,14 +737,22 @@ namespace SilksongItemRandomizer
                         audioComp.playOnAwake = true;
                         continue;
                     }
-                    if (comp is Behaviour b) b.enabled = false;
+                    // 其余组件（含未显式列出的 Behaviour）保持模板状态（模板阶段已启用，除声音外不额外禁用）
                 }
             }
 
             go.AddComponent<FleaRescueSpawned>();
+            // 将生成的跳蚤归入当前场景：模板在 DontDestroyOnLoad 持久层，克隆对象若不归入
+            // 当前 active 场景，将无法在本场景渲染/交互（玩家看不到跳蚤），FleaRescueSpawned
+            // 记录的 _spawnScene 也会错误地变成 "DontDestroyOnLoad"。
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (activeScene.IsValid())
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, activeScene);
             go.SetActive(true);
+
             return go;
         }
+
     }
 
     /// <summary>
@@ -765,12 +768,42 @@ namespace SilksongItemRandomizer
 
         private static IEnumerator ProcessScene(Scene scene)
         {
+            if (!scene.IsValid() || !scene.isLoaded || string.IsNullOrEmpty(scene.name))
+            {
+                Plugin.Log.LogInfo($"[FleaRescueReplacer] 跳过无效场景处理: {scene.name}");
+                yield break;
+            }
             yield return new WaitForSeconds(0.3f);
+
+            // 等待期间场景可能已卸载（切换/加载链），再次校验，失效则放弃
+            if (!scene.IsValid() || !scene.isLoaded || string.IsNullOrEmpty(scene.name))
+            {
+                Plugin.Log.LogInfo($"[FleaRescueReplacer] 等待后场景已失效: {scene.name}, isLoaded={scene.isLoaded}，跳过");
+                yield break;
+            }
             Plugin.Log.LogInfo($"[FleaRescueReplacer] ProcessScene 开始: {scene.name}, isLoaded={scene.isLoaded}");
+
+            // 性能门控：FleaRescueReplacer 只处理 27 个原生跳蚤场景（flea:01~27）。
+            // 非跳蚤场景无原生存放对象、无 flea:NN 映射，直接跳过，省掉整棵场景树遍历扫描。
+            if (FleaSceneMap.SceneToIndex(scene.name) < 0)
+            {
+                Plugin.Log.LogInfo($"[FleaRescueReplacer] 非原生跳蚤场景，跳过: {scene.name}");
+                yield break;
+            }
 
             // 第一轮：列出场景中所有含 "flea" 的对象（诊断用）
             var fleaObjects = new List<GameObject>();
-            foreach (var root in scene.GetRootGameObjects())
+            GameObject[] fleaRoots;
+            try
+            {
+                fleaRoots = scene.GetRootGameObjects();
+            }
+            catch (ArgumentException ex)
+            {
+                Plugin.Log.LogWarning($"[FleaRescueReplacer] 场景失效无法读取根对象，放弃处理: {ex.Message}");
+                yield break;
+            }
+            foreach (var root in fleaRoots)
             {
                 foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
                 {
@@ -795,11 +828,29 @@ namespace SilksongItemRandomizer
             if (anchor == null) anchor = fleaObjects[0];
             Plugin.Log.LogInfo($"[FleaRescueReplacer] anchor: {anchor.name}");
 
-            // 本场景跳蚤已被处理过：清场不再生成
-            bool sceneProcessed = Plugin.SaveData.FleaRescueReplacedPositions.Contains($"fleascene:{scene.name}")
-                || Plugin.SaveData.PickedPickupKeys.Contains($"fleascene:{scene.name}");
-            Plugin.Log.LogInfo($"[FleaRescueReplacer] sceneProcessed={sceneProcessed}");
+            // ══════════════════════════════════════════════════════════════════
+            // ==== 机制一【原生点处理】与机制二【奖励处理】的公共定位点 ====
+            // anchor：本场景原生跳蚤点的代表坐标。机制一/机制二都以它为生成位置。
+            // ══════════════════════════════════════════════════════════════════
+            var anchorPos = anchor.transform.position;
+            string pointKey = $"{scene.name}_{anchorPos.x:F2}_{anchorPos.y:F2}_{anchorPos.z:F2}";
 
+            // 是否已捡起：只凭「拾取点坐标」是否进了 PickedPickupKeys（容差判断，对齐 Extracurrencypickup）。
+            // 唯一持久化真值就是该点坐标是否已被捡起；每次进场景若未捡都要重新生成拾取点。
+            bool coordinatePicked = IsCoordinatePicked(scene.name, anchorPos);
+            Plugin.Log.LogInfo($"[FleaRescueReplacer] 场景 '{scene.name}' 拾取点 {pointKey} 坐标是否已捡={coordinatePicked}");
+
+            // ────────────────────────────────────────────────────────────────
+            // ==== 机制一【原生点处理】：27 个原生跳蚤场景统一走此链路 ====
+            // 把所有原生 flea 对象销毁，改用一个 Extracurrencypickup 拾取点(Simple Key)
+            // 代替。坐标 (pointKey) 是唯一持久化真值：只要该点坐标没被捡起
+            // (PickedPickupKeys)，每次进场景都会重新生成拾取点（对齐 Extracurrencypickup
+            // 反复生成模式）；捡起后由 PickupPatch 写坐标键 + 记救援，拾取点由拾取自动销毁，
+            // 不再生成。
+            // 注：跳蚤救援奖励(flea:Rescue/...)不在此判断——由机制三 FleaAutoSpawner
+            // 对携带坐标的 flea:NN 键拾取点统一处理，本机制只负责原生点 → 拾取点转换。
+            // 注：我们自定义的奖励跳蚤(FleaRescueSpawned，由机制三生成)带标记放行，不在此销毁。
+            // ────────────────────────────────────────────────────────────────
             // 销毁所有原生 flea 对象
             int destroyed = 0;
             foreach (var go in fleaObjects)
@@ -812,35 +863,44 @@ namespace SilksongItemRandomizer
             }
             Plugin.Log.LogInfo($"[FleaRescueReplacer] 已销毁 {destroyed} 个对象");
 
-            if (sceneProcessed) yield break;
+            // 坐标已被捡起（已救走）→ 不再重复生成拾取点
+            if (coordinatePicked) yield break;
 
-            // ★ 原生跳蚤地点 → 用 Extracurrencypickup 生成拾取点（全局 prefab，不克隆）
-            var pos = anchor.transform.position;
-            string key = $"{scene.name}_{pos.x:F2}_{pos.y:F2}_{pos.z:F2}";
+            // ★ 原生跳蚤地点 → 用 Extracurrencypickup 生成拾取点（全局 prefab，不克隆，直接拿新建对象引用）
+            GameObject spawned = Extracurrencypickup.SpawnPickupAtPosition(anchorPos, "Simple Key");
+            if (spawned == null)
+            {
+                Plugin.Log.LogWarning($"[FleaRescueReplacer] 未能生成拾取点");
+                yield break;
+            }
+            var bestPickup = spawned.GetComponent<CollectableItemPickup>();
+            if (bestPickup == null)
+            {
+                Plugin.Log.LogWarning($"[FleaRescueReplacer] 生成对象无 CollectableItemPickup 组件");
+                yield break;
+            }
+            bestPickup.gameObject.AddComponent<FleaSequentialPickupPoint>().PickupKey = pointKey;
+            Plugin.Log.LogInfo($"[FleaRescueReplacer] 场景 '{scene.name}' 跳蚤点 {pointKey} 替换为拾取点, pos=({anchorPos.x:F2},{anchorPos.y:F2})");
+        }
 
-            Plugin.SaveData.FleaRescueReplacedPositions.Add($"fleascene:{scene.name}");
-            Plugin.SaveGlobalData();
-
-            Extracurrencypickup.SpawnPickupAtPosition(pos, "Simple Key");
-            // 找到刚生成的拾取点并挂载我们的映射逻辑
-            float bestDist = float.MaxValue;
-            CollectableItemPickup bestPickup = null;
-            foreach (var p in Resources.FindObjectsOfTypeAll<CollectableItemPickup>())
+        /// <summary>按坐标容差判断 PickedPickupKeys 里该点是否已被捡起（对齐 Extracurrencypickup.IsPositionPicked）。</summary>
+        private static bool IsCoordinatePicked(string sceneName, Vector3 pos, float tolerance = 2.0f)
+        {
+            var save = Plugin.SaveData;
+            if (save == null || save.PickedPickupKeys == null) return false;
+            foreach (string key in save.PickedPickupKeys)
             {
-                if (p == null || !p.gameObject.activeInHierarchy) continue;
-                if (p.GetComponent<FleaSequentialPickupPoint>() != null) continue;
-                float d = Vector3.SqrMagnitude(p.transform.position - pos);
-                if (d < bestDist) { bestDist = d; bestPickup = p; }
+                if (string.IsNullOrEmpty(key) || !key.StartsWith(sceneName + "_", StringComparison.OrdinalIgnoreCase)) continue;
+                string rest = key.Substring(sceneName.Length + 1);
+                string[] parts = rest.Split('_');
+                if (parts.Length < 2) continue;
+                if (float.TryParse(parts[0], out float px) && float.TryParse(parts[1], out float py))
+                {
+                    if (Mathf.Abs(pos.x - px) <= tolerance && Mathf.Abs(pos.y - py) <= tolerance)
+                        return true;
+                }
             }
-            if (bestPickup != null)
-            {
-                bestPickup.gameObject.AddComponent<FleaSequentialPickupPoint>().PickupKey = key;
-                Plugin.Log.LogInfo($"[FleaRescueReplacer] 场景 '{scene.name}' 跳蚤点 {key} 替换为拾取点, pos=({pos.x:F2},{pos.y:F2})");
-            }
-            else
-            {
-                Plugin.Log.LogWarning($"[FleaRescueReplacer] 未能定位刚生成的拾取点");
-            }
+            return false;
         }
 
         private static string GetPath(Transform t)
@@ -860,35 +920,74 @@ namespace SilksongItemRandomizer
     /// <summary>标记组件：标识随机池/F4 生成的跳蚤，防止 FleaRescueReplacer 误清理；救援消失后计入游戏内救援任务。</summary>
     public class FleaRescueSpawned : MonoBehaviour
     {
+        private const string RescueState = "Rescue 1";
         private string _spawnScene;
         private bool _recorded;
 
+        /// <summary>可选：该跳蚤所属触发点的判重键（仅在生成链路上使用）。</summary>
+        public string PointKey;
+
         private void Awake()
         {
-            _spawnScene = gameObject.scene.name;
+            // 生成时目标场景即当前活动场景（对象稍后由 MoveGameObjectToScene 归入），直接读它。
+            _spawnScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         }
 
         private void Start()
         {
-            StartCoroutine(WatchDisappear());
+            StartCoroutine(WatchRescueState());
         }
 
-        private System.Collections.IEnumerator WatchDisappear()
+        /// <summary>
+        /// 轮询 Call Out FSM 是否进入 'Rescue 1' 状态——该状态执行 SavedItemGetV2
+        /// （任务进度增加 / 救援领取记录写入）即跳蚤被救走的触发时期。
+        /// 记录的是【人物坐标】——触发时人物已走到跳蚤身上，人物坐标即该点被拾取的证据。
+        /// 跳蚤救走后并不 SetActive(false)，故不能用 OnDisable 判定。
+        /// </summary>
+        private System.Collections.IEnumerator WatchRescueState()
         {
+            var fsm = GetComponent<PlayMakerFSM>();
             while (!_recorded)
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.2f);
                 if (this == null) yield break;
 
-                if (!gameObject.activeSelf)
+                if (fsm != null && string.Equals(fsm.ActiveStateName, RescueState, StringComparison.Ordinal))
                 {
-                    if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == _spawnScene)
-                    {
-                        _recorded = true;
-                        FleaSceneMap.RecordFleaRescueNextAvailable();
-                    }
+                    TryRecordRescue();
                     yield break;
                 }
+            }
+        }
+
+        /// <summary>记录救援任务，并把人物坐标写入 FleaRescuedKeys（仅当跳蚤在本场景内被救走）。</summary>
+        private void TryRecordRescue()
+        {
+            if (_recorded) return;
+            if (string.IsNullOrEmpty(_spawnScene)) return;
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != _spawnScene) return;
+            _recorded = true;
+
+            if (FleaSceneMap.SceneToIndex(_spawnScene) > 0)
+                FleaSceneMap.RecordFleaRescueByScene(_spawnScene);
+            else
+                FleaSceneMap.RecordFleaRescueNextAvailable();
+
+            try
+            {
+                var save = Plugin.SaveData;
+                if (save == null) return;
+                var hero = HeroController.instance;
+                Vector3 h = hero != null
+                    ? hero.transform.position
+                    : transform.position;
+                save.FleaRescuedKeys.Add($"{_spawnScene}_{h.x:F2}_{h.y:F2}_{h.z:F2}");
+                Plugin.Log.LogInfo($"[FleaAutoSpawner] 跳蚤已救走，记录人物坐标: {_spawnScene}_{h.x:F2}_{h.y:F2}_{h.z:F2}, PointKey={PointKey ?? "null"}");
+                Plugin.SaveGlobalData();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[FleaAutoSpawner] 记录已救跳蚤异常: {ex.Message}");
             }
         }
     }
