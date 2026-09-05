@@ -55,12 +55,15 @@ using Plugin = SilksongItemRandomizer.Plugin;   // 别名，解决命名冲突
 public class HotkeyHandler : MonoBehaviour
 {
     private GUIStyle _tipStyle;
+    private GUIStyle _titleBoldStyle;
+    private GUIStyle _nameBoldStyle;
+    private GUIStyle _hintStyle;
+    private GUIStyle _pickBtnStyle;
+    private GUIStyle _skipBtnStyle;
+    private GUIStyle _smallHintStyle;
+    private GUIStyle _noteFieldStyle;
+    private GUIStyle _noteBtnStyle;
     private static bool _isChineseCache;
-    private static bool _benchwarpChecked;
-    private static Type _benchwarpType;
-    private static PropertyInfo _benchwarpInstanceProp;
-    private static PropertyInfo _benchwarpIsDisplayingProp;
-    private static object _benchwarpInstance;
 
     private void Update()
     {
@@ -2782,7 +2785,7 @@ var flowerPrompt = new List<string>();
         GUI.Box(new Rect(wx, wy, winW, winH), "");
         GUI.Label(new Rect(wx + 20, wy + 12, winW - 40, 30),
             $"图标备注器  {_annotateIndex + 1}/{_annotateList.Count}  填写该图标用途",
-            new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
+            _titleBoldStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
 
         // 左侧：图片预览
         Rect imgRect = new Rect(wx + 30, wy + 60, 200f, 200f);
@@ -2794,21 +2797,21 @@ var flowerPrompt = new List<string>();
 
         // 右侧：名字 + 长输入框 + 按钮
         GUI.Label(new Rect(wx + 260, wy + 55, winW - 300, 30), name,
-            new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
+            _titleBoldStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
 
         GUI.Label(new Rect(wx + 260, wy + 95, winW - 300, 25), "用途备注（输入后 Enter 保存并下一张）",
-            new GUIStyle(GUI.skin.label) { fontSize = 15 });
+            _smallHintStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 15 });
 
         // 足够长的输入框
         _noteText = GUI.TextField(new Rect(wx + 260, wy + 125, winW - 310, 40), _noteText,
-            new GUIStyle(GUI.skin.textField) { fontSize = 20 });
+            _noteFieldStyle ??= new GUIStyle(GUI.skin.textField) { fontSize = 20 });
 
         bool save = false;
         if (GUI.Button(new Rect(wx + 260, wy + 185, 200f, 60f), "保存并下一张 (Enter)",
-            new GUIStyle(GUI.skin.button) { fontSize = 18 }))
+            _noteBtnStyle ??= new GUIStyle(GUI.skin.button) { fontSize = 18 }))
             save = true;
         if (GUI.Button(new Rect(wx + 480, wy + 185, 160f, 60f), "跳过 (留空)",
-            new GUIStyle(GUI.skin.button) { fontSize = 18 }))
+            _noteBtnStyle ??= new GUIStyle(GUI.skin.button) { fontSize = 18 }))
             save = true;
 
         if (save)
@@ -2834,7 +2837,7 @@ var flowerPrompt = new List<string>();
         GUI.Box(new Rect(wx, wy, winW, winH), "");
         GUI.Label(new Rect(wx + 20, wy + 12, winW - 40, 30),
             $"图标筛选器  {_pickerIndex + 1}/{candidates.Count}  类别[{cat}]",
-            new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
+            _titleBoldStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold });
 
         // 左侧：图片预览（直接使用 Sprite 纹理 + UV 裁剪）
         Rect imgRect = new Rect(wx + 30, wy + 60, 240f, 240f);
@@ -2858,15 +2861,15 @@ var flowerPrompt = new List<string>();
 
         // 右侧：名字 + 操作按钮
         GUI.Label(new Rect(wx + 300, wy + 70, winW - 340, 40), name,
-            new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Bold });
+            _nameBoldStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Bold });
         GUI.Label(new Rect(wx + 300, wy + 120, winW - 340, 30), $"[Enter] ✓ 使用    [X] ✗ 跳过",
-            new GUIStyle(GUI.skin.label) { fontSize = 16 });
+            _hintStyle ??= new GUIStyle(GUI.skin.label) { fontSize = 16 });
 
         bool wantPick = false;
         bool wantSkip = false;
-        if (GUI.Button(new Rect(wx + 310, wy + 200, 170f, 70f), "✓ 使用 (Enter)", new GUIStyle(GUI.skin.button) { fontSize = 22, normal = { textColor = Color.green } }))
+        if (GUI.Button(new Rect(wx + 310, wy + 200, 170f, 70f), "✓ 使用 (Enter)", _pickBtnStyle ??= new GUIStyle(GUI.skin.button) { fontSize = 22, normal = { textColor = Color.green } }))
             wantPick = true;
-        if (GUI.Button(new Rect(wx + 500, wy + 200, 170f, 70f), "✗ 跳过 (X)", new GUIStyle(GUI.skin.button) { fontSize = 22, normal = { textColor = Color.red } }))
+        if (GUI.Button(new Rect(wx + 500, wy + 200, 170f, 70f), "✗ 跳过 (X)", _skipBtnStyle ??= new GUIStyle(GUI.skin.button) { fontSize = 22, normal = { textColor = Color.red } }))
             wantSkip = true;
 
         if (wantPick)
@@ -2918,37 +2921,15 @@ var flowerPrompt = new List<string>();
 
     private static bool IsBenchwarpMenuVisible()
     {
-        EnsureBenchwarpCache();
         try
         {
-            if (_benchwarpType != null)
-            {
-                if (_benchwarpInstanceProp != null && _benchwarpInstance == null)
-                    _benchwarpInstance = _benchwarpInstanceProp.GetValue(null);
-                if (_benchwarpInstance != null && _benchwarpIsDisplayingProp != null)
-                    return (bool)_benchwarpIsDisplayingProp.GetValue(_benchwarpInstance);
-                var menu = GameObject.Find("WarpMenu") ?? GameObject.Find("BenchwarpMenu");
-                return menu != null && menu.activeInHierarchy;
-            }
-            var menuFallback = GameObject.Find("WarpMenu") ?? GameObject.Find("BenchwarpMenu");
-            return menuFallback != null && menuFallback.activeInHierarchy;
+            var gui = Benchwarp.Components.GUIController.Instance;
+            return gui != null && gui.IsDisplaying;
         }
         catch
         {
             return false;
         }
-    }
-
-    private static void EnsureBenchwarpCache()
-    {
-        if (_benchwarpChecked)
-            return;
-        _benchwarpChecked = true;
-        _benchwarpType = Type.GetType("Benchwarp.Components.GUIController, Benchwarp");
-        if (_benchwarpType == null)
-            return;
-        _benchwarpInstanceProp = _benchwarpType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-        _benchwarpIsDisplayingProp = _benchwarpType.GetProperty("IsDisplaying");
     }
 
     // ========== F4：扫描特殊收集品触发点（苔莓 Mossberry / 面具碎片 Heart Piece / 丝轴碎片 Silk Spool） ==========

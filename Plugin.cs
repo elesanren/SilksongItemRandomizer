@@ -38,13 +38,12 @@ namespace SilksongItemRandomizer
 
         // ========== 全局存储 ==========
         public static GlobalSaveData SaveData { get; private set; }
-        private static readonly string GlobalSavePath = Path.Combine(Paths.ConfigPath, "SilksongItemRandomizer", "global_save.json");
+        private static string GlobalSavePath => ProfileManager.GlobalSavePathFor(ProfileManager.CurrentProfile);
 
         // 延迟落盘（批处理高频存档写入，降低同步序列化/写盘开销）
         private static bool _saveDirty;
         private static float _lastSaveTime = float.MinValue;
         private const float SaveDebounceSeconds = 1.5f;
-
         public static bool PublicItemRandomEnabled
         {
             get => ItemRandomEnabled.Value;
@@ -52,7 +51,7 @@ namespace SilksongItemRandomizer
             {
                 if (ItemRandomEnabled.Value == value) return;
                 ItemRandomEnabled.Value = value;
-                Instance.Config.Save();
+                SilksongItemRandomizer.GlobalConfig.Save();
                 SilksongItemRandomizerAPI.SetEnabled(value);
             }
         }
@@ -73,6 +72,7 @@ namespace SilksongItemRandomizer
 
             // ========== 统一配置系统：GlobalConfig 承载三 mod 全部条目 ==========
             GlobalConfig.Init(Config);
+            ProfileManager.MigrateLegacyData();
 
             RandomSeed = GlobalConfig.RandomSeed;
             ItemRandomEnabled = GlobalConfig.ItemRandomEnabled;
@@ -388,7 +388,7 @@ namespace SilksongItemRandomizer
         }
 
         // ========== 全局存档相关 ==========
-        private void LoadGlobalData()
+        internal void LoadGlobalData()
         {
             try
             {
@@ -472,6 +472,11 @@ namespace SilksongItemRandomizer
             }
         }
 
+        public static void RebuildRuntimeState()
+        {
+            SilksongItemRandomizerAPI.RebuildRuntimeState();
+        }
+
         public static void AddDestroyedPickupKey(string key)
         {
             SaveData.DestroyedPickupKeys.Add(key);
@@ -496,7 +501,7 @@ namespace SilksongItemRandomizer
             SilksongItemRandomizerAPI.ResetAllData();
             // 使用类名而非实例
             RandomSeed.Value = 0;
-            Instance?.Config.Save();
+            SilksongItemRandomizer.GlobalConfig.Save();
             Log.LogInfo("物品随机MOD所有静态数据已重置，随机系统已重新初始化，并传送回椅子");
         }
 

@@ -174,6 +174,7 @@ namespace SilksongItemRandomizer
         {
             try { File?.Save(); }
             catch (Exception ex) { Plugin.Log?.LogError($"[GlobalConfig] 保存配置文件失败: {ex}"); }
+            try { ProfileManager.SaveCurrentConfig(); } catch { }
         }
 
         /// <summary>

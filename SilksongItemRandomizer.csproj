@@ -147,6 +147,8 @@
     <Compile Include="MiscPatches.cs" />
     <Compile Include="PickupSystem.cs" />
     <Compile Include="Plugin.cs" />
+    <Compile Include="ProfileManager.cs" />
+    <Compile Include="ProfileSwitchPatch.cs" />
     <Compile Include="PrefabIdList.cs.cs" />
     <Compile Include="RecentItemsUI.cs" />
     <Compile Include="RegionReplacePatch.cs" />

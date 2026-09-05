@@ -130,7 +130,7 @@ namespace SilksongItemRandomizer
         {
             if (Plugin.SilkRandomizerEnabled == null) return;
             Plugin.SilkRandomizerEnabled.Value = enabled;
-            Plugin.Instance?.Config.Save();
+            SilksongItemRandomizer.GlobalConfig.Save();
         }
 
         // ========== 运行时操作 ==========
@@ -190,6 +190,27 @@ namespace SilksongItemRandomizer
             // ★ 存档已重建，预生成表清空：重新从随机池摸全部检查点奖励
             PreGeneratedMap.Initialize();
 
+            CurrencyCollectPatch.ResetCounters();
+            SilkSpearPityPatch.ResetSilkSpearState();
+            PickupPatch.ResetAll();
+            ShopRandomizer.ResetCache();
+            Extracurrencypickup.ResetAll();
+            ShopMenuStock_BuildItemList_Patch.ResetAllCounts();
+            TrapRandomizer.ClearAll();
+        }
+
+        /// <summary>
+        /// 按当前 Plugin.SaveData 重建运行态（切档后用；不重置 SaveData）。
+        /// 复用 ResetAllData 中除 Plugin.ResetSaveData() 之外的重建步骤。
+        /// </summary>
+        public static void RebuildRuntimeState()
+        {
+            if (_cachedConfig == null) return;
+            SpriteCache.Reset();
+            PreGeneratedMap.Reset();
+            ItemRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig, new PluginSaveDataAccessor(), GetFullRandomMode());
+            CrestRandomizer.Initialize(_cachedConfig.Seed, _cachedConfig.CrestEnabled, new CrestSaveDataAccessor());
+            PreGeneratedMap.Initialize();
             CurrencyCollectPatch.ResetCounters();
             SilkSpearPityPatch.ResetSilkSpearState();
             PickupPatch.ResetAll();
@@ -322,7 +343,7 @@ namespace SilksongItemRandomizer
             }
 
             if (changed)
-                Plugin.Instance?.Config.Save();  // 值有变化才保存一次
+                SilksongItemRandomizer.GlobalConfig.Save();
         }
 
         // ========== 补丁类型清单（单一事实来源） ==========
@@ -417,6 +438,9 @@ namespace SilksongItemRandomizer
                 catch (Exception ex) { Plugin.Log.LogWarning($"常驻补丁注册失败 {type.Name}（目标方法可能不存在）: {ex.Message}"); }
             }
             _alwaysOnPatchesApplied = true;
+
+            try { ProfileSwitchPatch.Apply(_harmony); }
+            catch (Exception ex) { Plugin.Log.LogWarning($"ProfileSwitchPatch 注册失败: {ex.Message}"); }
         }
 
         private static void ApplyHarmonyPatches()
